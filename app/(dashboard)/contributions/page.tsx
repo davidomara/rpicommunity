@@ -7,7 +7,6 @@ import { ContributionForm } from "@/components/forms/contribution-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatMoney, formatDate } from "@/lib/utils";
-import { createContributionAction } from "./actions";
 
 export default async function ContributionsPage({ searchParams }: { searchParams: { memberId?: string } }) {
   const session = await auth();
@@ -24,7 +23,6 @@ export default async function ContributionsPage({ searchParams }: { searchParams
       </div>
       <ContributionForm
         members={members.map((m) => ({ id: m.id, name: m.name || m.username, username: m.username }))}
-        action={createContributionAction}
         selectedMemberId={selectedId}
       />
       <Card>

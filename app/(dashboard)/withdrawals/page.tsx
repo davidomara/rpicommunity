@@ -7,7 +7,6 @@ import { WithdrawalForm } from "@/components/forms/withdrawal-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatMoney, formatDate } from "@/lib/utils";
-import { createWithdrawalAction } from "./actions";
 
 export default async function WithdrawalsPage({ searchParams }: { searchParams: { memberId?: string } }) {
   const session = await auth();
@@ -24,7 +23,6 @@ export default async function WithdrawalsPage({ searchParams }: { searchParams: 
       </div>
       <WithdrawalForm
         members={members.map((m) => ({ id: m.id, name: m.name || m.username, username: m.username }))}
-        action={createWithdrawalAction}
         selectedMemberId={selectedId}
       />
       <Card>
