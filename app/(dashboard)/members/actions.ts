@@ -8,11 +8,23 @@ import { isAdmin } from "@/lib/rbac";
 import { createMemberSchema } from "@/lib/validators/account";
 import { revalidatePath } from "next/cache";
 
-export async function createMemberAction(formData: FormData) {
-  const session = await auth();
-  if (!session?.user || !isAdmin(session.user.role)) throw new Error("Unauthorized");
+export type CreateMemberFormState = {
+  success: boolean;
+  message: string;
+  error: string;
+};
 
-  const parsed = createMemberSchema.parse({
+export async function createMemberAction(_: CreateMemberFormState, formData: FormData): Promise<CreateMemberFormState> {
+  const session = await auth();
+  if (!session?.user || !isAdmin(session.user.role)) {
+    return {
+      success: false,
+      message: "",
+      error: "Unauthorized"
+    };
+  }
+
+  const parsed = createMemberSchema.safeParse({
     name: String(formData.get("name") || ""),
     username: String(formData.get("username") || ""),
     email: String(formData.get("email") || ""),
@@ -21,8 +33,16 @@ export async function createMemberAction(formData: FormData) {
     confirmTemporaryPin: String(formData.get("confirmTemporaryPin") || "")
   });
 
-  const username = parsed.username.trim().toLowerCase();
-  const email = parsed.email.trim().toLowerCase();
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: "",
+      error: parsed.error.issues[0]?.message || "Invalid member details"
+    };
+  }
+
+  const username = parsed.data.username.trim().toLowerCase();
+  const email = parsed.data.email.trim().toLowerCase();
 
   const existing = await prisma.user.findFirst({
     where: {
@@ -34,17 +54,29 @@ export async function createMemberAction(formData: FormData) {
     select: { id: true, username: true, email: true }
   });
 
-  if (existing?.username === username) throw new Error("Username already exists");
-  if (existing?.email === email) throw new Error("Email already exists");
+  if (existing?.username === username) {
+    return {
+      success: false,
+      message: "",
+      error: "Username already exists"
+    };
+  }
+  if (existing?.email === email) {
+    return {
+      success: false,
+      message: "",
+      error: "Email already exists"
+    };
+  }
 
   await prisma.user.create({
     data: {
-      name: parsed.name.trim(),
+      name: parsed.data.name.trim(),
       username,
       email,
-      passwordHash: await bcrypt.hash(parsed.temporaryPin, 12),
+      passwordHash: await bcrypt.hash(parsed.data.temporaryPin, 12),
       role: Role.MEMBER,
-      status: parsed.status as MemberStatus
+      status: parsed.data.status as MemberStatus
     }
   });
 
@@ -54,4 +86,10 @@ export async function createMemberAction(formData: FormData) {
   revalidatePath("/contributions");
   revalidatePath("/withdrawals");
   revalidatePath("/emergency-requests");
+
+  return {
+    success: true,
+    message: "Member created successfully.",
+    error: ""
+  };
 }
