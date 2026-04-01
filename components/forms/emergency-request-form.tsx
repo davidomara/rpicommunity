@@ -1,37 +1,35 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useFormState } from "react-dom";
-import { createEmergencyRequestAction, type EmergencyRequestFormState } from "@/app/(dashboard)/emergency-requests/actions";
+import { RefObject } from "react";
 import { SubmitButton } from "@/components/forms/submit-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const initialState: EmergencyRequestFormState = {
-  success: false,
-  error: ""
-};
-
-export function EmergencyRequestForm({ memberId, isAdmin, members }: {
+export function EmergencyRequestForm({
+  action,
+  formRef,
+  error,
+  memberId,
+  isAdmin,
+  members,
+  onCancel
+}: {
+  action: (formData: FormData) => void;
+  formRef: RefObject<HTMLFormElement>;
+  error: string;
   memberId: string;
   isAdmin: boolean;
   members: Array<{ id: string; name: string }>;
+  onCancel?: () => void;
 }) {
-  const [state, formAction] = useFormState(createEmergencyRequestAction, initialState);
-  const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (!state.success) return;
-    formRef.current?.reset();
-  }, [state.success]);
-
   return (
     <Card>
       <CardHeader><CardTitle>Submit Emergency Request</CardTitle></CardHeader>
       <CardContent>
-        <form ref={formRef} action={formAction} className="grid gap-4">
+        <form ref={formRef} action={action} className="grid gap-4">
           {isAdmin ? (
             <div className="grid gap-2">
               <Label htmlFor="memberId">Member</Label>
@@ -51,8 +49,15 @@ export function EmergencyRequestForm({ memberId, isAdmin, members }: {
             <Label htmlFor="reason">Reason</Label>
             <Textarea id="reason" name="reason" required />
           </div>
-          {state.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
-          <SubmitButton label="Submit Request" pendingLabel="Submitting..." />
+          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <SubmitButton label="Submit Request" pendingLabel="Submitting..." />
+            {onCancel ? (
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+            ) : null}
+          </div>
         </form>
       </CardContent>
     </Card>

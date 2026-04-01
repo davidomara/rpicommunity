@@ -1,6 +1,5 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { isAdmin } from "@/lib/rbac";
@@ -62,7 +61,8 @@ export async function decideEmergencyRequestAction(formData: FormData) {
 
   const parsed = emergencyDecisionSchema.parse({
     requestId: String(formData.get("requestId") || ""),
-    status: String(formData.get("status") || "")
+    status: String(formData.get("status") || ""),
+    disbursementAmount: formData.get("disbursementAmount")
   });
 
   await prisma.$transaction(async (tx) => {
@@ -95,10 +95,17 @@ export async function decideEmergencyRequestAction(formData: FormData) {
     if (!updated.count) throw new Error("Emergency request has already been processed");
 
     if (parsed.status === "APPROVED") {
+      const requestedAmount = Number(request.amount);
+      const disbursedAmount = parsed.disbursementAmount ?? requestedAmount;
+      const amountNote =
+        disbursedAmount === requestedAmount
+          ? `Emergency request approved and disbursed`
+          : `Emergency request approved. Requested ${requestedAmount}, disbursed ${disbursedAmount}`;
+
       const withdrawal = await tx.withdrawal.create({
         data: {
           memberId: request.memberId,
-          amount: request.amount,
+          amount: disbursedAmount,
           reason: `Emergency disbursement: ${request.reason}`,
           withdrawalDate: new Date(),
           createdById: session.user.id
@@ -109,10 +116,10 @@ export async function decideEmergencyRequestAction(formData: FormData) {
         data: {
           memberId: request.memberId,
           type: "WITHDRAWAL",
-          amount: request.amount as Prisma.Decimal,
+          amount: disbursedAmount,
           eventDate: withdrawal.withdrawalDate,
           actorId: session.user.id,
-          notes: `Emergency request approved and disbursed`
+          notes: amountNote
         }
       });
     }

@@ -26,5 +26,9 @@ export const emergencyRequestSchema = z.object({
 
 export const emergencyDecisionSchema = z.object({
   requestId: z.string().min(1),
-  status: z.enum(["APPROVED", "REJECTED"])
+  status: z.enum(["APPROVED", "REJECTED"]),
+  disbursementAmount: z.preprocess(
+    (value) => (value === "" || value == null ? undefined : value),
+    z.coerce.number().positive().optional()
+  )
 });
