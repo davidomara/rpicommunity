@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { isAdmin } from "@/lib/rbac";
@@ -64,15 +65,61 @@ export async function decideEmergencyRequestAction(formData: FormData) {
     status: String(formData.get("status") || "")
   });
 
-  await prisma.emergencyRequest.update({
-    where: { id: parsed.requestId },
-    data: {
-      status: parsed.status,
-      decisionDate: new Date(),
-      decidedById: session.user.id
+  await prisma.$transaction(async (tx) => {
+    const request = await tx.emergencyRequest.findUnique({
+      where: { id: parsed.requestId },
+      select: {
+        id: true,
+        memberId: true,
+        amount: true,
+        reason: true,
+        status: true
+      }
+    });
+
+    if (!request) throw new Error("Emergency request not found");
+    if (request.status !== "PENDING") throw new Error("Emergency request has already been processed");
+
+    const updated = await tx.emergencyRequest.updateMany({
+      where: {
+        id: parsed.requestId,
+        status: "PENDING"
+      },
+      data: {
+        status: parsed.status,
+        decisionDate: new Date(),
+        decidedById: session.user.id
+      }
+    });
+
+    if (!updated.count) throw new Error("Emergency request has already been processed");
+
+    if (parsed.status === "APPROVED") {
+      const withdrawal = await tx.withdrawal.create({
+        data: {
+          memberId: request.memberId,
+          amount: request.amount,
+          reason: `Emergency disbursement: ${request.reason}`,
+          withdrawalDate: new Date(),
+          createdById: session.user.id
+        }
+      });
+
+      await tx.transaction.create({
+        data: {
+          memberId: request.memberId,
+          type: "WITHDRAWAL",
+          amount: request.amount as Prisma.Decimal,
+          eventDate: withdrawal.withdrawalDate,
+          actorId: session.user.id,
+          notes: `Emergency request approved and disbursed`
+        }
+      });
     }
   });
 
   revalidatePath("/dashboard");
   revalidatePath("/emergency-requests");
+  revalidatePath("/withdrawals");
+  revalidatePath("/members");
 }

@@ -1,12 +1,11 @@
 import { auth } from "@/auth";
 import { isAdmin } from "@/lib/rbac";
 import { getEmergencyContext } from "@/lib/queries";
+import { EmergencyDecisionActions } from "@/components/forms/emergency-decision-actions";
 import { EmergencyRequestForm } from "@/components/forms/emergency-request-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatMoney, formatDate } from "@/lib/utils";
-import { decideEmergencyRequestAction } from "./actions";
 
 export default async function EmergencyRequestsPage() {
   const session = await auth();
@@ -37,10 +36,11 @@ export default async function EmergencyRequestsPage() {
                   <td>{formatDate(row.requestDate)}</td>
                   {admin ? (
                     <td>
-                      <div className="flex gap-2">
-                        <form action={decideEmergencyRequestAction}><input type="hidden" name="requestId" value={row.id} /><input type="hidden" name="status" value="APPROVED" /><Button size="sm">Approve</Button></form>
-                        <form action={decideEmergencyRequestAction}><input type="hidden" name="requestId" value={row.id} /><input type="hidden" name="status" value="REJECTED" /><Button size="sm" variant="destructive">Reject</Button></form>
-                      </div>
+                      <EmergencyDecisionActions
+                        requestId={row.id}
+                        memberName={row.member.name || row.member.username}
+                        amount={Number(row.amount)}
+                      />
                     </td>
                   ) : null}
                 </tr>
