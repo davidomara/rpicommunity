@@ -108,7 +108,7 @@ export async function getContributionContext(memberId?: string) {
     select: { id: true, name: true, username: true }
   });
 
-  const selectedId = memberId || members[0]?.id;
+  const selectedId = members.some((member) => member.id === memberId) ? memberId : undefined;
   const rows = selectedId ? await prisma.contribution.findMany({
     where: { memberId: selectedId },
     orderBy: { contributionDate: "desc" },
@@ -125,7 +125,7 @@ export async function getWithdrawalContext(memberId?: string) {
     select: { id: true, name: true, username: true }
   });
 
-  const selectedId = memberId || members[0]?.id;
+  const selectedId = members.some((member) => member.id === memberId) ? memberId : undefined;
   const rows = selectedId ? await prisma.withdrawal.findMany({
     where: { memberId: selectedId },
     orderBy: { withdrawalDate: "desc" },
