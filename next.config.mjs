@@ -4,6 +4,15 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "8mb"
     }
+  },
+  async redirects() {
+    return [
+      {
+        source: "/favicon.ico",
+        destination: "/favicon.svg",
+        permanent: false
+      }
+    ];
   }
 };
 

@@ -5,12 +5,15 @@ import { SessionProvider } from "@/components/providers/session-provider";
 
 export const metadata: Metadata = {
   title: APP_FULL_NAME,
-  description: `${APP_FULL_NAME} - ${APP_SUBTITLE}`
+  description: `${APP_FULL_NAME} - ${APP_SUBTITLE}`,
+  icons: {
+    icon: "/favicon.svg"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
         <SessionProvider>{children}</SessionProvider>
       </body>

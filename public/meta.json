@@ -1,0 +1,8 @@
+{
+  "name": "RPIC Community App",
+  "short_name": "RPIC",
+  "description": "Research Planning and Innovation Center Community platform.",
+  "theme_color": "#0f172a",
+  "background_color": "#f8fafc",
+  "display": "standalone"
+}
