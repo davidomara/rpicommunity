@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "database" },
+  session: { strategy: "jwt" },
   trustHost: true,
   pages: {
     signIn: "/login"
@@ -50,12 +50,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
-    async session({ session, user }) {
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+        token.role = (user as any).role;
+        token.status = (user as any).status;
+        token.username = (user as any).username;
+        token.name = user.name;
+        token.email = user.email;
+      }
+
+      return token;
+    },
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id;
-        session.user.role = (user as any).role;
-        session.user.status = (user as any).status;
-        session.user.username = (user as any).username;
+        session.user.id = token.sub || "";
+        session.user.role = (token as any).role;
+        session.user.status = (token as any).status;
+        session.user.username = (token as any).username;
+        session.user.name = token.name;
+        session.user.email = token.email;
       }
       return session;
     }

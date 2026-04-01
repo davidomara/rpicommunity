@@ -15,7 +15,7 @@ body {
 }
 
 .page-shell {
-  @apply flex min-h-screen bg-slate-100;
+  @apply flex min-h-screen overflow-x-hidden bg-slate-100;
 }
 
 .surface {
