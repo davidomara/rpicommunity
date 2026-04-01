@@ -87,6 +87,20 @@ export async function getMembersDirectory() {
   });
 }
 
+export async function getMemberAccountDirectory() {
+  return prisma.user.findMany({
+    where: { role: Role.MEMBER },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      status: true
+    }
+  });
+}
+
 export async function getContributionContext(memberId?: string) {
   const members = await prisma.user.findMany({
     where: { role: Role.MEMBER },

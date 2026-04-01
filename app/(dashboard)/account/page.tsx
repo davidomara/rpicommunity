@@ -1,13 +1,19 @@
 import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getMemberAccountDirectory } from "@/lib/queries";
+import { isAdmin } from "@/lib/rbac";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/forms/submit-button";
-import { updateEmailAction, updatePasswordAction } from "./actions";
+import { resetMemberPinAction, updateEmailAction, updateMemberEmailAction, updatePasswordAction } from "./actions";
 
 export default async function AccountPage() {
   const session = await auth();
   if (!session?.user) return null;
+  const admin = isAdmin(session.user.role);
+  const members = admin ? await getMemberAccountDirectory() : [];
+  const defaultMember = members[0];
+  const selectClassName = "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
     <div className="space-y-6">
@@ -40,6 +46,61 @@ export default async function AccountPage() {
           </CardContent>
         </Card>
       </div>
+      {admin ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Member Access Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {members.length ? (
+              <div className="grid gap-6 lg:grid-cols-2">
+                <form action={updateMemberEmailAction} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="memberEmailMemberId">Member</Label>
+                    <select id="memberEmailMemberId" name="memberId" defaultValue={defaultMember?.id} className={selectClassName} required>
+                      {members.map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.name} ({member.username})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="memberEmail">New Member Email</Label>
+                    <Input id="memberEmail" name="email" type="email" placeholder="Enter the updated email address" required />
+                  </div>
+                  <p className="text-xs text-slate-500">Select the member, then enter the replacement email address to save.</p>
+                  <SubmitButton label="Update Member Email" pendingLabel="Saving..." />
+                </form>
+                <form action={resetMemberPinAction} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="memberPinMemberId">Member</Label>
+                    <select id="memberPinMemberId" name="memberId" defaultValue={defaultMember?.id} className={selectClassName} required>
+                      {members.map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.name} ({member.username})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="newPin">Temporary PIN</Label>
+                    <Input id="newPin" name="newPin" type="password" defaultValue="Member@123" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPin">Confirm Temporary PIN</Label>
+                    <Input id="confirmPin" name="confirmPin" type="password" defaultValue="Member@123" required />
+                  </div>
+                  <p className="text-xs text-slate-500">Best option: use a temporary PIN, then share it directly with the member and have them change it after login.</p>
+                  <SubmitButton label="Reset Member PIN" pendingLabel="Resetting..." />
+                </form>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">No member accounts exist yet. Add a member from the Members page first.</p>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

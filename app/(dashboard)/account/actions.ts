@@ -1,10 +1,23 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { Role } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { updateEmailSchema, updatePasswordSchema } from "@/lib/validators/account";
+import { isAdmin } from "@/lib/rbac";
+import { resetMemberPinSchema, updateEmailSchema, updateMemberEmailSchema, updatePasswordSchema } from "@/lib/validators/account";
 import { revalidatePath } from "next/cache";
+
+async function assertMemberTarget(memberId: string) {
+  const member = await prisma.user.findUnique({
+    where: { id: memberId },
+    select: { id: true, role: true }
+  });
+
+  if (!member || member.role !== Role.MEMBER) {
+    throw new Error("Member not found");
+  }
+}
 
 export async function updateEmailAction(formData: FormData) {
   const session = await auth();
@@ -32,5 +45,43 @@ export async function updatePasswordAction(formData: FormData) {
   if (!valid) throw new Error("Current password is incorrect");
 
   await prisma.user.update({ where: { id: session.user.id }, data: { passwordHash: await bcrypt.hash(parsed.newPassword, 12) } });
+  revalidatePath("/account");
+}
+
+export async function updateMemberEmailAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user || !isAdmin(session.user.role)) throw new Error("Unauthorized");
+
+  const parsed = updateMemberEmailSchema.parse({
+    memberId: String(formData.get("memberId") || ""),
+    email: String(formData.get("email") || "")
+  });
+
+  await assertMemberTarget(parsed.memberId);
+  await prisma.user.update({
+    where: { id: parsed.memberId },
+    data: { email: parsed.email.toLowerCase() }
+  });
+
+  revalidatePath("/account");
+  revalidatePath("/members");
+}
+
+export async function resetMemberPinAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user || !isAdmin(session.user.role)) throw new Error("Unauthorized");
+
+  const parsed = resetMemberPinSchema.parse({
+    memberId: String(formData.get("memberId") || ""),
+    newPin: String(formData.get("newPin") || ""),
+    confirmPin: String(formData.get("confirmPin") || "")
+  });
+
+  await assertMemberTarget(parsed.memberId);
+  await prisma.user.update({
+    where: { id: parsed.memberId },
+    data: { passwordHash: await bcrypt.hash(parsed.newPin, 12) }
+  });
+
   revalidatePath("/account");
 }
