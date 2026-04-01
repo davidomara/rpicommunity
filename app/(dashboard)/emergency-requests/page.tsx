@@ -31,11 +31,15 @@ export default async function EmergencyRequestsPage() {
                   <td>{formatDate(row.requestDate)}</td>
                   {admin ? (
                     <td>
-                      <EmergencyDecisionActions
-                        requestId={row.id}
-                        memberName={row.member.name || row.member.username}
-                        amount={Number(row.amount)}
-                      />
+                      {row.status === "PENDING" ? (
+                        <EmergencyDecisionActions
+                          requestId={row.id}
+                          memberName={row.member.name || row.member.username}
+                          amount={Number(row.amount)}
+                        />
+                      ) : (
+                        <span className="text-xs font-medium text-slate-400">No actions</span>
+                      )}
                     </td>
                   ) : null}
                 </tr>

@@ -78,7 +78,7 @@ export async function decideEmergencyRequestAction(formData: FormData) {
     });
 
     if (!request) throw new Error("Emergency request not found");
-    if (request.status !== "PENDING") throw new Error("Emergency request has already been processed");
+    if (request.status !== "PENDING") return;
 
     const updated = await tx.emergencyRequest.updateMany({
       where: {
@@ -92,7 +92,7 @@ export async function decideEmergencyRequestAction(formData: FormData) {
       }
     });
 
-    if (!updated.count) throw new Error("Emergency request has already been processed");
+    if (!updated.count) return;
 
     if (parsed.status === "APPROVED") {
       const requestedAmount = Number(request.amount);

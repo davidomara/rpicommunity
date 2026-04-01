@@ -1,9 +1,28 @@
 "use client";
 
 import { useRef } from "react";
+import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { formatMoney } from "@/lib/utils";
 import { decideEmergencyRequestAction } from "@/app/(dashboard)/emergency-requests/actions";
+
+function DecisionButton({
+  children,
+  variant = "default",
+  onClick
+}: {
+  children: React.ReactNode;
+  variant?: "default" | "destructive";
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+}) {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button size="sm" variant={variant} type="submit" disabled={pending} onClick={onClick}>
+      {pending ? "Processing..." : children}
+    </Button>
+  );
+}
 
 export function EmergencyDecisionActions({
   requestId,
@@ -22,9 +41,7 @@ export function EmergencyDecisionActions({
         <input type="hidden" name="requestId" value={requestId} />
         <input type="hidden" name="status" value="APPROVED" />
         <input ref={amountRef} type="hidden" name="disbursementAmount" value={amount} />
-        <Button
-          size="sm"
-          type="submit"
+        <DecisionButton
           onClick={(event) => {
             const enteredAmount = window.prompt(
               `Enter the amount to disburse to ${memberName}.`,
@@ -57,12 +74,12 @@ export function EmergencyDecisionActions({
           }}
         >
           Approve & Disburse
-        </Button>
+        </DecisionButton>
       </form>
       <form action={decideEmergencyRequestAction}>
         <input type="hidden" name="requestId" value={requestId} />
         <input type="hidden" name="status" value="REJECTED" />
-        <Button size="sm" variant="destructive">Reject</Button>
+        <DecisionButton variant="destructive">Reject</DecisionButton>
       </form>
     </div>
   );
