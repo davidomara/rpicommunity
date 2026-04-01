@@ -30,7 +30,6 @@ export default async function DashboardPage() {
         <StatCard title="Warning Status" value={String(data.summary.warning)} note="Members needing follow-up" />
         <StatCard title="Closed Members" value={String(data.summary.closed)} note="No longer active" />
       </section>
-      <SummaryChart data={chartData} />
       <Card>
         <CardHeader><CardTitle>Pending Emergency Requests</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
@@ -58,6 +57,7 @@ export default async function DashboardPage() {
           </table>
         </CardContent>
       </Card>
+      <SummaryChart data={chartData} />
     </div>
   );
 }
