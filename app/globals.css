@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply min-h-screen bg-background text-foreground antialiased;
+}
+
+* {
+  @apply border-border;
+}
+
+.page-shell {
+  @apply flex min-h-screen bg-slate-100;
+}
+
+.surface {
+  @apply rounded-lg border bg-white shadow-soft;
+}
+
+.data-table th {
+  @apply bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600;
+}
+
+.data-table th,
+.data-table td {
+  @apply px-4 py-3;
+}
+
+.data-table tr {
+  @apply border-b border-slate-100;
+}
