@@ -14,6 +14,8 @@ export function AppShell({
   name: string;
   children: React.ReactNode;
 }) {
+  const logoutButtonClassName = "gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800";
+
   return (
     <div className="page-shell">
       <aside className="hidden w-72 shrink-0 border-r border-slate-200 bg-slate-950 px-5 py-6 text-slate-100 lg:block">
@@ -37,7 +39,7 @@ export function AppShell({
                 name={name}
                 actions={
                   <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}>
-                    <Button variant="outline" className="w-full gap-2 justify-center">
+                    <Button variant="outline" className={`w-full justify-center ${logoutButtonClassName}`}>
                       <LogOut className="h-4 w-4" />
                       Logout
                     </Button>
@@ -50,7 +52,7 @@ export function AppShell({
               </div>
             </div>
             <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }} className="hidden sm:block">
-              <Button variant="outline" className="gap-2"><LogOut className="h-4 w-4" />Logout</Button>
+              <Button variant="outline" className={logoutButtonClassName}><LogOut className="h-4 w-4" />Logout</Button>
             </form>
           </div>
         </header>

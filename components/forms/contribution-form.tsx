@@ -4,7 +4,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTodayISODate } from "@/lib/utils";
 
-export function ContributionForm({ members, action }: { members: Array<{ id: string; name: string; username: string }>; action: (formData: FormData) => Promise<void> }) {
+export function ContributionForm({
+  members,
+  action,
+  selectedMemberId
+}: {
+  members: Array<{ id: string; name: string; username: string }>;
+  action: (formData: FormData) => Promise<void>;
+  selectedMemberId?: string;
+}) {
   return (
     <Card>
       <CardHeader><CardTitle>Add Contribution</CardTitle></CardHeader>
@@ -12,7 +20,7 @@ export function ContributionForm({ members, action }: { members: Array<{ id: str
         <form action={action} className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="memberId">Member</Label>
-            <select id="memberId" name="memberId" required className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm">
+            <select id="memberId" name="memberId" defaultValue={selectedMemberId || ""} required className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm">
               <option value="">Select member</option>
               {members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
             </select>

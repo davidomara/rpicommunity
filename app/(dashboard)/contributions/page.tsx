@@ -11,7 +11,8 @@ export default async function ContributionsPage({ searchParams }: { searchParams
   const session = await auth();
   if (!session?.user || !canManageFinance(session.user.role)) redirect("/dashboard");
 
-  const { members, rows } = await getContributionContext(searchParams.memberId);
+  const { members, selectedId, rows } = await getContributionContext(searchParams.memberId);
+  const selectedMember = members.find((member) => member.id === selectedId);
 
   return (
     <div className="space-y-6">
@@ -19,14 +20,29 @@ export default async function ContributionsPage({ searchParams }: { searchParams
         <p className="text-sm font-medium text-cyan-700">Financial Administration</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Contributions</h1>
       </div>
-      <ContributionForm members={members.map((m) => ({ id: m.id, name: m.name || m.username, username: m.username }))} action={createContributionAction} />
+      <ContributionForm
+        members={members.map((m) => ({ id: m.id, name: m.name || m.username, username: m.username }))}
+        action={createContributionAction}
+        selectedMemberId={selectedId}
+      />
       <Card>
-        <CardHeader><CardTitle>Recent Contributions</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Recent Contributions</CardTitle>
+          <p className="mt-1 text-sm text-slate-500">
+            {selectedMember
+              ? `Displaying contributions for ${selectedMember.name || selectedMember.username}.`
+              : "No member selected."}
+          </p>
+        </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="data-table min-w-full">
             <thead><tr><th>ID</th><th>Amount</th><th>Date</th></tr></thead>
             <tbody>
-              {rows.map((row) => <tr key={row.id}><td>{row.id.slice(-8)}</td><td>{formatMoney(Number(row.amount))}</td><td>{formatDate(row.contributionDate)}</td></tr>)}
+              {rows.length ? rows.map((row) => <tr key={row.id}><td>{row.id.slice(-8)}</td><td>{formatMoney(Number(row.amount))}</td><td>{formatDate(row.contributionDate)}</td></tr>) : (
+                <tr>
+                  <td colSpan={3} className="text-sm text-slate-500">No contributions found for the selected member.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </CardContent>
