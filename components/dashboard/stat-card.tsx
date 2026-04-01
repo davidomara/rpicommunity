@@ -1,14 +1,29 @@
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { dashboardPalette, type DashboardTone } from "@/components/dashboard/palette";
 
-export function StatCard({ title, value, note }: { title: string; value: string; note: string }) {
+export function StatCard({
+  title,
+  value,
+  note,
+  tone = "neutral"
+}: {
+  title: string;
+  value: string;
+  note: string;
+  tone?: DashboardTone;
+}) {
+  const styles = dashboardPalette[tone];
+
   return (
-    <Card>
+    <Card className={cn("relative overflow-hidden border", styles.card)}>
+      <div className={cn("absolute inset-x-0 top-0 h-1.5", styles.accent)} />
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-slate-600">{title}</CardTitle>
+        <CardTitle className={cn("text-sm font-medium", styles.title)}>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-3xl font-semibold tracking-tight text-slate-950">{value}</p>
-        <p className="mt-1 text-xs text-slate-500">{note}</p>
+        <p className={cn("text-3xl font-semibold tracking-tight", styles.value)}>{value}</p>
+        <p className={cn("mt-1 text-xs", styles.note)}>{note}</p>
       </CardContent>
     </Card>
   );

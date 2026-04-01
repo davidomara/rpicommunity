@@ -22,13 +22,13 @@ export default async function DashboardPage() {
         <p className="mt-2 text-sm text-slate-500">Monitor contributions, withdrawals, community member status, and pending emergency assistance requests.</p>
       </div>
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Total Contributions" value={formatMoney(data.summary.totalContributions)} note="All-time community contributions" />
-        <StatCard title="Total Withdrawals" value={formatMoney(data.summary.totalWithdrawals)} note="All-time approved withdrawals" />
-        <StatCard title="Current Balance" value={formatMoney(data.summary.balance)} note="Contributions minus withdrawals" />
-        <StatCard title="Pending Emergency Requests" value={String(data.summary.pendingEmergencyRequests)} note="Awaiting admin action" />
-        <StatCard title="Active Members" value={String(data.summary.active)} note={`Out of ${data.summary.members} members`} />
-        <StatCard title="Warning Status" value={String(data.summary.warning)} note="Members needing follow-up" />
-        <StatCard title="Closed Members" value={String(data.summary.closed)} note="No longer active" />
+        <StatCard title="Total Contributions" value={formatMoney(data.summary.totalContributions)} note="All-time community contributions" tone="contributions" />
+        <StatCard title="Total Withdrawals" value={formatMoney(data.summary.totalWithdrawals)} note="All-time approved withdrawals" tone="withdrawals" />
+        <StatCard title="Current Balance" value={formatMoney(data.summary.balance)} note="Contributions minus withdrawals" tone="contributions" />
+        <StatCard title="Pending Emergency Requests" value={String(data.summary.pendingEmergencyRequests)} note="Awaiting admin action" tone="warning" />
+        <StatCard title="Active Members" value={String(data.summary.active)} note={`Out of ${data.summary.members} members`} tone="withdrawals" />
+        <StatCard title="Warning Status" value={String(data.summary.warning)} note="Members needing follow-up" tone="warning" />
+        <StatCard title="Closed Members" value={String(data.summary.closed)} note="No longer active" tone="neutral" />
       </section>
       <Card>
         <CardHeader><CardTitle>Pending Emergency Requests</CardTitle></CardHeader>

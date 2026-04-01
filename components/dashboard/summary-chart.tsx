@@ -2,6 +2,7 @@
 
 import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { dashboardPalette } from "@/components/dashboard/palette";
 
 export function SummaryChart({ data }: { data: Array<{ name: string; contributions: number; missing: number; withdrawals: number }> }) {
   return (
@@ -17,9 +18,9 @@ export function SummaryChart({ data }: { data: Array<{ name: string; contributio
               <XAxis type="number" />
               <YAxis type="category" dataKey="name" width={140} />
               <Tooltip />
-              <Bar dataKey="contributions" fill="#0369a1" radius={3} />
-              <Bar dataKey="missing" fill="#f59e0b" radius={3} />
-              <Bar dataKey="withdrawals" fill="#10b981" radius={3} />
+              <Bar dataKey="contributions" fill={dashboardPalette.contributions.bar} radius={3} />
+              <Bar dataKey="missing" fill={dashboardPalette.warning.bar} radius={3} />
+              <Bar dataKey="withdrawals" fill={dashboardPalette.withdrawals.bar} radius={3} />
             </BarChart>
           </ResponsiveContainer>
         </div>
