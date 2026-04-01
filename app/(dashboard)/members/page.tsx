@@ -22,14 +22,15 @@ export default async function MembersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      {admin ? (
+        <AddMemberPanel />
+      ) : (
         <div>
           <p className="text-sm font-medium text-cyan-700">Community Directory</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Members</h1>
           <p className="mt-2 text-sm text-slate-500">View contribution and withdrawal standing for each RPIC Community member.</p>
         </div>
-      </div>
-      {admin ? <AddMemberPanel /> : null}
+      )}
       <MembersTable rows={rows} />
     </div>
   );

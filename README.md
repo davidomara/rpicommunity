@@ -38,6 +38,7 @@ This repo is a migration and modernization of the original Lango Community appli
 ## Demo users
 - Admin: `admin` / `Admin@123`
 - Member: `alice` / `Member@123`
+- Temporary PIN for new or reset member accounts: `Member@123`
 
 ## Railway deployment
 - Create one Railway PostgreSQL service
