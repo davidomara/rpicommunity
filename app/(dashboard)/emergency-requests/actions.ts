@@ -6,28 +6,53 @@ import { isAdmin } from "@/lib/rbac";
 import { emergencyRequestSchema, emergencyDecisionSchema } from "@/lib/validators/finance";
 import { revalidatePath } from "next/cache";
 
-export async function createEmergencyRequestAction(formData: FormData) {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+export type EmergencyRequestFormState = {
+  success: boolean;
+  error: string;
+};
 
-  const parsed = emergencyRequestSchema.parse({
+export async function createEmergencyRequestAction(
+  _: EmergencyRequestFormState,
+  formData: FormData
+): Promise<EmergencyRequestFormState> {
+  const session = await auth();
+  if (!session?.user) {
+    return {
+      success: false,
+      error: "Unauthorized"
+    };
+  }
+
+  const parsed = emergencyRequestSchema.safeParse({
     memberId: String(formData.get("memberId") || session.user.id),
     amount: formData.get("amount"),
     reason: String(formData.get("reason") || "")
   });
 
-  const memberId = isAdmin(session.user.role) ? parsed.memberId : session.user.id;
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message || "Invalid emergency request"
+    };
+  }
+
+  const memberId = isAdmin(session.user.role) ? parsed.data.memberId : session.user.id;
 
   await prisma.emergencyRequest.create({
     data: {
       memberId,
-      amount: parsed.amount,
-      reason: parsed.reason
+      amount: parsed.data.amount,
+      reason: parsed.data.reason
     }
   });
 
   revalidatePath("/dashboard");
   revalidatePath("/emergency-requests");
+
+  return {
+    success: true,
+    error: ""
+  };
 }
 
 export async function decideEmergencyRequestAction(formData: FormData) {

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatMoney, formatDate } from "@/lib/utils";
-import { createEmergencyRequestAction, decideEmergencyRequestAction } from "./actions";
+import { decideEmergencyRequestAction } from "./actions";
 
 export default async function EmergencyRequestsPage() {
   const session = await auth();
@@ -21,7 +21,7 @@ export default async function EmergencyRequestsPage() {
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Emergency Requests</h1>
         <p className="mt-2 text-sm text-slate-500">Members can request emergency assistance. Admins can review and decide requests.</p>
       </div>
-      <EmergencyRequestForm action={createEmergencyRequestAction} memberId={session.user.id} isAdmin={admin} members={members.map((m) => ({ id: m.id, name: m.name || m.username }))} />
+      <EmergencyRequestForm memberId={session.user.id} isAdmin={admin} members={members.map((m) => ({ id: m.id, name: m.name || m.username }))} />
       <Card>
         <CardHeader><CardTitle>Recent Requests</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">

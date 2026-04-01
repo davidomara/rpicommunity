@@ -1,20 +1,37 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { useFormState } from "react-dom";
+import { createEmergencyRequestAction, type EmergencyRequestFormState } from "@/app/(dashboard)/emergency-requests/actions";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export function EmergencyRequestForm({ action, memberId, isAdmin, members }: {
-  action: (formData: FormData) => Promise<void>;
+const initialState: EmergencyRequestFormState = {
+  success: false,
+  error: ""
+};
+
+export function EmergencyRequestForm({ memberId, isAdmin, members }: {
   memberId: string;
   isAdmin: boolean;
   members: Array<{ id: string; name: string }>;
 }) {
+  const [state, formAction] = useFormState(createEmergencyRequestAction, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!state.success) return;
+    formRef.current?.reset();
+  }, [state.success]);
+
   return (
     <Card>
       <CardHeader><CardTitle>Submit Emergency Request</CardTitle></CardHeader>
       <CardContent>
-        <form action={action} className="grid gap-4">
+        <form ref={formRef} action={formAction} className="grid gap-4">
           {isAdmin ? (
             <div className="grid gap-2">
               <Label htmlFor="memberId">Member</Label>
@@ -34,6 +51,7 @@ export function EmergencyRequestForm({ action, memberId, isAdmin, members }: {
             <Label htmlFor="reason">Reason</Label>
             <Textarea id="reason" name="reason" required />
           </div>
+          {state.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
           <SubmitButton label="Submit Request" pendingLabel="Submitting..." />
         </form>
       </CardContent>
