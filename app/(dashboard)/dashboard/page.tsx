@@ -18,8 +18,8 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div>
         <p className="text-sm font-medium text-cyan-700">RPIC Community Overview</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Dashboard</h1>
-        <p className="mt-2 text-sm text-slate-500">Monitor contributions, withdrawals, community member status, and pending emergency assistance requests.</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Dashboard</h1>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Monitor contributions, withdrawals, community member status, and pending emergency assistance requests.</p>
       </div>
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard title="Total Contributions" value={formatMoney(data.summary.totalContributions)} note="All-time community contributions" tone="contributions" />
@@ -32,8 +32,8 @@ export default async function DashboardPage() {
       </section>
       <Card>
         <CardHeader><CardTitle>Pending Emergency Requests</CardTitle></CardHeader>
-        <CardContent className="overflow-x-auto">
-          <table className="data-table min-w-full">
+        <CardContent className="scroll-x">
+          <table className="data-table min-w-[720px]">
             <thead>
               <tr>
                 <th>Member</th>
@@ -46,11 +46,11 @@ export default async function DashboardPage() {
             <tbody>
               {data.pendingRequests.map((request) => (
                 <tr key={request.id}>
-                  <td>{request.member.name}</td>
-                  <td>{formatMoney(Number(request.amount))}</td>
-                  <td>{request.reason}</td>
-                  <td><Badge value={request.status} /></td>
-                  <td>{new Date(request.requestDate).toLocaleDateString()}</td>
+                  <td className="min-w-[160px]">{request.member.name}</td>
+                  <td className="whitespace-nowrap">{formatMoney(Number(request.amount))}</td>
+                  <td className="min-w-[220px]">{request.reason}</td>
+                  <td className="whitespace-nowrap"><Badge value={request.status} /></td>
+                  <td className="whitespace-nowrap">{new Date(request.requestDate).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>

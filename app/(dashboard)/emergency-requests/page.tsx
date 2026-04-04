@@ -18,19 +18,19 @@ export default async function EmergencyRequestsPage() {
       <EmergencyRequestPanel memberId={session.user.id} isAdmin={admin} members={members.map((m) => ({ id: m.id, name: m.name || m.username }))} />
       <Card>
         <CardHeader><CardTitle>Recent Requests</CardTitle></CardHeader>
-        <CardContent className="overflow-x-auto">
-          <table className="data-table min-w-full">
+        <CardContent className="scroll-x">
+          <table className="data-table min-w-[860px]">
             <thead><tr><th>Member</th><th>Amount</th><th>Reason</th><th>Status</th><th>Request Date</th>{admin ? <th>Actions</th> : null}</tr></thead>
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id}>
-                  <td>{row.member.name}</td>
-                  <td>{formatMoney(Number(row.amount))}</td>
-                  <td>{row.reason}</td>
-                  <td><Badge value={row.status} /></td>
-                  <td>{formatDate(row.requestDate)}</td>
+                  <td className="min-w-[180px]">{row.member.name}</td>
+                  <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
+                  <td className="min-w-[240px]">{row.reason}</td>
+                  <td className="whitespace-nowrap"><Badge value={row.status} /></td>
+                  <td className="whitespace-nowrap">{formatDate(row.requestDate)}</td>
                   {admin ? (
-                    <td>
+                    <td className="whitespace-nowrap">
                       {row.status === "PENDING" ? (
                         <EmergencyDecisionActions
                           requestId={row.id}

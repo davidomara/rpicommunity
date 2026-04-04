@@ -22,8 +22,8 @@ export function StatCard({
         <CardTitle className={cn("text-sm font-medium", styles.title)}>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className={cn("text-3xl font-semibold tracking-tight", styles.value)}>{value}</p>
-        <p className={cn("mt-1 text-xs", styles.note)}>{note}</p>
+        <p className={cn("break-words text-[2rem] font-semibold tracking-tight sm:text-3xl", styles.value)}>{value}</p>
+        <p className={cn("mt-1 text-xs leading-5", styles.note)}>{note}</p>
       </CardContent>
     </Card>
   );

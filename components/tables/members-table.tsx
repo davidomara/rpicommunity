@@ -17,8 +17,8 @@ export function MembersTable({ rows }: { rows: Array<{ id: string; name: string;
     <div className="space-y-4">
       <Input placeholder="Search members by name or email" value={query} onChange={(event) => setQuery(event.target.value)} />
       <div className="overflow-hidden rounded-lg border bg-white shadow-soft">
-        <div className="overflow-x-auto">
-          <table className="data-table min-w-full">
+        <div className="scroll-x">
+          <table className="data-table min-w-[760px]">
             <thead>
               <tr>
                 <th>Member</th>
@@ -31,14 +31,14 @@ export function MembersTable({ rows }: { rows: Array<{ id: string; name: string;
             <tbody>
               {filtered.map((row) => (
                 <tr key={row.id}>
-                  <td>
+                  <td className="min-w-[220px]">
                     <div className="font-medium text-slate-900">{row.name}</div>
                     <div className="text-xs text-slate-500">{row.email}</div>
                   </td>
-                  <td>{formatMoney(row.contributions)}</td>
-                  <td>{formatMoney(row.withdrawals)}</td>
-                  <td>{row.pending}</td>
-                  <td><Badge value={row.status} /></td>
+                  <td className="whitespace-nowrap">{formatMoney(row.contributions)}</td>
+                  <td className="whitespace-nowrap">{formatMoney(row.withdrawals)}</td>
+                  <td className="whitespace-nowrap">{row.pending}</td>
+                  <td className="whitespace-nowrap"><Badge value={row.status} /></td>
                 </tr>
               ))}
             </tbody>

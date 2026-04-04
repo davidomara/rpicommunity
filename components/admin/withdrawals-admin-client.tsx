@@ -73,16 +73,16 @@ export function WithdrawalsAdminClient({
             </select>
           </div>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <table className="data-table min-w-full">
+        <CardContent className="scroll-x">
+          <table className="data-table min-w-[700px]">
             <thead><tr><th>ID</th><th>Amount</th><th>Reason</th><th>Date</th></tr></thead>
             <tbody>
               {filteredRows.length ? filteredRows.map((row) => (
                 <tr key={row.id}>
-                  <td>{row.id.slice(-8)}</td>
-                  <td>{formatMoney(Number(row.amount))}</td>
-                  <td>{row.reason}</td>
-                  <td>{formatDate(row.withdrawalDate)}</td>
+                  <td className="whitespace-nowrap">{row.id.slice(-8)}</td>
+                  <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
+                  <td className="min-w-[220px]">{row.reason}</td>
+                  <td className="whitespace-nowrap">{formatDate(row.withdrawalDate)}</td>
                 </tr>
               )) : (
                 <tr>
