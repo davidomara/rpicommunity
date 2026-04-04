@@ -1,6 +1,6 @@
 "use server";
 
-import { AuthError } from "next-auth";
+import AuthError from "next-auth";
 import { signIn } from "@/auth";
 import { redirect } from "next/navigation";
 
@@ -14,9 +14,14 @@ export async function loginAction(formData: FormData) {
       password,
       redirectTo: "/dashboard"
     });
-  } catch (error) {
-    if (error instanceof AuthError) {
-      redirect(`/login?error=${error.type}`);
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "type" in error &&
+      typeof (error as { type: unknown }).type === "string"
+    ) {
+      redirect(`/login?error=${(error as { type: string }).type}`);
     }
 
     throw error;

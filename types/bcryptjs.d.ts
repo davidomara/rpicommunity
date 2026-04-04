@@ -1,11 +1,4 @@
-declare module "bcryptjs" {
-  export function hash(data: string, saltOrRounds: string | number): Promise<string>;
-  export function compare(data: string, encrypted: string): Promise<boolean>;
+import bcrypt from "bcryptjs";
 
-  const bcrypt: {
-    hash: typeof hash;
-    compare: typeof compare;
-  };
-
-  export default bcrypt;
-}
+const hashed = await bcrypt.hash(password, 10);
+const ok = await bcrypt.compare(password, hashed);
