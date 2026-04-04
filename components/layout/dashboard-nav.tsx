@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createPortal } from "react-dom";
 import {
   Building2,
   FileText,
@@ -96,14 +97,28 @@ export function MobileDashboardNav({
   actions: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    const originalOverflow = document.body.style.overflow;
+
+    if (open) {
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [mounted, open]);
+
+  const mobileMenu = (
     <>
-      <Button type="button" variant="outline" size="sm" className="gap-2 lg:hidden" onClick={() => setOpen(true)}>
-        <Menu className="h-4 w-4" />
-        Menu
-      </Button>
-
       <div
         className={cn(
           "fixed inset-0 z-40 bg-slate-950/45 transition-opacity duration-200 lg:hidden",
@@ -149,6 +164,16 @@ export function MobileDashboardNav({
           {actions}
         </div>
       </aside>
+    </>
+  );
+
+  return (
+    <>
+      <Button type="button" variant="outline" size="sm" className="gap-2 lg:hidden" onClick={() => setOpen(true)}>
+        <Menu className="h-4 w-4" />
+        Menu
+      </Button>
+      {mounted ? createPortal(mobileMenu, document.body) : null}
     </>
   );
 }

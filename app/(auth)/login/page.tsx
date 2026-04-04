@@ -14,7 +14,7 @@ export default async function LoginPage() {
   return (
     <main className="grid min-h-screen place-items-center bg-hero px-4 py-12">
       <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="bg-slate-950 px-8 py-12 text-slate-100 lg:px-10">
+        <section className="hidden bg-slate-950 px-8 py-12 text-slate-100 lg:block lg:px-10">
           <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200">Directorate of ICT</div>
           <h1 className="mt-6 text-4xl font-semibold tracking-tight">{APP_FULL_NAME}</h1>
           <p className="mt-4 max-w-lg text-sm leading-7 text-slate-300">A modern welfare, emergency savings, and financial administration platform for the RPIC Community. Contributions, withdrawals, emergency support, protected documents, and account management are handled in one secure internal system.</p>
