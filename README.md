@@ -46,8 +46,30 @@ This repo is a migration and modernization of the original Lango Community appli
 ## Railway deployment
 - Create one Railway PostgreSQL service
 - Create one Railway web service for this app
+- Root directory: repo root. Leave it blank if this repository is deployed directly to Railway because `package.json` is already at the project root.
 - Set `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, and `UPLOAD_ROOT`
-- Run Prisma migrations on deploy before first production launch
+- Recommended Railway variables:
+  `DATABASE_URL`
+  `AUTH_SECRET`
+  `APP_URL`
+  `UPLOAD_ROOT=./storage/private`
+  `AUTH_TRUST_HOST=true`
+- Recommended build command:
+  `npm install && npx prisma generate && npm run build`
+- Recommended start command:
+  `npx prisma migrate deploy && npm run start`
+- First deploy flow:
+  1. Push this repo to GitHub
+  2. In Railway, create a PostgreSQL service
+  3. In Railway, create a web service from the GitHub repo
+  4. Confirm the root directory is blank or `/`
+  5. Add the environment variables listed above
+  6. Set the build command to `npm install && npx prisma generate && npm run build`
+  7. Set the start command to `npx prisma migrate deploy && npm run start`
+  8. Deploy the service
+  9. After the first successful deploy, open a Railway shell and run `npm run prisma:seed` once if you want the demo data
+- Railway CLI example:
+  `railway up`
 
 ## Storage
 Protected files are stored under `storage/private` by default. This starter keeps file access behind authenticated routes. Move to object storage later if file volume grows.
