@@ -16,10 +16,12 @@ const initialState: ContributionFormState = {
 
 export function ContributionForm({
   members,
-  selectedMemberId
+  selectedMemberId,
+  onSelectedMemberChange
 }: {
   members: Array<{ id: string; name: string; username: string }>;
   selectedMemberId?: string;
+  onSelectedMemberChange?: (memberId: string) => void;
 }) {
   const [state, formAction] = useFormState(createContributionAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -36,7 +38,14 @@ export function ContributionForm({
         <form ref={formRef} action={formAction} className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="memberId">Member</Label>
-            <select id="memberId" name="memberId" defaultValue={selectedMemberId || ""} required className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm">
+            <select
+              id="memberId"
+              name="memberId"
+              value={selectedMemberId || ""}
+              onChange={(event) => onSelectedMemberChange?.(event.target.value)}
+              required
+              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm"
+            >
               <option value="">Select member</option>
               {members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
             </select>

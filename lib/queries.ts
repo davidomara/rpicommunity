@@ -101,38 +101,47 @@ export async function getMemberAccountDirectory() {
   });
 }
 
-export async function getContributionContext(memberId?: string) {
+export async function getContributionContext() {
   const members = await prisma.user.findMany({
     where: { role: Role.MEMBER },
     orderBy: { name: "asc" },
     select: { id: true, name: true, username: true }
   });
 
-  const selectedId = members.some((member) => member.id === memberId) ? memberId : undefined;
-  const rows = selectedId ? await prisma.contribution.findMany({
-    where: { memberId: selectedId },
-    orderBy: { contributionDate: "desc" },
-    take: 20
-  }) : [];
+  const rows = await prisma.contribution.findMany({
+    orderBy: [{ contributionDate: "desc" }, { createdAt: "desc" }],
+    take: 200,
+    select: {
+      id: true,
+      memberId: true,
+      amount: true,
+      contributionDate: true
+    }
+  });
 
-  return { members, selectedId, rows };
+  return { members, rows };
 }
 
-export async function getWithdrawalContext(memberId?: string) {
+export async function getWithdrawalContext() {
   const members = await prisma.user.findMany({
     where: { role: Role.MEMBER },
     orderBy: { name: "asc" },
     select: { id: true, name: true, username: true }
   });
 
-  const selectedId = members.some((member) => member.id === memberId) ? memberId : undefined;
-  const rows = selectedId ? await prisma.withdrawal.findMany({
-    where: { memberId: selectedId },
-    orderBy: { withdrawalDate: "desc" },
-    take: 20
-  }) : [];
+  const rows = await prisma.withdrawal.findMany({
+    orderBy: [{ withdrawalDate: "desc" }, { createdAt: "desc" }],
+    take: 200,
+    select: {
+      id: true,
+      memberId: true,
+      amount: true,
+      reason: true,
+      withdrawalDate: true
+    }
+  });
 
-  return { members, selectedId, rows };
+  return { members, rows };
 }
 
 export async function getEmergencyContext(memberId?: string, isAdmin = false) {
