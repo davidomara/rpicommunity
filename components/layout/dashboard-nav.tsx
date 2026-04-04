@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createPortal } from "react-dom";
@@ -66,7 +66,11 @@ function NavLinks({
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            onClick={onNavigate}
+            onClick={() => {
+              const activeElement = document.activeElement;
+              if (activeElement instanceof HTMLElement) activeElement.blur();
+              onNavigate?.();
+            }}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition",
               active
@@ -98,6 +102,8 @@ export function MobileDashboardNav({
 }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const asideRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -117,6 +123,16 @@ export function MobileDashboardNav({
     };
   }, [mounted, open]);
 
+  useEffect(() => {
+    if (open) return;
+
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement && asideRef.current?.contains(activeElement)) {
+      activeElement.blur();
+      triggerRef.current?.focus();
+    }
+  }, [open]);
+
   const mobileMenu = (
     <>
       <div
@@ -129,6 +145,7 @@ export function MobileDashboardNav({
       />
 
       <aside
+        ref={asideRef}
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-80 max-w-[88vw] flex-col bg-slate-950 px-5 py-6 text-slate-100 shadow-2xl transition-transform duration-200 ease-out lg:hidden",
           open ? "translate-x-0" : "-translate-x-full"
@@ -160,7 +177,14 @@ export function MobileDashboardNav({
           <NavLinks role={role} onNavigate={() => setOpen(false)} />
         </div>
 
-        <div className="mt-6 border-t border-white/10 pt-4" onClick={() => setOpen(false)}>
+        <div
+          className="mt-6 border-t border-white/10 pt-4"
+          onClick={() => {
+            const activeElement = document.activeElement;
+            if (activeElement instanceof HTMLElement) activeElement.blur();
+            setOpen(false);
+          }}
+        >
           {actions}
         </div>
       </aside>
@@ -169,7 +193,14 @@ export function MobileDashboardNav({
 
   return (
     <>
-      <Button type="button" variant="outline" size="sm" className="gap-2 lg:hidden" onClick={() => setOpen(true)}>
+      <Button
+        ref={triggerRef}
+        type="button"
+        variant="outline"
+        size="sm"
+        className="gap-2 lg:hidden"
+        onClick={() => setOpen(true)}
+      >
         <Menu className="h-4 w-4" />
         Menu
       </Button>

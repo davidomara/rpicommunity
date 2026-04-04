@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { APP_FULL_NAME, APP_SUBTITLE } from "@/lib/settings";
-import { SessionProvider } from "@/components/providers/session-provider";
 
 export const metadata: Metadata = {
   title: APP_FULL_NAME,
@@ -14,8 +13,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
-        <SessionProvider>{children}</SessionProvider>
+      <body suppressHydrationWarning>
+        {children}
       </body>
     </html>
   );
