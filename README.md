@@ -35,6 +35,9 @@ This repo is a migration and modernization of the original Lango Community appli
 5. Run `npm run prisma:seed`
 6. Run `npm run dev`
 
+## Environment notes
+- WSL setup and troubleshooting: [docs/wsl-setup.md](/mnt/d/.Nord%20APP/RPICCommunityApp/docs/wsl-setup.md)
+
 ## Demo users
 - Admin: `admin` / `Admin@123`
 - Member: `alice` / `Member@123`

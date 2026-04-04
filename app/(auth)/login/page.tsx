@@ -7,9 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/forms/submit-button";
 
-export default async function LoginPage() {
+const loginErrors: Record<string, string> = {
+  CredentialsSignin: "Invalid username/email or password.",
+  CallbackRouteError: "Sign-in could not be completed. Check the database and Prisma setup, then try again."
+};
+
+export default async function LoginPage({
+  searchParams
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
   const session = await auth();
   if (session?.user) redirect("/dashboard");
+  const params = await searchParams;
+  const errorMessage = params?.error ? loginErrors[params.error] || "Sign-in failed. Please try again." : "";
 
   return (
     <main className="grid min-h-screen place-items-center bg-hero px-4 py-12">
@@ -30,6 +41,11 @@ export default async function LoginPage() {
             <p className="mt-2 text-sm text-slate-500">Use your username or email to access the RPIC Community workspace.</p>
           </div>
           <form action={loginAction} className="space-y-5">
+            {errorMessage ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {errorMessage}
+              </div>
+            ) : null}
             <div className="space-y-2">
               <Label htmlFor="identifier">Username or Email</Label>
               <Input id="identifier" name="identifier" autoComplete="username" required />
