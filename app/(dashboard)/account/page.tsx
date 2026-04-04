@@ -19,7 +19,7 @@ export default async function AccountPage() {
     <div className="space-y-6">
       <div>
         <p className="text-sm font-medium text-cyan-700">Personal Settings</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Account Settings</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Account Settings</h1>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -30,7 +30,7 @@ export default async function AccountPage() {
                 <Label htmlFor="email">Email Address</Label>
                 <Input id="email" name="email" type="email" defaultValue={session.user.email || ""} required />
               </div>
-              <SubmitButton label="Save Email" pendingLabel="Saving..." />
+              <SubmitButton label="Save Email" pendingLabel="Saving..." className="w-full sm:w-auto" />
             </form>
           </CardContent>
         </Card>
@@ -41,7 +41,7 @@ export default async function AccountPage() {
               <div className="space-y-2"><Label htmlFor="currentPassword">Current Password</Label><Input id="currentPassword" name="currentPassword" type="password" required /></div>
               <div className="space-y-2"><Label htmlFor="newPassword">New Password</Label><Input id="newPassword" name="newPassword" type="password" required /></div>
               <div className="space-y-2"><Label htmlFor="confirmPassword">Confirm Password</Label><Input id="confirmPassword" name="confirmPassword" type="password" required /></div>
-              <SubmitButton label="Change Password" pendingLabel="Updating..." />
+              <SubmitButton label="Change Password" pendingLabel="Updating..." className="w-full sm:w-auto" />
             </form>
           </CardContent>
         </Card>
@@ -70,7 +70,7 @@ export default async function AccountPage() {
                     <Input id="memberEmail" name="email" type="email" placeholder="Enter the updated email address" required />
                   </div>
                   <p className="text-xs text-slate-500">Select the member, then enter the replacement email address to save.</p>
-                  <SubmitButton label="Update Member Email" pendingLabel="Saving..." />
+                  <SubmitButton label="Update Member Email" pendingLabel="Saving..." className="w-full sm:w-auto" />
                 </form>
                 <form action={resetMemberPinAction} className="space-y-4">
                   <div className="space-y-2">
@@ -92,7 +92,7 @@ export default async function AccountPage() {
                     <Input id="confirmPin" name="confirmPin" type="password" defaultValue="Member@123" required />
                   </div>
                   <p className="text-xs text-slate-500">Best option: use a temporary PIN, then share it directly with the member and have them change it after login.</p>
-                  <SubmitButton label="Reset Member PIN" pendingLabel="Resetting..." />
+                  <SubmitButton label="Reset Member PIN" pendingLabel="Resetting..." className="w-full sm:w-auto" />
                 </form>
               </div>
             ) : (

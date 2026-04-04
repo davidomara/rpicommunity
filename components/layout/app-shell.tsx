@@ -32,8 +32,8 @@ export function AppShell({
       </aside>
       <div className="flex min-h-screen flex-1 flex-col">
         <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
-          <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3">
+          <div className="mx-auto flex w-full max-w-7xl flex-wrap items-start justify-between gap-3 px-3 py-3 sm:px-6 sm:py-4 lg:px-8">
+            <div className="flex min-w-0 items-start gap-3">
               <MobileDashboardNav
                 role={role}
                 name={name}
@@ -46,9 +46,9 @@ export function AppShell({
                   </form>
                 }
               />
-              <div>
-                <p className="text-sm font-medium text-slate-900">Welcome back, {name}</p>
-                <p className="text-xs text-slate-500">Research Planning and Innovation Center Community</p>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-slate-900 sm:text-base">Welcome back, {name}</p>
+                <p className="line-clamp-2 text-xs leading-5 text-slate-500">Research Planning and Innovation Center Community</p>
               </div>
             </div>
             <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }} className="hidden sm:block">
@@ -56,7 +56,7 @@ export function AppShell({
             </form>
           </div>
         </header>
-        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-3 py-5 sm:gap-6 sm:px-6 sm:py-6 lg:px-8">
           {children}
         </main>
       </div>

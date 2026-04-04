@@ -64,7 +64,7 @@ export function WithdrawalForm({
           </div>
           <div className="md:col-span-2">
             {state.error ? <p className="mb-3 text-sm text-red-600">{state.error}</p> : null}
-            <SubmitButton label="Save Withdrawal" pendingLabel="Saving..." />
+            <SubmitButton label="Save Withdrawal" pendingLabel="Saving..." className="w-full sm:w-auto" />
           </div>
         </form>
       </CardContent>

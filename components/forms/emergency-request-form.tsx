@@ -51,9 +51,9 @@ export function EmergencyRequestForm({
           </div>
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
           <div className="flex flex-col gap-3 sm:flex-row">
-            <SubmitButton label="Submit Request" pendingLabel="Submitting..." />
+            <SubmitButton label="Submit Request" pendingLabel="Submitting..." className="w-full sm:w-auto" />
             {onCancel ? (
-              <Button type="button" variant="outline" onClick={onCancel}>
+              <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto">
                 Cancel
               </Button>
             ) : null}

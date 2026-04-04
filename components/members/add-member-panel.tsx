@@ -34,8 +34,8 @@ export function AddMemberPanel() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm font-medium text-cyan-700">Community Directory</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Members</h1>
-          <p className="mt-2 text-sm text-slate-500">View contribution and withdrawal standing for each RPIC Community member.</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Members</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">View contribution and withdrawal standing for each RPIC Community member.</p>
         </div>
         <div className="flex flex-col items-stretch gap-2 sm:items-end">
           <Button type="button" onClick={() => setOpen((value) => !value)} className="w-full sm:w-auto">
@@ -84,8 +84,8 @@ export function AddMemberPanel() {
                 <p className="mb-4 text-xs text-slate-500">Best option: create the member with a temporary PIN, then ask them to change it from Account Settings after first login.</p>
                 {state.error ? <p className="mb-4 text-sm text-red-600">{state.error}</p> : null}
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <SubmitButton label="Create Member" pendingLabel="Creating..." />
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                  <SubmitButton label="Create Member" pendingLabel="Creating..." className="w-full sm:w-auto" />
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">
                     Cancel
                   </Button>
                 </div>

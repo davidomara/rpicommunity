@@ -27,8 +27,8 @@ export default async function MembersPage() {
       ) : (
         <div>
           <p className="text-sm font-medium text-cyan-700">Community Directory</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Members</h1>
-          <p className="mt-2 text-sm text-slate-500">View contribution and withdrawal standing for each RPIC Community member.</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Members</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">View contribution and withdrawal standing for each RPIC Community member.</p>
         </div>
       )}
       <MembersTable rows={rows} />

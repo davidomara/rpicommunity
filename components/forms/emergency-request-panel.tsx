@@ -36,8 +36,8 @@ export function EmergencyRequestPanel({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm font-medium text-cyan-700">Emergency Support</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Emergency Requests</h1>
-          <p className="mt-2 text-sm text-slate-500">Members can request emergency assistance. Admins can review and decide requests.</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Emergency Requests</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Members can request emergency assistance. Admins can review and decide requests.</p>
         </div>
         <div className="flex flex-col items-stretch gap-2 sm:items-end">
           <Button type="button" onClick={() => setOpen((value) => !value)} className="w-full sm:w-auto">

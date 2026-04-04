@@ -37,7 +37,7 @@ export function WithdrawalsAdminClient({
     <div className="space-y-6">
       <div>
         <p className="text-sm font-medium text-cyan-700">Financial Administration</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Withdrawals</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Withdrawals</h1>
       </div>
       <WithdrawalForm
         members={members.map((member) => ({
@@ -56,7 +56,7 @@ export function WithdrawalsAdminClient({
               ? `Displaying withdrawals for ${selectedMember.name || selectedMember.username}.`
               : "Select a member to view withdrawal records."}
           </p>
-          <div className="mt-4 max-w-md">
+          <div className="mt-4 w-full max-w-md">
             <label htmlFor="withdrawalMemberId" className="mb-2 block text-sm font-medium text-slate-700">Selected Member</label>
             <select
               id="withdrawalMemberId"

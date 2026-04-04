@@ -36,7 +36,7 @@ export function ContributionsAdminClient({
     <div className="space-y-6">
       <div>
         <p className="text-sm font-medium text-cyan-700">Financial Administration</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Contributions</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Contributions</h1>
       </div>
       <ContributionForm
         members={members.map((member) => ({
@@ -55,7 +55,7 @@ export function ContributionsAdminClient({
               ? `Displaying contributions for ${selectedMember.name || selectedMember.username}.`
               : "Select a member to view contribution records."}
           </p>
-          <div className="mt-4 max-w-md">
+          <div className="mt-4 w-full max-w-md">
             <label htmlFor="contributionMemberId" className="mb-2 block text-sm font-medium text-slate-700">Selected Member</label>
             <select
               id="contributionMemberId"
