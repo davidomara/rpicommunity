@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useFormState } from "react-dom";
 import { createWithdrawalAction, type WithdrawalFormState } from "@/app/(dashboard)/withdrawals/actions";
 import { SubmitButton } from "@/components/forms/submit-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +36,12 @@ export function WithdrawalForm({
     <Card className="h-full min-h-[34rem]">
       <CardHeader><CardTitle>Add Withdrawal</CardTitle></CardHeader>
       <CardContent className="flex flex-1 flex-col">
-        <form ref={formRef} action={formAction} className="grid flex-1 content-start gap-4 md:grid-cols-2">
+        <form
+          ref={formRef}
+          action={formAction}
+          onReset={() => onSelectedMemberChange?.("")}
+          className="grid flex-1 content-start gap-4 md:grid-cols-2"
+        >
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="memberId">Member</Label>
             <select
@@ -64,7 +70,12 @@ export function WithdrawalForm({
           </div>
           <div className="mt-auto md:col-span-2">
             {state.error ? <p className="mb-3 text-sm text-red-600">{state.error}</p> : null}
-            <SubmitButton label="Save Withdrawal" pendingLabel="Saving..." className="w-full sm:w-auto" />
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <SubmitButton label="Save Withdrawal" pendingLabel="Saving..." className="w-full sm:w-auto" />
+              <Button type="reset" variant="outline" className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">
+                Clear
+              </Button>
+            </div>
             <div className="mt-4 w-full overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-sm leading-6 text-slate-600">
               <p className="font-medium text-emerald-800">Withdrawal note</p>
               <p className="mt-1">
