@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { getLatestBankStatement } from "@/lib/queries";
-import { isAdmin } from "@/lib/rbac";
+import { canManageProtectedDocuments } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DocumentViewer } from "@/components/documents/document-viewer";
 import { uploadBankStatementAction } from "./actions";
@@ -11,7 +11,7 @@ export default async function BankStatementsPage() {
   if (!session?.user) return null;
 
   const latest = await getLatestBankStatement();
-  const canUpload = isAdmin(session.user.role);
+  const canUpload = canManageProtectedDocuments(session.user.role);
 
   return (
     <div className="space-y-6">

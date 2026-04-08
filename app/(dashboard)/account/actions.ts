@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { Role } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { isAdmin } from "@/lib/rbac";
+import { canManageMembers } from "@/lib/rbac";
 import { resetMemberPinSchema, updateEmailSchema, updateMemberEmailSchema, updatePasswordSchema } from "@/lib/validators/account";
 import { revalidatePath } from "next/cache";
 
@@ -50,7 +50,7 @@ export async function updatePasswordAction(formData: FormData) {
 
 export async function updateMemberEmailAction(formData: FormData) {
   const session = await auth();
-  if (!session?.user || !isAdmin(session.user.role)) throw new Error("Unauthorized");
+  if (!session?.user || !canManageMembers(session.user.role)) throw new Error("Unauthorized");
 
   const parsed = updateMemberEmailSchema.parse({
     memberId: String(formData.get("memberId") || ""),
@@ -69,7 +69,7 @@ export async function updateMemberEmailAction(formData: FormData) {
 
 export async function resetMemberPinAction(formData: FormData) {
   const session = await auth();
-  if (!session?.user || !isAdmin(session.user.role)) throw new Error("Unauthorized");
+  if (!session?.user || !canManageMembers(session.user.role)) throw new Error("Unauthorized");
 
   const parsed = resetMemberPinSchema.parse({
     memberId: String(formData.get("memberId") || ""),

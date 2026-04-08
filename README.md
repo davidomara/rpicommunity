@@ -46,6 +46,7 @@ This repo is a migration and modernization of the original Lango Community appli
 ## Demo users
 
 - Admin: `admin` / `Admin@123`
+- Treasurer: `treasurer` / `Admin@123`
 - Member: `alice` / `Member@123`
 - Temporary PIN for new or reset member accounts: `Member@123`
 
@@ -71,19 +72,33 @@ npm run build
   `UPLOAD_ROOT=./storage/private`
   `AUTH_TRUST_HOST=true`
 - Recommended build command:
-  `npm install && npx prisma generate && npm run build`
+  `npm run build`
 - Recommended start command:
-  `npx prisma migrate deploy && npm run start`
+  `npm run start`
+- Recommended migration flow:
+  Run `npx prisma migrate deploy` manually from a Railway shell or CI job when you intentionally want to apply pending production migrations.
+- Example production migration commands from your own terminal:
+  `DATABASE_URL='postgresql://...production...?sslmode=require' npx prisma migrate deploy`
+  `DATABASE_URL='postgresql://...production...?sslmode=require' npx prisma migrate status`
+- Why:
+  Running `prisma migrate deploy` inside the Railway start command can put the service into a restart loop if a migration fails. Keeping migrations as a manual deployment step is safer for production.
 - First deploy flow:
   1. Push this repo to GitHub
   2. In Railway, create a PostgreSQL service
   3. In Railway, create a web service from the GitHub repo
   4. Confirm the root directory is blank or `/`
   5. Add the environment variables listed above
-  6. Set the build command to `npm install && npx prisma generate && npm run build`
-  7. Set the start command to `npx prisma migrate deploy && npm run start`
+  6. Set the build command to `npm run build`
+  7. Set the start command to `npm run start`
   8. Deploy the service
-  9. After the first successful deploy, open a Railway shell and run `npm run prisma:seed` once if you want the demo data
+  9. If you have pending schema changes, open a Railway shell and run `npx prisma migrate deploy`
+  10. After the first successful deploy, open a Railway shell and run `npm run prisma:seed` once if you want the demo data
+  11. If Prisma reports a failed production migration record but the schema changes are already present, resolve it before future deploys with:
+     `npx prisma migrate resolve --applied <migration_name>`
+  12. If you only need to add a Treasurer user in production, do not reseed the whole database. Run a one-off create command instead:
+     `DATABASE_URL='postgresql://...production...?sslmode=require' node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.create({ data:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer created: treasurer / Admin@123'); })().finally(()=>prisma.$disconnect());"`
+  13. If a Treasurer account may already exist, use an upsert instead:
+     `DATABASE_URL='postgresql://...production...?sslmode=require' node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.upsert({ where:{ username:'treasurer' }, update:{ email:'treasurer@rpic.local', role:Role.TREASURER, status:MemberStatus.ACTIVE }, create:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer upserted'); })().finally(()=>prisma.$disconnect());"`
 - Railway CLI example:
   `railway up`
 

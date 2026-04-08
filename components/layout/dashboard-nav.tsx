@@ -20,8 +20,10 @@ import {
 import { APP_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { canManageFinance } from "@/lib/rbac";
+import type { Role } from "@prisma/client";
 
-type NavRole = "ADMIN" | "MEMBER";
+type NavRole = Role;
 
 const baseItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
@@ -38,7 +40,7 @@ const financeItems = [
 ];
 
 function getItems(role: NavRole) {
-  return role === "ADMIN" ? [...baseItems.slice(0, 2), ...financeItems, ...baseItems.slice(2)] : baseItems;
+  return canManageFinance(role) ? [...baseItems.slice(0, 2), ...financeItems, ...baseItems.slice(2)] : baseItems;
 }
 
 function isActive(pathname: string, href: string) {

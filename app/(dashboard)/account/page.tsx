@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMemberAccountDirectory } from "@/lib/queries";
-import { isAdmin } from "@/lib/rbac";
+import { canManageMembers } from "@/lib/rbac";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/forms/submit-button";
@@ -10,7 +10,7 @@ import { resetMemberPinAction, updateEmailAction, updateMemberEmailAction, updat
 export default async function AccountPage() {
   const session = await auth();
   if (!session?.user) return null;
-  const admin = isAdmin(session.user.role);
+  const admin = canManageMembers(session.user.role);
   const members = admin ? await getMemberAccountDirectory() : [];
   const defaultMember = members[0];
   const selectClassName = "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";

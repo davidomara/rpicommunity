@@ -1,14 +1,14 @@
 import { auth } from "@/auth";
 import { AddMemberPanel } from "@/components/members/add-member-panel";
 import { getMembersDirectory } from "@/lib/queries";
-import { isAdmin } from "@/lib/rbac";
+import { canManageMembers } from "@/lib/rbac";
 import { MembersTable } from "@/components/tables/members-table";
 
 export default async function MembersPage() {
   const session = await auth();
   if (!session?.user) return null;
 
-  const admin = isAdmin(session.user.role);
+  const admin = canManageMembers(session.user.role);
   const members = await getMembersDirectory();
   const rows = members.map((member) => ({
     id: member.id,

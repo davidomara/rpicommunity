@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { MemberStatus, Role } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { isAdmin } from "@/lib/rbac";
+import { canManageMembers } from "@/lib/rbac";
 import { createMemberSchema } from "@/lib/validators/account";
 import { revalidatePath } from "next/cache";
 
@@ -16,7 +16,7 @@ export type CreateMemberFormState = {
 
 export async function createMemberAction(_: CreateMemberFormState, formData: FormData): Promise<CreateMemberFormState> {
   const session = await auth();
-  if (!session?.user || !isAdmin(session.user.role)) {
+  if (!session?.user || !canManageMembers(session.user.role)) {
     return {
       success: false,
       message: "",

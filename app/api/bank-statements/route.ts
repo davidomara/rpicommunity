@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { isAdmin } from "@/lib/rbac";
+import { canManageProtectedDocuments } from "@/lib/rbac";
 import { storePrivateFile } from "@/lib/storage";
 import { NextResponse } from "next/server";
 
@@ -17,7 +17,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session?.user || !isAdmin(session.user.role)) {
+  if (!session?.user || !canManageProtectedDocuments(session.user.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

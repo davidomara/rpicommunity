@@ -154,7 +154,7 @@ export async function getEmergencyContext(memberId?: string, isAdmin = false) {
   const filterId = isAdmin ? memberId : memberId;
   const rows = await prisma.emergencyRequest.findMany({
     where: filterId ? { memberId: filterId } : undefined,
-    include: { member: true, decidedBy: true },
+    include: { member: true, adminApprovedBy: true, treasurerApprovedBy: true, rejectedBy: true, disbursedBy: true },
     orderBy: { requestDate: "desc" },
     take: 30
   });

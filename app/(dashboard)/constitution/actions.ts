@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { isAdmin } from "@/lib/rbac";
+import { canManageProtectedDocuments } from "@/lib/rbac";
 import { storePrivateFile } from "@/lib/storage";
 import { revalidatePath } from "next/cache";
 
@@ -10,7 +10,7 @@ const MAX_BYTES = 8 * 1024 * 1024;
 
 export async function uploadConstitutionAction(formData: FormData) {
   const session = await auth();
-  if (!session?.user || !isAdmin(session.user.role)) {
+  if (!session?.user || !canManageProtectedDocuments(session.user.role)) {
     throw new Error("Unauthorized");
   }
 
