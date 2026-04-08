@@ -32,10 +32,10 @@ export function ContributionForm({
   }, [state.success]);
 
   return (
-    <Card>
+    <Card className="h-full min-h-[34rem]">
       <CardHeader><CardTitle>Add Contribution</CardTitle></CardHeader>
-      <CardContent>
-        <form ref={formRef} action={formAction} className="grid gap-4 md:grid-cols-2">
+      <CardContent className="flex flex-1 flex-col">
+        <form ref={formRef} action={formAction} className="grid flex-1 content-start gap-4 md:grid-cols-2">
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="memberId">Member</Label>
             <select
@@ -58,9 +58,16 @@ export function ContributionForm({
             <Label htmlFor="contributionDate">Contribution Date</Label>
             <Input id="contributionDate" name="contributionDate" type="date" defaultValue={getTodayISODate()} max={getTodayISODate()} required />
           </div>
-          <div className="md:col-span-2">
+          <div className="mt-auto md:col-span-2">
             {state.error ? <p className="mb-3 text-sm text-red-600">{state.error}</p> : null}
             <SubmitButton label="Save Contribution" pendingLabel="Saving..." className="w-full sm:w-auto" />
+            <div className="mt-4 w-full overflow-hidden rounded-2xl border border-cyan-100 bg-cyan-50/70 px-4 py-3 text-sm leading-6 text-slate-600">
+              <p className="font-medium text-cyan-800">Contribution note</p>
+              <p className="mt-1">
+                Record each member payment with the correct date and amount so the community balance, arrears,
+                and member standing remain accurate from the start of the May 2026 contribution cycle.
+              </p>
+            </div>
           </div>
         </form>
       </CardContent>

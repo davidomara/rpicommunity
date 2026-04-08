@@ -40,65 +40,67 @@ export function WithdrawalsAdminClient({
         <p className="text-sm font-medium text-cyan-700">Financial Administration</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Withdrawals</h1>
       </div>
-      <WithdrawalForm
-        members={members.map((member) => ({
-          id: member.id,
-          name: member.name || member.username,
-          username: member.username
-        }))}
-        selectedMemberId={selectedMemberId}
-        onSelectedMemberChange={setSelectedMemberId}
-      />
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Withdrawals</CardTitle>
-          <p className="mt-1 text-sm text-slate-500">
-            {selectedMember
-              ? `Displaying withdrawals for ${selectedMember.name || selectedMember.username}.`
-              : "Select a member to view withdrawal records."}
-          </p>
-          <div className="mt-4 w-full max-w-md">
-            <label htmlFor="withdrawalMemberId" className="mb-2 block text-sm font-medium text-slate-700">Selected Member</label>
-            <select
-              id="withdrawalMemberId"
-              value={selectedMemberId}
-              onChange={(event) => setSelectedMemberId(event.target.value)}
-              className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900"
-            >
-              <option value="">Choose member</option>
-              {members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name || member.username}
-                </option>
-              ))}
-            </select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="scroll-hint">Scroll sideways to view all withdrawal columns.</p>
-          <DataScroll>
-            <table className="data-table min-w-[700px]">
-              <thead><tr><th>S/N</th><th>Amount</th><th>Reason</th><th>Date</th></tr></thead>
-              <tbody>
-                {filteredRows.length ? filteredRows.map((row, index) => (
-                  <tr key={row.id}>
-                    <td className="whitespace-nowrap">{filteredRows.length - index}</td>
-                    <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
-                    <td className="min-w-[220px]">{row.reason}</td>
-                    <td className="whitespace-nowrap">{formatDate(row.withdrawalDate)}</td>
-                  </tr>
-                )) : (
-                  <tr>
-                    <td colSpan={4} className="text-sm text-slate-500">
-                      {selectedMemberId ? "No withdrawals found for the selected member." : "No member selected."}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </DataScroll>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-stretch">
+        <WithdrawalForm
+          members={members.map((member) => ({
+            id: member.id,
+            name: member.name || member.username,
+            username: member.username
+          }))}
+          selectedMemberId={selectedMemberId}
+          onSelectedMemberChange={setSelectedMemberId}
+        />
+        <Card className="h-full min-h-[34rem]">
+          <CardHeader>
+            <CardTitle>Recent Withdrawals</CardTitle>
+            <p className="mt-1 text-sm text-slate-500">
+              {selectedMember
+                ? `Displaying withdrawals for ${selectedMember.name || selectedMember.username}.`
+                : "Select a member to view withdrawal records."}
+            </p>
+            <div className="mt-4 w-full max-w-md">
+              <label htmlFor="withdrawalMemberId" className="mb-2 block text-sm font-medium text-slate-700">Selected Member</label>
+              <select
+                id="withdrawalMemberId"
+                value={selectedMemberId}
+                onChange={(event) => setSelectedMemberId(event.target.value)}
+                className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900"
+              >
+                <option value="">Choose member</option>
+                {members.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name || member.username}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col">
+            <p className="scroll-hint">Scroll sideways to view all withdrawal columns.</p>
+            <DataScroll className="mt-2">
+              <table className="data-table min-w-[700px]">
+                <thead><tr><th>S/N</th><th>Amount</th><th>Reason</th><th>Date</th></tr></thead>
+                <tbody>
+                  {filteredRows.length ? filteredRows.map((row, index) => (
+                    <tr key={row.id}>
+                      <td className="whitespace-nowrap">{filteredRows.length - index}</td>
+                      <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
+                      <td className="min-w-[220px]">{row.reason}</td>
+                      <td className="whitespace-nowrap">{formatDate(row.withdrawalDate)}</td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan={4} className="text-sm text-slate-500">
+                        {selectedMemberId ? "No withdrawals found for the selected member." : "No member selected."}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </DataScroll>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

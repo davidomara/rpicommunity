@@ -39,64 +39,66 @@ export function ContributionsAdminClient({
         <p className="text-sm font-medium text-cyan-700">Financial Administration</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Contributions</h1>
       </div>
-      <ContributionForm
-        members={members.map((member) => ({
-          id: member.id,
-          name: member.name || member.username,
-          username: member.username
-        }))}
-        selectedMemberId={selectedMemberId}
-        onSelectedMemberChange={setSelectedMemberId}
-      />
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Contributions</CardTitle>
-          <p className="mt-1 text-sm text-slate-500">
-            {selectedMember
-              ? `Displaying contributions for ${selectedMember.name || selectedMember.username}.`
-              : "Select a member to view contribution records."}
-          </p>
-          <div className="mt-4 w-full max-w-md">
-            <label htmlFor="contributionMemberId" className="mb-2 block text-sm font-medium text-slate-700">Selected Member</label>
-            <select
-              id="contributionMemberId"
-              value={selectedMemberId}
-              onChange={(event) => setSelectedMemberId(event.target.value)}
-              className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900"
-            >
-              <option value="">Choose member</option>
-              {members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name || member.username}
-                </option>
-              ))}
-            </select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="scroll-hint">Scroll sideways to view all contribution columns.</p>
-          <DataScroll>
-            <table className="data-table min-w-[560px]">
-              <thead><tr><th>S/N</th><th>Amount</th><th>Date</th></tr></thead>
-              <tbody>
-                {filteredRows.length ? filteredRows.map((row, index) => (
-                  <tr key={row.id}>
-                    <td className="whitespace-nowrap">{filteredRows.length - index}</td>
-                    <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
-                    <td className="whitespace-nowrap">{formatDate(row.contributionDate)}</td>
-                  </tr>
-                )) : (
-                  <tr>
-                    <td colSpan={3} className="text-sm text-slate-500">
-                      {selectedMemberId ? "No contributions found for the selected member." : "No member selected."}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </DataScroll>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-stretch">
+        <ContributionForm
+          members={members.map((member) => ({
+            id: member.id,
+            name: member.name || member.username,
+            username: member.username
+          }))}
+          selectedMemberId={selectedMemberId}
+          onSelectedMemberChange={setSelectedMemberId}
+        />
+        <Card className="h-full min-h-[34rem]">
+          <CardHeader>
+            <CardTitle>Recent Contributions</CardTitle>
+            <p className="mt-1 text-sm text-slate-500">
+              {selectedMember
+                ? `Displaying contributions for ${selectedMember.name || selectedMember.username}.`
+                : "Select a member to view contribution records."}
+            </p>
+            <div className="mt-4 w-full max-w-md">
+              <label htmlFor="contributionMemberId" className="mb-2 block text-sm font-medium text-slate-700">Selected Member</label>
+              <select
+                id="contributionMemberId"
+                value={selectedMemberId}
+                onChange={(event) => setSelectedMemberId(event.target.value)}
+                className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900"
+              >
+                <option value="">Choose member</option>
+                {members.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name || member.username}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col">
+            <p className="scroll-hint">Scroll sideways to view all contribution columns.</p>
+            <DataScroll className="mt-2">
+              <table className="data-table min-w-[560px]">
+                <thead><tr><th>S/N</th><th>Amount</th><th>Date</th></tr></thead>
+                <tbody>
+                  {filteredRows.length ? filteredRows.map((row, index) => (
+                    <tr key={row.id}>
+                      <td className="whitespace-nowrap">{filteredRows.length - index}</td>
+                      <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
+                      <td className="whitespace-nowrap">{formatDate(row.contributionDate)}</td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan={3} className="text-sm text-slate-500">
+                        {selectedMemberId ? "No contributions found for the selected member." : "No member selected."}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </DataScroll>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

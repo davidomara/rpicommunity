@@ -32,10 +32,10 @@ export function WithdrawalForm({
   }, [state.success]);
 
   return (
-    <Card>
+    <Card className="h-full min-h-[34rem]">
       <CardHeader><CardTitle>Add Withdrawal</CardTitle></CardHeader>
-      <CardContent>
-        <form ref={formRef} action={formAction} className="grid gap-4 md:grid-cols-2">
+      <CardContent className="flex flex-1 flex-col">
+        <form ref={formRef} action={formAction} className="grid flex-1 content-start gap-4 md:grid-cols-2">
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="memberId">Member</Label>
             <select
@@ -62,9 +62,16 @@ export function WithdrawalForm({
             <Label htmlFor="reason">Reason</Label>
             <Input id="reason" name="reason" required />
           </div>
-          <div className="md:col-span-2">
+          <div className="mt-auto md:col-span-2">
             {state.error ? <p className="mb-3 text-sm text-red-600">{state.error}</p> : null}
             <SubmitButton label="Save Withdrawal" pendingLabel="Saving..." className="w-full sm:w-auto" />
+            <div className="mt-4 w-full overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-sm leading-6 text-slate-600">
+              <p className="font-medium text-emerald-800">Withdrawal note</p>
+              <p className="mt-1">
+                Capture the full withdrawal reason and correct date for each member so approved payouts,
+                emergency support records, and the running community balance remain consistent.
+              </p>
+            </div>
           </div>
         </form>
       </CardContent>
