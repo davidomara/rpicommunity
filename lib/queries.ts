@@ -58,6 +58,7 @@ export async function getDashboardData() {
   const summary = memberRows.reduce((acc, row) => {
     acc.totalContributions += row.totalContributions;
     acc.totalWithdrawals += row.totalWithdrawals;
+    acc.totalArrears += row.missing;
     acc.pendingEmergencyRequests += row.pendingEmergencyRequests;
     acc.members += 1;
     if (row.status === "ACTIVE") acc.active += 1;
@@ -67,6 +68,7 @@ export async function getDashboardData() {
   }, {
     totalContributions: 0,
     totalWithdrawals: 0,
+    totalArrears: 0,
     pendingEmergencyRequests: 0,
     members: 0,
     active: 0,
