@@ -24,7 +24,7 @@ export default async function BankStatementsPage() {
           <CardHeader><CardTitle>Upload Latest Statement</CardTitle></CardHeader>
           <CardContent>
             <form action={uploadBankStatementAction} className="flex flex-col gap-4 md:flex-row md:items-center">
-              <input type="file" name="file" accept=".pdf,image/*" required className="block w-full text-sm md:flex-1" />
+              <input type="file" name="file" accept=".pdf,image/*" required className="upload-file-input md:flex-1" />
               <SubmitButton label="Upload Statement" pendingLabel="Uploading..." className="w-full whitespace-nowrap md:w-auto" />
             </form>
             <p className="mt-3 text-xs text-slate-500">The latest statement becomes the current protected preview for logged-in users.</p>

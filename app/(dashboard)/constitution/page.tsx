@@ -24,7 +24,7 @@ export default async function ConstitutionPage() {
           <CardHeader><CardTitle>Upload Active Constitution</CardTitle></CardHeader>
           <CardContent>
             <form action={uploadConstitutionAction} className="flex flex-col gap-4 md:flex-row md:items-center">
-              <input type="file" name="file" accept=".pdf,image/*" required className="block w-full text-sm md:flex-1" />
+              <input type="file" name="file" accept=".pdf,image/*" required className="upload-file-input md:flex-1" />
               <SubmitButton label="Upload Constitution" pendingLabel="Uploading..." className="w-full whitespace-nowrap md:w-auto" />
             </form>
             <p className="mt-3 text-xs text-slate-500">Uploading a new file automatically marks the previous governing document as inactive.</p>

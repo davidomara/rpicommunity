@@ -69,6 +69,26 @@ body {
   @apply mb-3 text-xs font-medium text-slate-500;
 }
 
+.upload-file-input {
+  @apply block h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 shadow-sm transition;
+}
+
+.upload-file-input:hover {
+  @apply border-slate-300 bg-white;
+}
+
+.upload-file-input:focus {
+  @apply outline-none ring-2 ring-cyan-200;
+}
+
+.upload-file-input::file-selector-button {
+  @apply mr-3 rounded-lg border-0 bg-slate-950 px-4 py-2 text-sm font-medium text-white shadow-sm transition;
+}
+
+.upload-file-input::file-selector-button:hover {
+  @apply bg-slate-800;
+}
+
 .data-table th {
   @apply bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600;
 }
