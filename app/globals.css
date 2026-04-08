@@ -44,6 +44,27 @@ body {
   border: 2px solid rgb(203 213 225);
 }
 
+.scroll-y {
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: rgb(71 85 105) rgb(203 213 225);
+}
+
+.scroll-y::-webkit-scrollbar {
+  width: 12px;
+}
+
+.scroll-y::-webkit-scrollbar-track {
+  background: rgb(203 213 225);
+  border-radius: 9999px;
+}
+
+.scroll-y::-webkit-scrollbar-thumb {
+  background: rgb(71 85 105);
+  border-radius: 9999px;
+  border: 2px solid rgb(203 213 225);
+}
+
 .scroll-hint {
   @apply mb-3 text-xs font-medium text-slate-500;
 }

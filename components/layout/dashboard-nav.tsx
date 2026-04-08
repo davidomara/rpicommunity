@@ -199,8 +199,8 @@ export function MobileDashboardNav({
         ref={triggerRef}
         type="button"
         variant="outline"
-        size="sm"
-        className="gap-2 lg:hidden"
+        size="default"
+        className="h-12 min-w-[122px] gap-2 rounded-xl px-4 lg:hidden"
         onClick={() => setOpen(true)}
       >
         <Menu className="h-4 w-4" />

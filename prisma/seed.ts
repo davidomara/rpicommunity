@@ -1,11 +1,119 @@
 import bcrypt from "bcryptjs";
-import { EmergencyStatus, MemberStatus, PrismaClient, Role, StatementType, TransactionType } from "@prisma/client";
+import { MemberStatus, PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+const rankPrefixes = new Set(["CP", "SSP", "SP", "ASP", "AIP", "CPL", "PC"]);
+
+const onboardingMembers: Array<{
+  name: string;
+  role: Role;
+  username?: string;
+  email?: string;
+}> = [
+  { name: "CP Munanura Dan", role: Role.ADMIN, username: "admin", email: "admin@rpic.local" },
+  { name: "SSP Ssenyondo Richard", role: Role.MEMBER },
+  { name: "SSP Epedu David", role: Role.MEMBER },
+  { name: "SP Mutaasa Ivan", role: Role.MEMBER },
+  { name: "SP Ayebaze Lee", role: Role.MEMBER },
+  { name: "SP Kedi Betty", role: Role.TREASURER, username: "treasurer", email: "treasurer@rpic.local" },
+  { name: "SP Kitimbo Daniel", role: Role.MEMBER },
+  { name: "SP NiringiYimana Gideon", role: Role.MEMBER },
+  { name: "SP Mukembo Joel", role: Role.MEMBER },
+  { name: "SP Emukadde Emmanuel", role: Role.MEMBER },
+  { name: "SP Etene Moses", role: Role.MEMBER },
+  { name: "SP Naggayi Sophie Kaggwa", role: Role.MEMBER },
+  { name: "SP Arinda Nickson", role: Role.MEMBER },
+  { name: "SP Wampamba Jacob", role: Role.MEMBER },
+  { name: "SP Mugabe K Peter", role: Role.MEMBER },
+  { name: "SP Mafuko George", role: Role.MEMBER },
+  { name: "ASP Ogwal Morish", role: Role.MEMBER },
+  { name: "ASP Malinga John", role: Role.MEMBER },
+  { name: "ASP Twesigye Fred", role: Role.MEMBER },
+  { name: "ASP Musinguzi Benson", role: Role.MEMBER },
+  { name: "AIP Mubbala Paul", role: Role.MEMBER },
+  { name: "AIP Kalyebi Brian", role: Role.MEMBER },
+  { name: "AIP Draciri James Raymond", role: Role.MEMBER },
+  { name: "AIP Mukama Jovita Jason", role: Role.MEMBER },
+  { name: "AIP Ayima Bonny", role: Role.MEMBER },
+  { name: "AIP Kamunanwire Elvis", role: Role.MEMBER },
+  { name: "AIP Fagiyo Juma", role: Role.MEMBER },
+  { name: "AIP Emudong Daniel William", role: Role.MEMBER },
+  { name: "AIP Lutaaya George", role: Role.MEMBER },
+  { name: "AIP Egesu Eryau Henry", role: Role.MEMBER },
+  { name: "AIP Balikowa Bosco", role: Role.MEMBER },
+  { name: "AIP Omara David Owiny", role: Role.MEMBER },
+  { name: "AIP Akumu Phiona", role: Role.MEMBER },
+  { name: "AIP Omuut Francis", role: Role.MEMBER },
+  { name: "AIP Nuwasasira Abel", role: Role.MEMBER },
+  { name: "AIP Ssuuna Henry", role: Role.MEMBER },
+  { name: "AIP Nakajubi Rebecca", role: Role.MEMBER },
+  { name: "AIP Mugizi Adrian", role: Role.MEMBER },
+  { name: "AIP Etyang Rowling Jerry", role: Role.MEMBER },
+  { name: "AIP Olanya Geoffrey", role: Role.MEMBER },
+  { name: "AIP Kibet Victor", role: Role.MEMBER },
+  { name: "AIP Akampwera Bannet", role: Role.MEMBER },
+  { name: "AIP Abalonde Noah", role: Role.MEMBER },
+  { name: "AIP Auma Ceazeria", role: Role.MEMBER },
+  { name: "AIP Magezi John Paul", role: Role.MEMBER },
+  { name: "AIP Kidandi Remmy", role: Role.MEMBER },
+  { name: "CPL Tasamba Boyi Balamu", role: Role.MEMBER },
+  { name: "PC Ayebare B Godfrey", role: Role.MEMBER }
+];
+
+function stripRank(name: string) {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length > 1 && rankPrefixes.has(parts[0].toUpperCase())) {
+    return parts.slice(1).join(" ");
+  }
+  return name.trim();
+}
+
+function slugPart(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[^a-zA-Z0-9\s]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ".");
+}
+
+function createCredentials(name: string, used: Set<string>) {
+  const baseName = stripRank(name);
+  const parts = baseName.split(/\s+/).filter(Boolean);
+  const first = slugPart(parts[0] || baseName);
+  const last = slugPart(parts[parts.length - 1] || baseName);
+  const full = slugPart(baseName);
+
+  const candidates = [full, `${first}.${last}`, first].filter(Boolean);
+
+  for (const candidate of candidates) {
+    if (!used.has(candidate)) {
+      used.add(candidate);
+      return {
+        username: candidate,
+        email: `${candidate}@rpic.local`
+      };
+    }
+  }
+
+  let suffix = 2;
+  while (used.has(`${full}.${suffix}`)) {
+    suffix += 1;
+  }
+
+  const username = `${full}.${suffix}`;
+  used.add(username);
+  return {
+    username,
+    email: `${username}@rpic.local`
+  };
+}
+
 async function main() {
-  const passwordHash = await bcrypt.hash("Admin@123", 12);
+  const adminHash = await bcrypt.hash("Admin@123", 12);
   const memberHash = await bcrypt.hash("Member@123", 12);
+  const usedUsernames = new Set<string>();
 
   await prisma.transaction.deleteMany();
   await prisma.emergencyRequest.deleteMany();
@@ -18,136 +126,29 @@ async function main() {
   await prisma.account.deleteMany();
   await prisma.user.deleteMany();
 
-  const admin = await prisma.user.create({
-    data: {
-      name: "RPIC Community Admin",
-      username: "admin",
-      email: "admin@rpic.local",
-      passwordHash,
-      role: Role.ADMIN,
-      status: MemberStatus.ACTIVE
-    }
-  });
+  for (const person of onboardingMembers) {
+    const generated = person.username && person.email
+      ? { username: person.username, email: person.email }
+      : createCredentials(person.name, usedUsernames);
 
-  const treasurer = await prisma.user.create({
-    data: {
-      name: "RPIC Community Treasurer",
-      username: "treasurer",
-      email: "treasurer@rpic.local",
-      passwordHash,
-      role: Role.TREASURER,
-      status: MemberStatus.ACTIVE
-    }
-  });
+    usedUsernames.add(generated.username);
 
-  const members = await Promise.all([
-    prisma.user.create({
+    await prisma.user.create({
       data: {
-        name: "Alice Namayanja",
-        username: "alice",
-        email: "alice@rpic.local",
-        passwordHash: memberHash,
-        role: Role.MEMBER,
+        name: person.name,
+        username: generated.username,
+        email: generated.email,
+        passwordHash: person.role === Role.MEMBER ? memberHash : adminHash,
+        role: person.role,
         status: MemberStatus.ACTIVE
-      }
-    }),
-    prisma.user.create({
-      data: {
-        name: "Brian Okello",
-        username: "brian",
-        email: "brian@rpic.local",
-        passwordHash: memberHash,
-        role: Role.MEMBER,
-        status: MemberStatus.WARNING
-      }
-    }),
-    prisma.user.create({
-      data: {
-        name: "Catherine Auma",
-        username: "catherine",
-        email: "catherine@rpic.local",
-        passwordHash: memberHash,
-        role: Role.MEMBER,
-        status: MemberStatus.ACTIVE
-      }
-    })
-  ]);
-
-  for (const [index, member] of members.entries()) {
-    const contribution = await prisma.contribution.create({
-      data: {
-        memberId: member.id,
-        amount: 150000 + index * 25000,
-        contributionDate: new Date(`2026-0${index + 1}-15T00:00:00.000Z`),
-        createdById: admin.id
-      }
-    });
-
-    await prisma.transaction.create({
-      data: {
-        memberId: member.id,
-        type: TransactionType.CONTRIBUTION,
-        amount: contribution.amount,
-        eventDate: contribution.contributionDate,
-        actorId: admin.id,
-        notes: "Seed contribution"
       }
     });
   }
 
-  const withdrawal = await prisma.withdrawal.create({
-    data: {
-      memberId: members[1].id,
-      amount: 50000,
-      reason: "Medical support",
-      withdrawalDate: new Date("2026-03-03T00:00:00.000Z"),
-      createdById: admin.id
-    }
-  });
-
-  await prisma.transaction.create({
-    data: {
-      memberId: members[1].id,
-      type: TransactionType.WITHDRAWAL,
-      amount: withdrawal.amount,
-      eventDate: withdrawal.withdrawalDate,
-      actorId: admin.id,
-      notes: withdrawal.reason
-    }
-  });
-
-  await prisma.emergencyRequest.create({
-    data: {
-      memberId: members[0].id,
-      amount: 200000,
-      reason: "Emergency medical bill support",
-      status: EmergencyStatus.PENDING,
-      requestDate: new Date("2026-03-18T00:00:00.000Z")
-    }
-  });
-
-  await prisma.emergencyRequest.create({
-    data: {
-      memberId: members[2].id,
-      amount: 120000,
-      approvedAmount: 120000,
-      reason: "Funeral contribution support",
-      status: EmergencyStatus.APPROVED,
-      requestDate: new Date("2026-02-22T00:00:00.000Z"),
-      adminApprovedAt: new Date("2026-02-23T00:00:00.000Z"),
-      adminApprovedById: admin.id,
-      treasurerApprovedAt: new Date("2026-02-24T00:00:00.000Z"),
-      treasurerApprovedById: treasurer.id,
-      decisionDate: new Date("2026-02-24T00:00:00.000Z"),
-      disbursedAt: new Date("2026-02-24T00:00:00.000Z"),
-      disbursedById: treasurer.id
-    }
-  });
-
-  console.log("Seeded RPIC Community demo data");
+  console.log(`Seeded RPIC Community onboarding users: ${onboardingMembers.length}`);
   console.log("Admin login: admin / Admin@123");
   console.log("Treasurer login: treasurer / Admin@123");
-  console.log("Member login: alice / Member@123");
+  console.log("All other onboarded members use: Member@123");
 }
 
 main().finally(async () => {

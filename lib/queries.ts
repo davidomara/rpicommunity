@@ -2,10 +2,12 @@ import { EmergencyStatus, Prisma, Role } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { EXPECTED_MONTHLY_CONTRIBUTION } from "@/lib/settings";
 
+const communityRoles: Role[] = [Role.ADMIN, Role.TREASURER, Role.MEMBER];
+
 export async function getDashboardData() {
   const [members, pendingRequests, totals] = await Promise.all([
     prisma.user.findMany({
-      where: { role: Role.MEMBER },
+      where: { role: { in: communityRoles } },
       include: {
         contributions: true,
         withdrawals: true,
@@ -75,7 +77,7 @@ export async function getDashboardData() {
 
 export async function getMembersDirectory() {
   return prisma.user.findMany({
-    where: { role: Role.MEMBER },
+    where: { role: { in: communityRoles } },
     include: {
       contributions: true,
       withdrawals: true,
@@ -103,7 +105,7 @@ export async function getMemberAccountDirectory() {
 
 export async function getContributionContext() {
   const members = await prisma.user.findMany({
-    where: { role: Role.MEMBER },
+    where: { role: { in: communityRoles } },
     orderBy: { name: "asc" },
     select: { id: true, name: true, username: true }
   });
@@ -124,7 +126,7 @@ export async function getContributionContext() {
 
 export async function getWithdrawalContext() {
   const members = await prisma.user.findMany({
-    where: { role: Role.MEMBER },
+    where: { role: { in: communityRoles } },
     orderBy: { name: "asc" },
     select: { id: true, name: true, username: true }
   });
@@ -146,7 +148,7 @@ export async function getWithdrawalContext() {
 
 export async function getEmergencyContext(memberId?: string, isAdmin = false) {
   const members = await prisma.user.findMany({
-    where: { role: Role.MEMBER },
+    where: { role: { in: communityRoles } },
     orderBy: { name: "asc" },
     select: { id: true, name: true, username: true }
   });

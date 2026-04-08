@@ -33,7 +33,7 @@ export function AppShell({
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
           <div className="mx-auto flex w-full max-w-7xl flex-wrap items-start justify-between gap-3 px-3 py-3 sm:px-6 sm:py-4 lg:px-8">
-            <div className="flex min-w-0 items-start gap-3">
+            <div className="flex min-w-0 items-stretch gap-3">
               <MobileDashboardNav
                 role={role}
                 name={name}
@@ -46,9 +46,9 @@ export function AppShell({
                   </form>
                 }
               />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-slate-900 sm:text-base">Welcome back, {name}</p>
-                <p className="line-clamp-2 text-xs leading-5 text-slate-500">Research Planning and Innovation Center Community</p>
+              <div className="flex min-w-0 flex-1 flex-col justify-center py-0.5">
+                <p className="truncate text-[15px] font-medium leading-5 text-slate-900 sm:text-base">Welcome back, {name}</p>
+                <p className="line-clamp-2 text-xs leading-4 text-slate-500 sm:leading-5">Research Planning and Innovation Center Community</p>
               </div>
             </div>
             <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }} className="hidden sm:block">

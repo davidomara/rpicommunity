@@ -43,12 +43,12 @@ This repo is a migration and modernization of the original Lango Community appli
 
 - WSL setup and troubleshooting: [docs/wsl-setup.md](/mnt/d/.Nord%20APP/RPICCommunityApp/docs/wsl-setup.md)
 
-## Demo users
+## Default users
 
 - Admin: `admin` / `Admin@123`
 - Treasurer: `treasurer` / `Admin@123`
-- Member: `alice` / `Member@123`
-- Temporary PIN for new or reset member accounts: `Member@123`
+- All onboarded members: default temporary PIN `Member@123`
+- `npm run prisma:seed` now creates the onboarding user list only. It does not insert demo contributions, withdrawals, transactions, or emergency requests.
 
 ## WSL 
 
@@ -92,7 +92,7 @@ npm run build
   7. Set the start command to `npm run start`
   8. Deploy the service
   9. If you have pending schema changes, open a Railway shell and run `npx prisma migrate deploy`
-  10. After the first successful deploy, open a Railway shell and run `npm run prisma:seed` once if you want the demo data
+  10. After the first successful deploy, open a Railway shell and run `npm run prisma:seed` once if you want the onboarding user accounts
   11. If Prisma reports a failed production migration record but the schema changes are already present, resolve it before future deploys with:
      `npx prisma migrate resolve --applied <migration_name>`
   12. If you only need to add a Treasurer user in production, do not reseed the whole database. Run a one-off create command instead:
