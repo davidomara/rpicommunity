@@ -24,7 +24,7 @@ export default async function LoginPage({
 
   return (
     <main className="grid min-h-screen place-items-center bg-hero px-4 py-12">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft lg:max-w-5xl lg:grid-cols-[1.1fr_0.9fr]">
         <section className="hidden bg-slate-950 px-8 py-12 text-slate-100 lg:block lg:px-10">
           <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200">Directorate of ICT</div>
           <h1 className="mt-6 text-4xl font-semibold tracking-tight">{APP_FULL_NAME}</h1>
@@ -34,7 +34,7 @@ export default async function LoginPage({
             <div className="flex items-center gap-3"><Building2 className="h-4 w-4 text-cyan-300" />Purpose-built for RPIC Community under the Directorate of ICT</div>
           </div>
         </section>
-        <section className="px-6 py-10 sm:px-8 sm:py-12 lg:px-10">
+        <section className="mx-auto w-full max-w-xl px-6 py-10 sm:px-8 sm:py-12 lg:max-w-none lg:px-10">
           <div className="mb-8">
             <p className="text-sm font-medium text-cyan-700">{APP_SUBTITLE}</p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950">Sign in</h2>
@@ -58,8 +58,9 @@ export default async function LoginPage({
               <a href="/forgot-password" className="font-medium text-cyan-700 hover:text-cyan-800">Forgot password?</a>
             </div>
             <SubmitButton label="Sign in" pendingLabel="Signing in..." className="w-full sm:w-auto" />
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-500">
               Demo admin: <strong>admin</strong> / <strong>Admin@123</strong><br />
+              Demo treasurer: <strong>treasurer</strong> / <strong>Admin@123</strong><br />
               Demo member: <strong>alice</strong> / <strong>Member@123</strong>
             </div>
           </form>
