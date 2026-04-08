@@ -32,16 +32,20 @@ export function AddMemberPanel() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-cyan-700">Community Directory</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Members</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">View contribution and withdrawal standing for each RPIC Community member.</p>
         </div>
-        <div className="flex flex-col items-stretch gap-2 sm:items-end">
-          <Button type="button" onClick={() => setOpen((value) => !value)} className="w-full sm:w-auto">
+        <div className="flex flex-col gap-2 sm:items-end">
+          <Button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            className="self-start whitespace-nowrap px-5 sm:self-auto"
+          >
             {open ? "Hide Add Member Form" : "Add New Member"}
           </Button>
-          {state.success && state.message ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
+          {state.success && state.message ? <p className="max-w-xs text-sm text-emerald-700 sm:text-right">{state.message}</p> : null}
         </div>
       </div>
 

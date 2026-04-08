@@ -17,15 +17,15 @@ export default async function ConstitutionPage() {
     <div className="space-y-6">
       <div>
         <p className="text-sm font-medium text-cyan-700">Protected Governance Document</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Community Constitution</h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Community Constitution</h1>
       </div>
       {canUpload ? (
         <Card>
           <CardHeader><CardTitle>Upload Active Constitution</CardTitle></CardHeader>
           <CardContent>
             <form action={uploadConstitutionAction} className="flex flex-col gap-4 md:flex-row md:items-center">
-              <input type="file" name="file" accept=".pdf,image/*" required className="block text-sm" />
-              <SubmitButton label="Upload Constitution" pendingLabel="Uploading..." />
+              <input type="file" name="file" accept=".pdf,image/*" required className="block w-full text-sm md:flex-1" />
+              <SubmitButton label="Upload Constitution" pendingLabel="Uploading..." className="w-full whitespace-nowrap md:w-auto" />
             </form>
             <p className="mt-3 text-xs text-slate-500">Uploading a new file automatically marks the previous governing document as inactive.</p>
           </CardContent>

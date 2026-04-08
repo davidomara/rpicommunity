@@ -34,7 +34,7 @@ export default async function LoginPage({
             <div className="flex items-center gap-3"><Building2 className="h-4 w-4 text-cyan-300" />Purpose-built for RPIC Community under the Directorate of ICT</div>
           </div>
         </section>
-        <section className="px-8 py-12 lg:px-10">
+        <section className="px-6 py-10 sm:px-8 sm:py-12 lg:px-10">
           <div className="mb-8">
             <p className="text-sm font-medium text-cyan-700">{APP_SUBTITLE}</p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950">Sign in</h2>
@@ -57,7 +57,7 @@ export default async function LoginPage({
             <div className="flex items-center justify-between text-sm">
               <a href="/forgot-password" className="font-medium text-cyan-700 hover:text-cyan-800">Forgot password?</a>
             </div>
-            <SubmitButton label="Sign in" pendingLabel="Signing in..." />
+            <SubmitButton label="Sign in" pendingLabel="Signing in..." className="w-full sm:w-auto" />
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
               Demo admin: <strong>admin</strong> / <strong>Admin@123</strong><br />
               Demo member: <strong>alice</strong> / <strong>Member@123</strong>

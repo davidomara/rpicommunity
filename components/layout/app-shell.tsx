@@ -30,7 +30,7 @@ export function AppShell({
         </div>
         <DesktopDashboardNav role={role} />
       </aside>
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
           <div className="mx-auto flex w-full max-w-7xl flex-wrap items-start justify-between gap-3 px-3 py-3 sm:px-6 sm:py-4 lg:px-8">
             <div className="flex min-w-0 items-start gap-3">
@@ -56,7 +56,7 @@ export function AppShell({
             </form>
           </div>
         </header>
-        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-3 py-5 sm:gap-6 sm:px-6 sm:py-6 lg:px-8">
+        <main className="mx-auto flex w-full min-w-0 max-w-7xl flex-1 flex-col gap-5 overflow-x-hidden px-2 py-5 sm:gap-6 sm:px-6 sm:py-6 lg:px-8">
           {children}
         </main>
       </div>

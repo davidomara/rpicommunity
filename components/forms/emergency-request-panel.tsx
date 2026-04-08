@@ -34,16 +34,20 @@ export function EmergencyRequestPanel({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-cyan-700">Emergency Support</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Emergency Requests</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Members can request emergency assistance. Admins can review and decide requests.</p>
         </div>
-        <div className="flex flex-col items-stretch gap-2 sm:items-end">
-          <Button type="button" onClick={() => setOpen((value) => !value)} className="w-full sm:w-auto">
+        <div className="flex flex-col gap-2 sm:items-end">
+          <Button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            className="self-start whitespace-nowrap px-5 sm:self-auto"
+          >
             {open ? "Hide Request Form" : "Submit Emergency Request"}
           </Button>
-          {state.success ? <p className="text-sm text-emerald-700">Emergency request submitted successfully.</p> : null}
+          {state.success ? <p className="max-w-xs text-sm text-emerald-700 sm:text-right">Emergency request submitted successfully.</p> : null}
         </div>
       </div>
 
