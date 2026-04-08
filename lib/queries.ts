@@ -1,9 +1,18 @@
 import { EmergencyStatus, Prisma, Role } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { EXPECTED_MONTHLY_CONTRIBUTION } from "@/lib/settings";
+import { COMMUNITY_CONTRIBUTION_START, EXPECTED_MONTHLY_CONTRIBUTION } from "@/lib/settings";
 import { sortCommunityRows } from "@/lib/community-order";
 
 const communityRoles: Role[] = [Role.ADMIN, Role.TREASURER, Role.MEMBER];
+
+function getExpectedContributionMonths(now = new Date()) {
+  const startYear = COMMUNITY_CONTRIBUTION_START.getUTCFullYear();
+  const startMonth = COMMUNITY_CONTRIBUTION_START.getUTCMonth();
+  const currentYear = now.getUTCFullYear();
+  const currentMonth = now.getUTCMonth();
+
+  return Math.max(0, (currentYear - startYear) * 12 + (currentMonth - startMonth));
+}
 
 export async function getDashboardData() {
   const [members, pendingRequests, totals] = await Promise.all([
@@ -31,7 +40,7 @@ export async function getDashboardData() {
   const memberRows = sortCommunityRows(members.map((member) => {
     const contributionTotal = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
     const withdrawalTotal = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
-    const monthsActive = 12;
+    const monthsActive = getExpectedContributionMonths();
     const expected = monthsActive * EXPECTED_MONTHLY_CONTRIBUTION;
     return {
       id: member.id,

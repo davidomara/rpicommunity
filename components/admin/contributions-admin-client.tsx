@@ -77,11 +77,11 @@ export function ContributionsAdminClient({
           <p className="scroll-hint">Scroll sideways to view all contribution columns.</p>
           <DataScroll>
             <table className="data-table min-w-[560px]">
-              <thead><tr><th>ID</th><th>Amount</th><th>Date</th></tr></thead>
+              <thead><tr><th>S/N</th><th>Amount</th><th>Date</th></tr></thead>
               <tbody>
-                {filteredRows.length ? filteredRows.map((row) => (
+                {filteredRows.length ? filteredRows.map((row, index) => (
                   <tr key={row.id}>
-                    <td className="whitespace-nowrap">{row.id.slice(-8)}</td>
+                    <td className="whitespace-nowrap">{filteredRows.length - index}</td>
                     <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
                     <td className="whitespace-nowrap">{formatDate(row.contributionDate)}</td>
                   </tr>

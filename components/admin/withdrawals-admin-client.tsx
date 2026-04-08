@@ -78,11 +78,11 @@ export function WithdrawalsAdminClient({
           <p className="scroll-hint">Scroll sideways to view all withdrawal columns.</p>
           <DataScroll>
             <table className="data-table min-w-[700px]">
-              <thead><tr><th>ID</th><th>Amount</th><th>Reason</th><th>Date</th></tr></thead>
+              <thead><tr><th>S/N</th><th>Amount</th><th>Reason</th><th>Date</th></tr></thead>
               <tbody>
-                {filteredRows.length ? filteredRows.map((row) => (
+                {filteredRows.length ? filteredRows.map((row, index) => (
                   <tr key={row.id}>
-                    <td className="whitespace-nowrap">{row.id.slice(-8)}</td>
+                    <td className="whitespace-nowrap">{filteredRows.length - index}</td>
                     <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
                     <td className="min-w-[220px]">{row.reason}</td>
                     <td className="whitespace-nowrap">{formatDate(row.withdrawalDate)}</td>

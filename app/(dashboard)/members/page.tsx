@@ -3,6 +3,16 @@ import { AddMemberPanel } from "@/components/members/add-member-panel";
 import { getMembersDirectory } from "@/lib/queries";
 import { canManageMembers } from "@/lib/rbac";
 import { MembersTable } from "@/components/tables/members-table";
+import { COMMUNITY_CONTRIBUTION_START, EXPECTED_MONTHLY_CONTRIBUTION } from "@/lib/settings";
+
+function getExpectedContributionMonths(now = new Date()) {
+  const startYear = COMMUNITY_CONTRIBUTION_START.getUTCFullYear();
+  const startMonth = COMMUNITY_CONTRIBUTION_START.getUTCMonth();
+  const currentYear = now.getUTCFullYear();
+  const currentMonth = now.getUTCMonth();
+
+  return Math.max(0, (currentYear - startYear) * 12 + (currentMonth - startMonth));
+}
 
 export default async function MembersPage() {
   const session = await auth();
@@ -10,6 +20,8 @@ export default async function MembersPage() {
 
   const admin = canManageMembers(session.user.role);
   const members = await getMembersDirectory();
+  const expectedMonths = getExpectedContributionMonths();
+  const expectedContribution = expectedMonths * EXPECTED_MONTHLY_CONTRIBUTION;
   const rows = members.map((member) => ({
     id: member.id,
     name: member.name,
@@ -17,7 +29,8 @@ export default async function MembersPage() {
     status: member.status,
     contributions: member.contributions.reduce((sum, row) => sum + Number(row.amount), 0),
     withdrawals: member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0),
-    pending: member.emergencyRequests.length
+    pending: member.emergencyRequests.length,
+    arrears: Math.max(0, expectedContribution - member.contributions.reduce((sum, row) => sum + Number(row.amount), 0))
   }));
 
   return (
