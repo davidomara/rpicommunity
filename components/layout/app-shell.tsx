@@ -4,6 +4,7 @@ import { APP_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { Role } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { DesktopDashboardNav, MobileDashboardNav } from "@/components/layout/dashboard-nav";
+import { BackToTopButton } from "@/components/ui/back-to-top-button";
 
 export function AppShell({
   role,
@@ -56,9 +57,10 @@ export function AppShell({
             </form>
           </div>
         </header>
-        <main className="mx-auto flex w-full min-w-0 max-w-7xl flex-1 flex-col gap-5 overflow-x-hidden overflow-y-auto px-2 py-5 sm:gap-6 sm:px-6 sm:py-6 lg:px-8">
+        <main data-app-scroll-container="true" className="mx-auto flex w-full min-w-0 max-w-7xl flex-1 flex-col gap-5 overflow-x-hidden overflow-y-auto px-2 py-5 sm:gap-6 sm:px-6 sm:py-6 lg:px-8">
           {children}
         </main>
+        <BackToTopButton />
       </div>
     </div>
   );
