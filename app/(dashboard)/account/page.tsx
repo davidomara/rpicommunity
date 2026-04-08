@@ -5,6 +5,7 @@ import { canManageMembers } from "@/lib/rbac";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/forms/submit-button";
+import { Button } from "@/components/ui/button";
 import { resetMemberPinAction, updateEmailAction, updateMemberEmailAction, updatePasswordAction } from "./actions";
 
 export default async function AccountPage() {
@@ -70,7 +71,10 @@ export default async function AccountPage() {
                     <Input id="memberEmail" name="email" type="email" placeholder="Enter the updated email address" required />
                   </div>
                   <p className="text-xs text-slate-500">Select the member, then enter the replacement email address to save.</p>
-                  <SubmitButton label="Update Member Email" pendingLabel="Saving..." className="w-full sm:w-auto" />
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <SubmitButton label="Update Member Email" pendingLabel="Saving..." className="w-full sm:w-auto" />
+                    <Button type="reset" variant="outline" className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">Clear</Button>
+                  </div>
                 </form>
                 <form action={resetMemberPinAction} className="space-y-4">
                   <div className="space-y-2">
@@ -93,7 +97,10 @@ export default async function AccountPage() {
                     <Input id="confirmPin" name="confirmPin" type="password" defaultValue="Member@123" required />
                   </div>
                   <p className="text-xs text-slate-500">Best option: use a temporary PIN, then share it directly with the member and have them change it after login.</p>
-                  <SubmitButton label="Reset Member PIN" pendingLabel="Resetting..." className="w-full sm:w-auto" />
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <SubmitButton label="Reset Member PIN" pendingLabel="Resetting..." className="w-full sm:w-auto" />
+                    <Button type="reset" variant="outline" className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">Clear</Button>
+                  </div>
                 </form>
               </div>
             ) : (
