@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { loginAction } from "./actions";
-import { APP_FULL_NAME, APP_SUBTITLE } from "@/lib/settings";
+import { APP_FULL_NAME } from "@/lib/settings";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/forms/submit-button";
@@ -35,23 +35,21 @@ export default async function LoginPage({
             <div className="flex items-center gap-3"><ShieldCheck className="h-4 w-4 text-cyan-300" />Purpose-built for RPIC Community member operations</div>
           </div>
         </section>
-        <section className="mx-auto w-full max-w-md px-6 py-8 sm:px-8 sm:py-10 lg:max-w-none lg:px-10">
-          <div className="mb-7">
-            <div className="mb-4 flex items-center gap-3">
+        <section className="mx-auto w-full max-w-md px-6 py-6 sm:px-8 sm:py-7 lg:max-w-none lg:px-10">
+          <div className="mb-5">
+            <div className="mb-2.5 flex items-center gap-3">
               <Image
                 src="/branding/rpic-logo.svg"
                 alt="RPIC Community logo"
                 width={72}
                 height={72}
-                className="h-14 w-14 shrink-0 rounded-full border border-slate-200 bg-white shadow-sm"
+                className="h-12 w-12 shrink-0 rounded-full border border-slate-200 bg-white shadow-sm"
               />
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700">RPIC Community</p>
-                <p className="mt-1 text-sm text-slate-500">{APP_SUBTITLE}</p>
+                <p className="text-xl font-semibold leading-6 text-slate-950">RPIC Community Members</p>
               </div>
             </div>
-            <h2 className="text-2xl font-semibold text-slate-950">Sign in</h2>
-            <p className="mt-2 text-sm text-slate-500">Use your username or email to access the RPIC Community workspace.</p>
+            <p className="text-sm text-slate-500">Use your username or email to access the RPIC Community workspace.</p>
           </div>
           <form action={loginAction} className="space-y-5">
             {errorMessage ? (
