@@ -12,7 +12,6 @@ export default async function AccountPage() {
   if (!session?.user) return null;
   const admin = canManageMembers(session.user.role);
   const members = admin ? await getMemberAccountDirectory() : [];
-  const defaultMember = members[0];
   const selectClassName = "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
@@ -57,7 +56,8 @@ export default async function AccountPage() {
                 <form action={updateMemberEmailAction} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="memberEmailMemberId">Member</Label>
-                    <select id="memberEmailMemberId" name="memberId" defaultValue={defaultMember?.id} className={selectClassName} required>
+                    <select id="memberEmailMemberId" name="memberId" defaultValue="" className={selectClassName} required>
+                      <option value="" disabled>Select member account</option>
                       {members.map((member) => (
                         <option key={member.id} value={member.id}>
                           {member.name} ({member.username})
@@ -75,7 +75,8 @@ export default async function AccountPage() {
                 <form action={resetMemberPinAction} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="memberPinMemberId">Member</Label>
-                    <select id="memberPinMemberId" name="memberId" defaultValue={defaultMember?.id} className={selectClassName} required>
+                    <select id="memberPinMemberId" name="memberId" defaultValue="" className={selectClassName} required>
+                      <option value="" disabled>Select member account</option>
                       {members.map((member) => (
                         <option key={member.id} value={member.id}>
                           {member.name} ({member.username})
