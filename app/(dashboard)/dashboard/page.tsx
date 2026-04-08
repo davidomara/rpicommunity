@@ -4,6 +4,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { SummaryChart } from "@/components/dashboard/summary-chart";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataScroll } from "@/components/ui/data-scroll";
 
 export default async function DashboardPage() {
   const data = await getDashboardData();
@@ -32,30 +33,32 @@ export default async function DashboardPage() {
       </section>
       <Card>
         <CardHeader><CardTitle>Pending Emergency Requests</CardTitle></CardHeader>
-        <CardContent className="scroll-x">
+        <CardContent>
           <p className="scroll-hint">Scroll sideways to view the full request table.</p>
-          <table className="data-table min-w-[720px]">
-            <thead>
-              <tr>
-                <th>Member</th>
-                <th>Amount</th>
-                <th>Reason</th>
-                <th>Status</th>
-                <th>Request Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.pendingRequests.map((request) => (
-                <tr key={request.id}>
-                  <td className="min-w-[160px]">{request.member.name}</td>
-                  <td className="whitespace-nowrap">{formatMoney(Number(request.amount))}</td>
-                  <td className="min-w-[220px]">{request.reason}</td>
-                  <td className="whitespace-nowrap"><Badge value={request.status} /></td>
-                  <td className="whitespace-nowrap">{new Date(request.requestDate).toLocaleDateString()}</td>
+          <DataScroll>
+            <table className="data-table min-w-[720px]">
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Amount</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>Request Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.pendingRequests.map((request) => (
+                  <tr key={request.id}>
+                    <td className="min-w-[160px]">{request.member.name}</td>
+                    <td className="whitespace-nowrap">{formatMoney(Number(request.amount))}</td>
+                    <td className="min-w-[220px]">{request.reason}</td>
+                    <td className="whitespace-nowrap"><Badge value={request.status} /></td>
+                    <td className="whitespace-nowrap">{new Date(request.requestDate).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </DataScroll>
         </CardContent>
       </Card>
       <SummaryChart data={chartData} />

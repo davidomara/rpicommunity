@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { DataScroll } from "@/components/ui/data-scroll";
 import { formatMoney } from "@/lib/utils";
 
 export function MembersTable({ rows }: { rows: Array<{ id: string; name: string; email: string; status: string; contributions: number; withdrawals: number; pending: number }> }) {
@@ -18,7 +19,7 @@ export function MembersTable({ rows }: { rows: Array<{ id: string; name: string;
       <Input placeholder="Search members by name or email" value={query} onChange={(event) => setQuery(event.target.value)} />
       <div className="overflow-hidden rounded-lg border bg-white shadow-soft">
         <p className="scroll-hint px-4 pt-4 sm:px-6">Scroll sideways to view all member columns.</p>
-        <div className="scroll-x">
+        <DataScroll>
           <table className="data-table min-w-[760px]">
             <thead>
               <tr>
@@ -44,7 +45,7 @@ export function MembersTable({ rows }: { rows: Array<{ id: string; name: string;
               ))}
             </tbody>
           </table>
-        </div>
+        </DataScroll>
       </div>
     </div>
   );

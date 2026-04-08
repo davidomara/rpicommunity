@@ -3,6 +3,7 @@
 import { useDeferredValue, useState } from "react";
 import { WithdrawalForm } from "@/components/forms/withdrawal-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataScroll } from "@/components/ui/data-scroll";
 import { formatDate, formatMoney } from "@/lib/utils";
 
 type MemberOption = {
@@ -73,27 +74,29 @@ export function WithdrawalsAdminClient({
             </select>
           </div>
         </CardHeader>
-        <CardContent className="scroll-x">
+        <CardContent>
           <p className="scroll-hint">Scroll sideways to view all withdrawal columns.</p>
-          <table className="data-table min-w-[700px]">
-            <thead><tr><th>ID</th><th>Amount</th><th>Reason</th><th>Date</th></tr></thead>
-            <tbody>
-              {filteredRows.length ? filteredRows.map((row) => (
-                <tr key={row.id}>
-                  <td className="whitespace-nowrap">{row.id.slice(-8)}</td>
-                  <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
-                  <td className="min-w-[220px]">{row.reason}</td>
-                  <td className="whitespace-nowrap">{formatDate(row.withdrawalDate)}</td>
-                </tr>
-              )) : (
-                <tr>
-                  <td colSpan={4} className="text-sm text-slate-500">
-                    {selectedMemberId ? "No withdrawals found for the selected member." : "No member selected."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <DataScroll>
+            <table className="data-table min-w-[700px]">
+              <thead><tr><th>ID</th><th>Amount</th><th>Reason</th><th>Date</th></tr></thead>
+              <tbody>
+                {filteredRows.length ? filteredRows.map((row) => (
+                  <tr key={row.id}>
+                    <td className="whitespace-nowrap">{row.id.slice(-8)}</td>
+                    <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
+                    <td className="min-w-[220px]">{row.reason}</td>
+                    <td className="whitespace-nowrap">{formatDate(row.withdrawalDate)}</td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan={4} className="text-sm text-slate-500">
+                      {selectedMemberId ? "No withdrawals found for the selected member." : "No member selected."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </DataScroll>
         </CardContent>
       </Card>
     </div>
