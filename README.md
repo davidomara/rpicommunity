@@ -3,9 +3,11 @@
 A modern Next.js + TypeScript implementation of the existing community welfare and emergency savings platform, adapted for the Research Planning and Innovation Center Community under the Directorate of ICT.
 
 ## Source reference
+
 This repo is a migration and modernization of the original Lango Community application. The source system's financial workflows, protected document handling, dashboard behaviors, and role model were preserved.
 
 ## Stack
+
 - Next.js App Router
 - TypeScript
 - Tailwind CSS
@@ -17,6 +19,7 @@ This repo is a migration and modernization of the original Lango Community appli
 - Recharts
 
 ## Modules
+
 - login, password reset, protected pages
 - dashboard summaries and contribution status chart
 - member directory
@@ -28,6 +31,7 @@ This repo is a migration and modernization of the original Lango Community appli
 - account settings
 
 ## Getting started
+
 1. Copy `.env.example` to `.env`
 2. Set `DATABASE_URL` and `AUTH_SECRET`
 3. Run `npm install`
@@ -36,14 +40,26 @@ This repo is a migration and modernization of the original Lango Community appli
 6. Run `npm run dev`
 
 ## Environment notes
+
 - WSL setup and troubleshooting: [docs/wsl-setup.md](/mnt/d/.Nord%20APP/RPICCommunityApp/docs/wsl-setup.md)
 
 ## Demo users
+
 - Admin: `admin` / `Admin@123`
 - Member: `alice` / `Member@123`
 - Temporary PIN for new or reset member accounts: `Member@123`
 
+## WSL 
+
+Then redeploy Railway.
+
+If you want to verify locally first from the WSL repo:
+
+cd /home/nord/projects/RPICCommunityApp
+npm run build
+
 ## Railway deployment
+
 - Create one Railway PostgreSQL service
 - Create one Railway web service for this app
 - Root directory: repo root. Leave it blank if this repository is deployed directly to Railway because `package.json` is already at the project root.
@@ -72,8 +88,10 @@ This repo is a migration and modernization of the original Lango Community appli
   `railway up`
 
 ## Storage
+
 Protected files are stored under `storage/private` by default. This starter keeps file access behind authenticated routes. Move to object storage later if file volume grows.
 
 ## Notes
+
 - Password reset token generation is implemented; delivery email is not wired in this starter.
 - The architecture is intentionally monolithic for faster, cheaper, and simpler deployment on Railway.
