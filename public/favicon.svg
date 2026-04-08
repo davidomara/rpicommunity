@@ -1,6 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
   <title>RPIC Community</title>
-  <rect width="64" height="64" rx="16" fill="#0f172a" />
-  <path d="M18 46V18h14c8 0 13 4.8 13 11.8S40 42 32 42h-7v4zm7-12h6.1c4.2 0 6.9-1.5 6.9-4.9s-2.7-4.9-6.9-4.9H25z" fill="#67e8f9" />
-  <path d="M41 46 30.5 35.8l4.9-3.9L48 46z" fill="#e2e8f0" opacity=".9" />
+  <circle cx="32" cy="32" r="31" fill="#ffffff" />
+  <circle cx="32" cy="32" r="30" fill="none" stroke="#f97316" stroke-width="2.4" />
+  <circle cx="32" cy="32" r="26.5" fill="none" stroke="#0f4fa8" stroke-width="3" />
+  <circle cx="32" cy="32" r="18" fill="#ffffff" stroke="#0f4fa8" stroke-width="1.8" />
+  <path d="M32 22.5c4.8 0 8.5 3.7 8.5 8.5v5.3c0 6.3-3.3 12.1-8.5 16-5.2-3.9-8.5-9.7-8.5-16V31c0-4.8 3.7-8.5 8.5-8.5Z" fill="#ffffff" stroke="#0f4fa8" stroke-width="1.8" />
+  <path d="M32 27v15.8M26.2 31.8h11.6M27.4 37.1c3.1 2 6.1 2 9.2 0" stroke="#0f4fa8" stroke-width="1.8" stroke-linecap="round" fill="none" />
+  <circle cx="32" cy="32" r="1.6" fill="#f97316" />
+  <path d="M19.5 45.3h25" stroke="#0f4fa8" stroke-width="1.6" stroke-linecap="round" />
 </svg>

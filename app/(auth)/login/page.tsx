@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Building2, ShieldCheck } from "lucide-react";
@@ -36,6 +37,19 @@ export default async function LoginPage({
         </section>
         <section className="mx-auto w-full max-w-xl px-6 py-10 sm:px-8 sm:py-12 lg:max-w-none lg:px-10">
           <div className="mb-8">
+            <div className="mb-4 flex items-center gap-4">
+              <Image
+                src="/branding/rpic-logo.svg"
+                alt="RPIC Community logo"
+                width={72}
+                height={72}
+                className="h-16 w-16 shrink-0 rounded-full border border-slate-200 bg-white shadow-sm"
+              />
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700">RPIC Community</p>
+                <p className="mt-1 text-sm text-slate-500">Research Planning and Innovation Center</p>
+              </div>
+            </div>
             <p className="text-sm font-medium text-cyan-700">{APP_SUBTITLE}</p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950">Sign in</h2>
             <p className="mt-2 text-sm text-slate-500">Use your username or email to access the RPIC Community workspace.</p>
