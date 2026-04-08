@@ -74,6 +74,7 @@ export function WithdrawalsAdminClient({
           </div>
         </CardHeader>
         <CardContent className="scroll-x">
+          <p className="scroll-hint">Scroll sideways to view all withdrawal columns.</p>
           <table className="data-table min-w-[700px]">
             <thead><tr><th>ID</th><th>Amount</th><th>Reason</th><th>Date</th></tr></thead>
             <tbody>

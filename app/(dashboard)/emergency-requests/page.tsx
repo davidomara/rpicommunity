@@ -19,6 +19,7 @@ export default async function EmergencyRequestsPage() {
       <Card>
         <CardHeader><CardTitle>Recent Requests</CardTitle></CardHeader>
         <CardContent className="scroll-x">
+          <p className="scroll-hint">Scroll sideways to view the full request table and actions.</p>
           <table className="data-table min-w-[860px]">
             <thead><tr><th>Member</th><th>Amount</th><th>Reason</th><th>Status</th><th>Request Date</th>{admin ? <th>Actions</th> : null}</tr></thead>
             <tbody>

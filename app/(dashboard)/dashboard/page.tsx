@@ -33,6 +33,7 @@ export default async function DashboardPage() {
       <Card>
         <CardHeader><CardTitle>Pending Emergency Requests</CardTitle></CardHeader>
         <CardContent className="scroll-x">
+          <p className="scroll-hint">Scroll sideways to view the full request table.</p>
           <table className="data-table min-w-[720px]">
             <thead>
               <tr>

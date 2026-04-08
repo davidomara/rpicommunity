@@ -73,6 +73,7 @@ export function ContributionsAdminClient({
           </div>
         </CardHeader>
         <CardContent className="scroll-x">
+          <p className="scroll-hint">Scroll sideways to view all contribution columns.</p>
           <table className="data-table min-w-[560px]">
             <thead><tr><th>ID</th><th>Amount</th><th>Date</th></tr></thead>
             <tbody>

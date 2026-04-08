@@ -23,23 +23,29 @@ body {
 }
 
 .scroll-x {
-  @apply overflow-x-auto overscroll-x-contain pb-2;
-  scrollbar-width: thin;
-  scrollbar-color: rgb(148 163 184) rgb(226 232 240);
+  @apply overflow-x-scroll overscroll-x-contain pb-2;
+  scrollbar-gutter: stable both-edges;
+  scrollbar-width: auto;
+  scrollbar-color: rgb(71 85 105) rgb(203 213 225);
 }
 
 .scroll-x::-webkit-scrollbar {
-  height: 10px;
+  height: 14px;
 }
 
 .scroll-x::-webkit-scrollbar-track {
-  background: rgb(226 232 240);
+  background: rgb(203 213 225);
   border-radius: 9999px;
 }
 
 .scroll-x::-webkit-scrollbar-thumb {
-  background: rgb(148 163 184);
+  background: rgb(71 85 105);
   border-radius: 9999px;
+  border: 2px solid rgb(203 213 225);
+}
+
+.scroll-hint {
+  @apply mb-3 text-xs font-medium text-slate-500;
 }
 
 .data-table th {
