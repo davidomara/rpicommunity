@@ -1,6 +1,6 @@
 # RPIC Community App
 
-A modern Next.js + TypeScript implementation of the existing community welfare and emergency savings platform, adapted for the Research Planning and Innovation Center Community under the Directorate of ICT.
+A modern Next.js + TypeScript implementation of the existing community welfare and emergency savings platform, adapted for the Research Planning and Innovation Center Community.
 
 ## Source reference
 

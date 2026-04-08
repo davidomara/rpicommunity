@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { Building2, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { loginAction } from "./actions";
 import { APP_FULL_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { Input } from "@/components/ui/input";
@@ -25,33 +25,32 @@ export default async function LoginPage({
 
   return (
     <main className="grid min-h-screen place-items-center bg-hero px-4 py-12">
-      <div className="grid w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft lg:max-w-5xl lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="hidden bg-slate-950 px-8 py-12 text-slate-100 lg:block lg:px-10">
-          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200">Directorate of ICT</div>
-          <h1 className="mt-6 text-4xl font-semibold tracking-tight">{APP_FULL_NAME}</h1>
+      <div className="grid w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft lg:max-w-4xl lg:grid-cols-[1fr_0.92fr]">
+        <section className="hidden bg-slate-950 px-8 py-10 text-slate-100 lg:block lg:px-10">
+          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200">RPIC Community</div>
+          <h1 className="mt-5 text-4xl font-semibold tracking-tight">{APP_FULL_NAME}</h1>
           <p className="mt-4 max-w-lg text-sm leading-7 text-slate-300">A modern welfare, emergency savings, and financial administration platform for the RPIC Community. Contributions, withdrawals, emergency support, protected documents, and account management are handled in one secure internal system.</p>
-          <div className="mt-10 space-y-4 text-sm text-slate-300">
+          <div className="mt-8 space-y-4 text-sm text-slate-300">
             <div className="flex items-center gap-3"><ShieldCheck className="h-4 w-4 text-cyan-300" />Secure role-based access and protected financial workflows</div>
-            <div className="flex items-center gap-3"><Building2 className="h-4 w-4 text-cyan-300" />Purpose-built for RPIC Community under the Directorate of ICT</div>
+            <div className="flex items-center gap-3"><ShieldCheck className="h-4 w-4 text-cyan-300" />Purpose-built for RPIC Community member operations</div>
           </div>
         </section>
-        <section className="mx-auto w-full max-w-xl px-6 py-10 sm:px-8 sm:py-12 lg:max-w-none lg:px-10">
-          <div className="mb-8">
-            <div className="mb-4 flex items-center gap-4">
+        <section className="mx-auto w-full max-w-md px-6 py-8 sm:px-8 sm:py-10 lg:max-w-none lg:px-10">
+          <div className="mb-7">
+            <div className="mb-4 flex items-center gap-3">
               <Image
                 src="/branding/rpic-logo.svg"
                 alt="RPIC Community logo"
                 width={72}
                 height={72}
-                className="h-16 w-16 shrink-0 rounded-full border border-slate-200 bg-white shadow-sm"
+                className="h-14 w-14 shrink-0 rounded-full border border-slate-200 bg-white shadow-sm"
               />
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700">RPIC Community</p>
-                <p className="mt-1 text-sm text-slate-500">Research Planning and Innovation Center</p>
+                <p className="mt-1 text-sm text-slate-500">{APP_SUBTITLE}</p>
               </div>
             </div>
-            <p className="text-sm font-medium text-cyan-700">{APP_SUBTITLE}</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">Sign in</h2>
+            <h2 className="text-2xl font-semibold text-slate-950">Sign in</h2>
             <p className="mt-2 text-sm text-slate-500">Use your username or email to access the RPIC Community workspace.</p>
           </div>
           <form action={loginAction} className="space-y-5">
