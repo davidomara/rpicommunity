@@ -24,19 +24,19 @@ export default async function LoginPage({
   const errorMessage = params?.error ? loginErrors[params.error] || "Sign-in failed. Please try again." : "";
 
   return (
-    <main className="grid min-h-screen place-items-center bg-hero px-4 py-12">
-      <div className="grid w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft lg:max-w-4xl lg:grid-cols-[1fr_0.92fr]">
-        <section className="hidden bg-slate-950 px-8 py-10 text-slate-100 lg:block lg:px-10">
+    <main className="grid min-h-screen place-items-center bg-hero px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <div className="grid w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft lg:max-w-6xl lg:grid-cols-[0.95fr_1.05fr]">
+        <section className="hidden bg-slate-950 px-8 py-10 text-slate-100 lg:block lg:px-12 lg:py-12">
           <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200">RPIC Community</div>
-          <h1 className="mt-5 text-4xl font-semibold tracking-tight">{APP_FULL_NAME}</h1>
-          <p className="mt-4 max-w-lg text-sm leading-7 text-slate-300">A modern welfare, emergency savings, and financial administration platform for the RPIC Community. Contributions, withdrawals, emergency support, protected documents, and account management are handled in one secure internal system.</p>
-          <div className="mt-8 space-y-4 text-sm text-slate-300">
+          <h1 className="mt-5 max-w-xl text-4xl font-semibold tracking-tight xl:text-5xl">{APP_FULL_NAME}</h1>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300 xl:text-base">A modern welfare, emergency savings, and financial administration platform for the RPIC Community. Contributions, withdrawals, emergency support, protected documents, and account management are handled in one secure internal system.</p>
+          <div className="mt-8 space-y-4 text-sm text-slate-300 xl:text-base">
             <div className="flex items-center gap-3"><ShieldCheck className="h-4 w-4 text-cyan-300" />Secure role-based access and protected financial workflows</div>
             <div className="flex items-center gap-3"><ShieldCheck className="h-4 w-4 text-cyan-300" />Purpose-built for RPIC Community member operations</div>
           </div>
         </section>
-        <section className="mx-auto w-full max-w-md px-6 py-6 sm:px-8 sm:py-7 lg:max-w-none lg:px-10">
-          <div className="mb-5">
+        <section className="mx-auto flex w-full max-w-md flex-col justify-center px-6 py-6 sm:px-8 sm:py-7 lg:max-w-none lg:px-12 lg:py-12">
+          <div className="mb-5 lg:mb-6">
             <div className="mb-2.5 flex items-center gap-3">
               <Image
                 src="/branding/rpic-logo.svg"
@@ -49,7 +49,7 @@ export default async function LoginPage({
                 <p className="text-xl font-semibold leading-6 text-slate-950">RPIC Community Members</p>
               </div>
             </div>
-            <p className="text-sm text-slate-500">Use your username or email to access the RPIC Community workspace.</p>
+            <p className="max-w-md text-sm leading-6 text-slate-500">Use your username or email to access the RPIC Community workspace.</p>
           </div>
           <form action={loginAction} className="space-y-5">
             {errorMessage ? (
