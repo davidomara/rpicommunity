@@ -7,6 +7,7 @@ import { SubmitButton } from "@/components/forms/submit-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTodayISODate } from "@/lib/utils";
 
@@ -56,17 +57,23 @@ export function WithdrawalForm({
               {members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
             </select>
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="amount">Amount</Label>
             <Input id="amount" name="amount" type="number" min="1" step="0.01" required />
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="withdrawalDate">Withdrawal Date</Label>
             <Input id="withdrawalDate" name="withdrawalDate" type="date" defaultValue={getTodayISODate()} max={getTodayISODate()} required />
           </div>
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="reason">Reason</Label>
-            <Input id="reason" name="reason" required />
+            <Textarea
+              id="reason"
+              name="reason"
+              required
+              rows={3}
+              className="min-h-[80px] resize-y overflow-auto"
+            />
           </div>
           <div className="mt-auto md:col-span-2">
             {state.error ? <p className="mb-3 text-sm text-red-600">{state.error}</p> : null}

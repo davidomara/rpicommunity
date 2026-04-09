@@ -56,11 +56,11 @@ export function ContributionForm({
               {members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
             </select>
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="amount">Amount</Label>
             <Input id="amount" name="amount" type="number" min="1" step="0.01" required />
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="contributionDate">Contribution Date</Label>
             <Input id="contributionDate" name="contributionDate" type="date" defaultValue={getTodayISODate()} max={getTodayISODate()} required />
           </div>
