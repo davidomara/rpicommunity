@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Pencil } from "lucide-react";
 import type { Role } from "@prisma/client";
@@ -52,52 +52,84 @@ export function MemberStatusActions({
 }) {
   const [requestState, requestAction] = useFormState(requestMemberStatusChangeAction, initialState);
   const [decisionState, decisionAction] = useFormState(decideMemberStatusChangeAction, initialState);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(currentStatus);
   const requestedStatusRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (requestState.success) {
+      setIsOpen(false);
+    }
+  }, [requestState.success]);
 
   if (!pendingChange) {
     if (actorRole !== "ADMIN") return <span className="text-xs text-slate-400">No action</span>;
 
     return (
       <div className="space-y-2">
-        <form action={requestAction}>
-          <input type="hidden" name="memberId" value={memberId} />
-          <input ref={requestedStatusRef} type="hidden" name="requestedStatus" value={currentStatus} />
-          <ActionButton
-            variant="outline"
-            onClick={(event) => {
-              const nextStatus = window.prompt(
-                "Enter the new member status: ACTIVE, WARNING, or CLOSED.",
-                currentStatus
-              );
-
-              if (!nextStatus) {
-                event.preventDefault();
-                return;
-              }
-
-              const normalized = nextStatus.trim().toUpperCase();
-              if (!["ACTIVE", "WARNING", "CLOSED"].includes(normalized)) {
-                event.preventDefault();
-                window.alert("Enter one of: ACTIVE, WARNING, CLOSED.");
-                return;
-              }
-
-              if (normalized === currentStatus) {
-                event.preventDefault();
-                window.alert("Choose a different status.");
-                return;
-              }
-
-              if (requestedStatusRef.current) {
-                requestedStatusRef.current.value = normalized;
-              }
-            }}
-          >
-            <Pencil className="mr-1 h-4 w-4" />
-            Edit
-          </ActionButton>
-        </form>
-        {requestState.error ? <p className="text-xs text-red-600">{requestState.error}</p> : null}
+        <Button
+          size="sm"
+          variant="outline"
+          type="button"
+          onClick={() => {
+            setSelectedStatus(currentStatus);
+            setIsOpen(true);
+          }}
+        >
+          <Pencil className="mr-1 h-4 w-4" />
+          Edit
+        </Button>
+        {!isOpen && requestState.error ? <p className="text-xs text-red-600">{requestState.error}</p> : null}
+        {isOpen ? (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/40 px-4">
+            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-slate-950">Change Member Status</p>
+                <p className="text-sm leading-6 text-slate-500">
+                  Request a manual status change for this member. The change is only applied after Admin and Treasurer approval.
+                </p>
+              </div>
+              <form action={requestAction} className="mt-5 space-y-4">
+                <input type="hidden" name="memberId" value={memberId} />
+                <input ref={requestedStatusRef} type="hidden" name="requestedStatus" value={selectedStatus} />
+                <div className="space-y-2">
+                  <label htmlFor={`member-status-${memberId}`} className="text-sm font-medium text-slate-700">
+                    New Status
+                  </label>
+                  <select
+                    id={`member-status-${memberId}`}
+                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    value={selectedStatus}
+                    onChange={(event) => {
+                      setSelectedStatus(event.target.value);
+                      if (requestedStatusRef.current) {
+                        requestedStatusRef.current.value = event.target.value;
+                      }
+                    }}
+                  >
+                    {MEMBER_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {requestState.error ? <p className="text-xs text-red-600">{requestState.error}</p> : null}
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-amber-300 bg-amber-50 font-semibold text-amber-800 hover:bg-amber-100"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <ActionButton disabled={selectedStatus === currentStatus}>Submit Request</ActionButton>
+                </div>
+              </form>
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   }
