@@ -29,6 +29,10 @@ export function DataScroll({
         )}
         onPointerDown={(event) => {
           if (!viewportRef.current) return;
+          const target = event.target as HTMLElement | null;
+          if (target?.closest("button, a, input, select, textarea, label")) {
+            return;
+          }
           pointerIdRef.current = event.pointerId;
           startXRef.current = event.clientX;
           startScrollLeftRef.current = viewportRef.current.scrollLeft;
