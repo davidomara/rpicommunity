@@ -41,7 +41,7 @@ export function resolveMemberStatus(
   const arrearsAmount = getArrearsAmount(totalContributions, now);
   const arrearsMonths = getArrearsMonthsFromAmount(arrearsAmount);
 
-  let status = MemberStatus.ACTIVE;
+  let status: MemberStatus = MemberStatus.ACTIVE;
   if (arrearsMonths >= thresholds.closeAfterMonths) {
     status = MemberStatus.CLOSED;
   } else if (arrearsMonths >= thresholds.warningAfterMonths) {
