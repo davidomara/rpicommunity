@@ -7,6 +7,7 @@ import type { Role } from "@prisma/client";
 import { decideMemberStatusChangeAction, requestMemberStatusChangeAction, type MemberStatusChangeFormState } from "@/app/(dashboard)/members/actions";
 import { Button } from "@/components/ui/button";
 
+const MEMBER_STATUSES = ["ACTIVE", "WARNING", "CLOSED"] as const;
 const initialState: MemberStatusChangeFormState = {
   success: false,
   error: ""
