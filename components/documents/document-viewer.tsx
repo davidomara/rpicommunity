@@ -26,14 +26,6 @@ export function DocumentViewer({ src, mimeType, title }: { src: string; mimeType
           className="h-[72vh] w-full rounded-lg border-0 bg-white sm:h-[78vh]"
         />
       </div>
-      <div className="flex flex-wrap gap-4 text-sm font-medium">
-        <a href={src} rel="noreferrer" className="inline-flex text-cyan-700 hover:text-cyan-800">
-          Open in this tab
-        </a>
-        <a href={src} target="_blank" rel="noreferrer" className="inline-flex text-cyan-700 hover:text-cyan-800">
-          Open in new tab
-        </a>
-      </div>
     </div>
   );
 }
