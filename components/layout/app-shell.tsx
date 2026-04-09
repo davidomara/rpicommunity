@@ -1,4 +1,5 @@
-import { Building2, LogOut } from "lucide-react";
+import Image from "next/image";
+import { LogOut } from "lucide-react";
 import { signOut } from "@/auth";
 import { APP_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { Role } from "@prisma/client";
@@ -20,9 +21,15 @@ export function AppShell({
   return (
     <div className="page-shell h-screen overflow-hidden">
       <aside className="hidden h-screen w-72 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-950 px-5 py-6 text-slate-100 lg:block">
-        <div className="mb-8 flex items-center gap-3 rounded-xl bg-white/5 p-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-200">
-            <Building2 className="h-6 w-6" />
+        <div className="mb-8 flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 p-1.5 shadow-sm ring-1 ring-white/10">
+            <Image
+              src="/branding/rpic-logo.svg"
+              alt="RPIC logo"
+              width={40}
+              height={40}
+              className="h-9 w-9 rounded-full bg-white object-contain"
+            />
           </div>
           <div>
             <div className="text-sm font-medium text-cyan-100">{APP_NAME}</div>
@@ -32,7 +39,7 @@ export function AppShell({
         <DesktopDashboardNav role={role} />
       </aside>
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
+        <header className="border-b border-slate-200 bg-[linear-gradient(180deg,rgba(238,244,251,0.99)_0%,rgba(224,234,245,0.99)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.68)] backdrop-blur">
           <div className="mx-auto flex w-full max-w-7xl flex-wrap items-start justify-between gap-3 px-3 py-3 sm:px-6 sm:py-4 lg:px-8">
             <div className="flex min-w-0 items-stretch gap-1.5 sm:gap-3">
               <MobileDashboardNav

@@ -1,11 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createPortal } from "react-dom";
 import {
-  Building2,
   FileText,
   HandCoins,
   Home,
@@ -155,9 +155,15 @@ export function MobileDashboardNav({
         aria-hidden={!open}
       >
         <div className="mb-6 flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 rounded-xl bg-white/5 p-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-200">
-              <Building2 className="h-6 w-6" />
+          <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 p-1.5 shadow-sm ring-1 ring-white/10">
+              <Image
+                src="/branding/rpic-logo.svg"
+                alt="RPIC logo"
+                width={40}
+                height={40}
+                className="h-9 w-9 rounded-full bg-white object-contain"
+              />
             </div>
             <div>
               <div className="text-sm font-medium text-cyan-100">{APP_NAME}</div>
