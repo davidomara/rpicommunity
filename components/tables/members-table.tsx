@@ -44,8 +44,7 @@ export function MembersTable({
       <Input placeholder="Search members by name or email" value={query} onChange={(event) => setQuery(event.target.value)} />
       <div className="min-w-0 rounded-lg border bg-white shadow-soft">
         <p className="scroll-hint px-4 pt-4 sm:px-6">Scroll sideways to view all member columns.</p>
-        <div className="scroll-y max-h-[520px] overflow-y-auto">
-        <DataScroll className="px-0">
+        <DataScroll className="scroll-y max-h-[520px] overflow-y-auto px-0">
           <table className="data-table min-w-[1180px]">
             <colgroup>
               <col className="w-[26%]" />
@@ -94,7 +93,6 @@ export function MembersTable({
             </tbody>
           </table>
         </DataScroll>
-        </div>
       </div>
     </div>
   );
