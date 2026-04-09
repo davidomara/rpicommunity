@@ -29,7 +29,7 @@ export default async function DashboardPage() {
             <StatCard title="Total Withdrawals" value={formatMoney(data.summary.totalWithdrawals)} note="All-time approved withdrawals" tone="withdrawals" />
             <StatCard title="Current Balance" value={formatMoney(data.summary.balance)} note="Contributions minus withdrawals" tone="contributions" />
             <StatCard title="Arrears" value={formatMoney(data.summary.totalArrears)} note="Outstanding member contribution gap" tone="warning" />
-            <StatCard title="Pending Emergency Requests" value={String(data.summary.pendingEmergencyRequests)} note="Awaiting admin action" tone="warning" />
+            <StatCard title="Pending Emergency Requests" value={String(data.summary.pendingEmergencyRequests)} note="Awaiting approval workflow" tone="warning" />
             <StatCard title="Active Members" value={String(data.summary.active)} note={`Out of ${data.summary.members} members`} tone="withdrawals" />
             <StatCard title="Warning Status" value={String(data.summary.warning)} note="Members needing follow-up" tone="warning" />
             <StatCard title="Closed Members" value={String(data.summary.closed)} note="No longer active" tone="neutral" />

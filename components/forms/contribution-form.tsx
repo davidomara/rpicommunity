@@ -33,9 +33,9 @@ export function ContributionForm({
   }, [state.success]);
 
   return (
-    <Card className="h-full min-h-[34rem]">
+    <Card className="min-w-0 h-full min-h-[34rem]">
       <CardHeader><CardTitle>Add Contribution</CardTitle></CardHeader>
-      <CardContent className="flex flex-1 flex-col">
+      <CardContent className="flex min-w-0 flex-1 flex-col">
         <form
           ref={formRef}
           action={formAction}

@@ -30,7 +30,13 @@ export default async function EmergencyRequestsPage() {
                   <tr key={row.id}>
                     <td className="min-w-[180px]">{row.member.name}</td>
                     <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
-                    <td className="whitespace-nowrap">{row.approvedAmount ? formatMoney(Number(row.approvedAmount)) : "Pending"}</td>
+                    <td className="whitespace-nowrap">
+                      {row.approvedAmount
+                        ? formatMoney(Number(row.approvedAmount))
+                        : row.status === "PENDING"
+                          ? "Pending"
+                          : "-"}
+                    </td>
                     <td className="min-w-[240px]">{row.reason}</td>
                     <td className="whitespace-nowrap"><Badge value={row.status} /></td>
                     <td className="whitespace-nowrap">{row.adminApprovedAt ? `Approved ${formatDate(row.adminApprovedAt)}` : "Awaiting Admin"}</td>

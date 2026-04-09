@@ -40,11 +40,11 @@ export function MembersTable({
   }), [rows, query]);
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       <Input placeholder="Search members by name or email" value={query} onChange={(event) => setQuery(event.target.value)} />
-      <div className="overflow-hidden rounded-lg border bg-white shadow-soft">
+      <div className="min-w-0 rounded-lg border bg-white shadow-soft">
         <p className="scroll-hint px-4 pt-4 sm:px-6">Scroll sideways to view all member columns.</p>
-        <DataScroll>
+        <DataScroll className="px-0">
           <table className="data-table min-w-[1180px]">
             <colgroup>
               <col className="w-[26%]" />

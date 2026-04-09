@@ -34,12 +34,12 @@ export function ContributionsAdminClient({
     : [];
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <div>
         <p className="text-sm font-medium text-cyan-700">Financial Administration</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Contributions</h1>
       </div>
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-stretch">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-stretch">
         <ContributionForm
           members={members.map((member) => ({
             id: member.id,
@@ -49,7 +49,7 @@ export function ContributionsAdminClient({
           selectedMemberId={selectedMemberId}
           onSelectedMemberChange={setSelectedMemberId}
         />
-        <Card className="h-full min-h-[34rem]">
+        <Card className="min-w-0 h-full min-h-[34rem]">
           <CardHeader>
             <CardTitle>Recent Contributions</CardTitle>
             <p className="mt-1 text-sm text-slate-500">
@@ -74,7 +74,7 @@ export function ContributionsAdminClient({
               </select>
             </div>
           </CardHeader>
-          <CardContent className="flex flex-1 flex-col">
+          <CardContent className="flex min-w-0 flex-1 flex-col">
             <p className="scroll-hint">Scroll sideways to view all contribution columns.</p>
             <DataScroll className="mt-2">
               <table className="data-table min-w-[560px]">
