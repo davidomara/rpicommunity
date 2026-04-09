@@ -1,6 +1,8 @@
+import { createReadStream } from "node:fs";
 import { mkdir, writeFile, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { Readable } from "node:stream";
 
 const uploadRoot = process.env.UPLOAD_ROOT || path.join(process.cwd(), "storage/private");
 
@@ -25,4 +27,12 @@ export async function readPrivateFile(storagePath: string) {
 export async function getPrivateFileSize(storagePath: string) {
   const info = await stat(storagePath);
   return info.size;
+}
+
+export async function getPrivateFileStat(storagePath: string) {
+  return stat(storagePath);
+}
+
+export function streamPrivateFile(storagePath: string, start?: number, end?: number) {
+  return Readable.toWeb(createReadStream(storagePath, { start, end })) as ReadableStream;
 }

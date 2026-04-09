@@ -35,7 +35,7 @@ export default async function ConstitutionPage() {
         <CardHeader><CardTitle>Current Governing Document</CardTitle></CardHeader>
         <CardContent>
           {doc ? (
-            <DocumentViewer src="/api/documents/constitution" mimeType={doc.mimeType} title={doc.title} />
+            <DocumentViewer src={`/api/documents/constitution?docId=${doc.id}`} mimeType={doc.mimeType} title={doc.title} />
           ) : (
             <p className="text-sm text-slate-500">No constitution or guidelines document has been uploaded yet.</p>
           )}
