@@ -45,15 +45,15 @@ export function MembersTable({
       <div className="overflow-hidden rounded-lg border bg-white shadow-soft">
         <p className="scroll-hint px-4 pt-4 sm:px-6">Scroll sideways to view all member columns.</p>
         <DataScroll>
-          <table className="data-table min-w-[1180px]">
+          <table className="data-table min-w-[1040px] lg:min-w-full">
             <colgroup>
-              <col className="w-[26%]" />
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
+              <col className="w-[25%]" />
+              <col className="w-[11%]" />
+              <col className="w-[11%]" />
+              <col className="w-[11%]" />
               <col className="w-[10%]" />
-              {showActions ? <col className="w-[16%]" /> : null}
+              <col className="w-[10%]" />
+              {showActions ? <col className="w-[14%]" /> : null}
             </colgroup>
             <thead>
               <tr>
@@ -63,7 +63,7 @@ export function MembersTable({
                 <th className="whitespace-nowrap">Withdrawals</th>
                 <th className="whitespace-nowrap">Pending Emergency</th>
                 <th className="whitespace-nowrap">Status</th>
-                {showActions ? <th className="whitespace-nowrap">Actions</th> : null}
+                {showActions ? <th className="sticky right-0 whitespace-nowrap bg-slate-50 shadow-[-8px_0_12px_-12px_rgba(15,23,42,0.35)]">Actions</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -79,7 +79,7 @@ export function MembersTable({
                   <td className="whitespace-nowrap pr-6 text-slate-900">{row.pending}</td>
                   <td className="whitespace-nowrap"><Badge value={row.status} className="min-w-[88px] justify-center" /></td>
                   {showActions ? (
-                    <td className="min-w-[220px]">
+                    <td className="sticky right-0 min-w-[190px] bg-white shadow-[-8px_0_12px_-12px_rgba(15,23,42,0.35)]">
                       <MemberStatusActions
                         memberId={row.id}
                         currentStatus={row.status}
