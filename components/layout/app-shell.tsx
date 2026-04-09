@@ -34,7 +34,7 @@ export function AppShell({
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
           <div className="mx-auto flex w-full max-w-7xl flex-wrap items-start justify-between gap-3 px-3 py-3 sm:px-6 sm:py-4 lg:px-8">
-            <div className="flex min-w-0 items-stretch gap-3">
+            <div className="flex min-w-0 items-stretch gap-1.5 sm:gap-3">
               <MobileDashboardNav
                 role={role}
                 name={name}

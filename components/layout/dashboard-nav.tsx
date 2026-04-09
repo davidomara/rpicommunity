@@ -200,11 +200,11 @@ export function MobileDashboardNav({
         type="button"
         variant="outline"
         size="default"
-        className="h-12 min-w-[122px] gap-2 rounded-xl px-4 lg:hidden"
+        className="h-10 w-10 rounded-xl px-0 lg:hidden"
         onClick={() => setOpen(true)}
       >
-        <Menu className="h-4 w-4" />
-        Menu
+        <Menu className="h-5 w-5 stroke-[2.6]" />
+        <span className="sr-only">Open menu</span>
       </Button>
       {mounted ? createPortal(mobileMenu, document.body) : null}
     </>
