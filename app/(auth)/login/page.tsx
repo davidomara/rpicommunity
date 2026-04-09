@@ -43,7 +43,7 @@ export default async function LoginPage({
                 alt="RPIC Community logo"
                 width={72}
                 height={72}
-                className="h-12 w-12 shrink-0 rounded-full border border-slate-200 bg-white shadow-sm"
+                className="h-14 w-14 shrink-0 object-contain"
               />
               <div className="min-w-0">
                 <p className="text-xl font-semibold leading-6 text-slate-950">RPIC Community Members</p>
