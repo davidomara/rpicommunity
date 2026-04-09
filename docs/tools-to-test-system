@@ -1,0 +1,262 @@
+<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" style="height:64px;margin-right:32px"/>
+
+# WHICH TOOLS DO I USE TO TEST THIS SYSTEM : \# RPIC Community App
+
+A modern Next.js + TypeScript implementation of the existing community welfare and emergency savings platform, adapted for the Research Planning and Innovation Center Community.
+
+## Source reference
+
+This repo is a migration and modernization of the original Lango Community application. The source system's financial workflows, protected document handling, dashboard behaviors, and role model were preserved.
+
+## Stack
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- shadcn-style UI primitives
+- Prisma ORM
+- Railway PostgreSQL
+- Auth.js with database sessions
+- Zod validation
+- Recharts
+
+
+## Modules
+
+- login, password reset, protected pages
+- dashboard summaries and contribution status chart
+- member directory
+- contributions
+- withdrawals
+- emergency requests with approve/reject flow
+- protected bank statements
+- protected constitution/guidelines document
+- account settings
+
+
+## Getting started
+
+1. Copy `.env.example` to `.env`
+2. Set `DATABASE_URL` and `AUTH_SECRET`
+3. Run `npm install`
+4. Run `npx prisma migrate dev`
+5. Run `npm run prisma:seed`
+6. Run `npm run dev`
+
+## Environment notes
+
+- WSL setup and troubleshooting: [docs/wsl-setup.md](/mnt/d/.Nord%20APP/RPICCommunityApp/docs/wsl-setup.md)
+
+
+## Default users
+
+- Admin: `admin` / `Admin@123`
+- Treasurer: `treasurer` / `Admin@123`
+- All onboarded members: default temporary PIN `Member@123`
+- `npm run prisma:seed` now creates the onboarding user list only. It does not insert demo contributions, withdrawals, transactions, or emergency requests.
+- Community member ordering in views, selectors, and search results follows rank order:
+  `CP`, `SSP`, `SP`, `ASP`, `AIP`, `CPL`, `PC`
+- Within the same rank, names are sorted alphabetically.
+
+
+## WSL
+
+Then redeploy Railway.
+
+If you want to verify locally first from the WSL repo:
+
+cd /home/nord/projects/RPICCommunityApp
+npm run build
+
+## Railway deployment
+
+- Create one Railway PostgreSQL service
+- Create one Railway web service for this app
+- Root directory: repo root. Leave it blank if this repository is deployed directly to Railway because `package.json` is already at the project root.
+- Set `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, and `UPLOAD_ROOT`
+- Recommended Railway variables:
+  `DATABASE_URL`
+  `AUTH_SECRET`
+  `APP_URL`
+  `UPLOAD_ROOT=./storage/private`
+  `AUTH_TRUST_HOST=true`
+- Recommended build command:
+  `npm run build`
+- Recommended start command:
+  `npm run start`
+- Recommended migration flow:
+  Run `npx prisma migrate deploy` manually from a Railway shell or CI job when you intentionally want to apply pending production migrations.
+- Example production migration commands from your own terminal:
+  `DATABASE_URL='postgresql://...production...?sslmode=require' npx prisma migrate deploy`
+  `DATABASE_URL='postgresql://...production...?sslmode=require' npx prisma migrate status`
+- Why:
+  Running `prisma migrate deploy` inside the Railway start command can put the service into a restart loop if a migration fails. Keeping migrations as a manual deployment step is safer for production.
+- First deploy flow:
+  1. Push this repo to GitHub
+  2. In Railway, create a PostgreSQL service
+  3. In Railway, create a web service from the GitHub repo
+  4. Confirm the root directory is blank or `/`
+  5. Add the environment variables listed above
+  6. Set the build command to `npm run build`
+  7. Set the start command to `npm run start`
+  8. Deploy the service
+  9. If you have pending schema changes, open a Railway shell and run `npx prisma migrate deploy`
+  10. After the first successful deploy, open a Railway shell and run `npm run prisma:seed` once if you want the onboarding user accounts
+  11. If Prisma reports a failed production migration record but the schema changes are already present, resolve it before future deploys with:
+     `npx prisma migrate resolve --applied <migration_name>`
+  12. If you only need to add a Treasurer user in production, do not reseed the whole database. Run a one-off create command instead:
+     `DATABASE_URL='postgresql://...production...?sslmode=require' node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.create({ data:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer created: treasurer / Admin@123'); })().finally(()=>prisma.$disconnect());"`
+  13. If a Treasurer account may already exist, use an upsert instead:
+     `DATABASE_URL='postgresql://...production...?sslmode=require' node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.upsert({ where:{ username:'treasurer' }, update:{ email:'treasurer@rpic.local', role:Role.TREASURER, status:MemberStatus.ACTIVE }, create:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer upserted'); })().finally(()=>prisma.$disconnect());"`
+- Railway CLI example:
+  `railway up`
+
+
+## Storage
+
+Protected files are stored under `storage/private` by default. This starter keeps file access behind authenticated routes. Move to object storage later if file volume grows.
+
+## Notes
+
+- Password reset token generation is implemented; delivery email is not wired in this starter.
+- The architecture is intentionally monolithic for faster, cheaper, and simpler deployment on Railway.
+
+For your **RPIC Community App** (Next.js + TypeScript + Prisma + Auth.js + PostgreSQL on Railway), you should combine several testing tools to cover **unit, integration, and end‑to‑end behavior**.[^1][^2][^3]
+
+***
+
+### 1. **Component \& unit tests**
+
+Use these to test React components, utilities, and Zod schemas.
+
+- **Vitest** (recommended by Next.js)
+    - Fast in‑memory test runner for TypeScript/JS.
+    - Use `@testing-library/react` + `@testing-library/jest‑dom`‑style assertions for queries/renders.[^3][^1]
+- **Jest** (alternative)
+    - Works well if you already know it; integrate with the Next.js App Router setup.[^1]
+
+Typical tests:
+
+- Login form validation (Zod + `react-hook-form` / equivalent).
+- Contribution/withdrawal form logic.
+- Dashboard summary calculations (e.g., total savings, outstanding requests).
+
+***
+
+### 2. **API / server‑side logic tests**
+
+Test your Next.js **API routes**, Prisma calls, and Auth.js‑related flows.
+
+- **Vitest** or **Jest** + `node‑mocks‑http`
+    - Mock `NextApiRequest` / `NextApiResponse` and hit your API handlers directly.[^2]
+- **Prisma test utilities**
+    - Spin up a **test database** (e.g., `TEST_DATABASE_URL`) and run migrations + seeding.
+    - Before each test, truncate or reset key tables; after each test, clean up.[^4][^5]
+
+Example scenarios:
+
+- `POST /api/contributions` → check DB inserts, balances, and permission checks.
+- `POST /api/emergency-requests` → approvals, rejections, status transitions.
+- Auth/session checks on protected endpoints.
+
+***
+
+### 3. **End‑to‑end / UI flow tests**
+
+Use a browser‑based tool to simulate real user flows: login → dashboard → contributions → emergency requests → withdrawals.
+
+- **Playwright** (strongly recommended for Next.js)
+    - Records and runs full browser flows; supports headless and CI‑friendly reporting.[^6][^3]
+- **Cypress** (alternative)
+    - Also officially listed in Next.js testing docs; good if your team prefers it.[^3]
+
+Example flows:
+
+- Admin logs in → views member list → approves emergency request.
+- Treasurer logs in → processes withdrawal → confirms balance updates.
+- Unauthenticated user cannot access `/dashboard`, `/contributions`, etc.
+
+***
+
+### 4. **Database / schema \& migration tests**
+
+Since you use **Prisma + PostgreSQL on Railway**, you need to verify the schema and data integrity.
+
+- **Prisma client tests**
+    - Write small scripts to verify:
+        - `await prisma.user.findMany()` returns expected roles and ranks.
+        - `await prisma.contribution.findMany()` respects filters and computed totals.[^5][^4]
+- **Migration tests**
+    - Run `npx prisma migrate dev` on a **local test DB** and verify:
+        - No foreign‑key violations.
+        - Seed script (`prisma:seed`) creates correct default users and roles.
+- **Production‑like migration checks**
+    - On Railway, before `prisma migrate deploy`, run `prisma migrate status` and a small smoke‑test script over the target DB.[^7][^5]
+
+***
+
+### 5. **Security / authorization checks**
+
+Given your **protected documents and role‑based flows**, add focused tests.
+
+- **Manual/integrated tests** for:
+    - Admin vs. Treasurer vs. member access to:
+        - Emergency‑request approvals.
+        - Protected bank statements and constitution/guidelines (403 vs. 200).
+- **Auth.js / session tests**
+    - Confirm that:
+        - Non‑authenticated users are redirected from `/dashboard`.
+        - Database sessions are correctly created and invalidated on logout.[^5][^6]
+
+Use Playwright or API tests to simulate multiple users with different roles logged in simultaneously.
+
+***
+
+### 6. **CI / Railway‑integrated testing**
+
+To make testing part of your Railway‑based workflow:
+
+- **GitHub Actions** or similar CI:
+    - Run migrations on a **test PostgreSQL** instance.
+    - Run `npm run test` (Vitest/Jest) + Playwright.
+- **Before Railway deploy**:
+    - Require passing tests in CI.
+    - Optionally run a small “smoke test” script against the Railway DB to verify migrations and basic queries.[^8][^7]
+
+***
+
+### Suggested testing stack for your repo
+
+| Layer | Tool(s) to use |
+| :-- | :-- |
+| Unit tests (utils, forms) | Vitest + React Testing Library |
+| API / server logic | Vitest/Jest + `node‑mocks‑http` |
+| UI / user flows | Playwright |
+| Database / Prisma | Prisma client tests over test DB |
+| Auth / sessions | Playwright + Auth.js session assertions |
+
+If you tell me whether you want to prioritize **Vitest + Playwright** or **Jest + Cypress**, I can give you a concrete `package.json` test config + a sample test file for one of your flows (e.g., emergency request approval).
+<span style="display:none">[^10][^9]</span>
+
+<div align="center">⁂</div>
+
+[^1]: https://jsmastery.com/blogs/testing-next-js-apps-with-jest
+
+[^2]: https://www.paigeniedringhaus.com/blog/how-to-unit-test-next-js-api-routes-with-typescript/
+
+[^3]: https://nextjs.org/docs/app/guides/testing
+
+[^4]: https://www.prisma.io/docs/ai/prompts/nextjs
+
+[^5]: https://www.prisma.io/docs/v6/guides/authjs-nextjs
+
+[^6]: https://dev.to/kuroski/writing-integration-tests-for-nextjs-next-auth-prisma-using-playwright-and-msw-388m
+
+[^7]: https://vercel.com/kb/guide/nextjs-prisma-postgres
+
+[^8]: https://railway.com/deploy/nextjs-better-auth-prisma-template
+
+[^9]: https://javascript.plainenglish.io/nextauth-js-prisma-postgresql-building-a-fullstack-authentication-app-9ca6217c6378
+
+[^10]: https://vercel.com/templates/next.js/fullstack-prisma-nextjs-blog
+

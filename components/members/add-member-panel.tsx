@@ -89,7 +89,7 @@ export function AddMemberPanel() {
                 {state.error ? <p className="mb-4 text-sm text-red-600">{state.error}</p> : null}
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <SubmitButton label="Create Member" pendingLabel="Creating..." className="w-full sm:w-auto" />
-                  <Button type="button" variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)} className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">
                     Cancel
                   </Button>
                 </div>
