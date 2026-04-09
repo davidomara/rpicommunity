@@ -9,44 +9,48 @@ export async function GET(request: Request, { params }: { params: { id: string }
   const row = await prisma.bankStatement.findUnique({ where: { id: params.id } });
   if (!row) return new Response("Not found", { status: 404 });
 
-  const info = await getPrivateFileStat(row.storagePath);
-  const range = request.headers.get("range");
-  const headers = new Headers({
-    "Content-Type": row.mimeType,
-    "Content-Disposition": `inline; filename="${row.originalName}"`,
-    "Cache-Control": "private, max-age=60, stale-while-revalidate=300",
-    "X-Content-Type-Options": "nosniff",
-    "Accept-Ranges": "bytes"
-  });
+  try {
+    const info = await getPrivateFileStat(row.storagePath);
+    const range = request.headers.get("range");
+    const headers = new Headers({
+      "Content-Type": row.mimeType,
+      "Content-Disposition": `inline; filename="${row.originalName}"`,
+      "Cache-Control": "private, max-age=60, stale-while-revalidate=300",
+      "X-Content-Type-Options": "nosniff",
+      "Accept-Ranges": "bytes"
+    });
 
-  if (range) {
-    const match = /bytes=(\d*)-(\d*)/.exec(range);
-    if (!match) {
-      return new Response("Invalid range", { status: 416, headers });
+    if (range) {
+      const match = /bytes=(\d*)-(\d*)/.exec(range);
+      if (!match) {
+        return new Response("Invalid range", { status: 416, headers });
+      }
+
+      const start = match[1] ? Number(match[1]) : 0;
+      const end = match[2] ? Number(match[2]) : info.size - 1;
+
+      if (Number.isNaN(start) || Number.isNaN(end) || start > end || start >= info.size) {
+        headers.set("Content-Range", `bytes */${info.size}`);
+        return new Response("Requested range not satisfiable", { status: 416, headers });
+      }
+
+      const boundedEnd = Math.min(end, info.size - 1);
+      headers.set("Content-Range", `bytes ${start}-${boundedEnd}/${info.size}`);
+      headers.set("Content-Length", String(boundedEnd - start + 1));
+
+      return new Response(streamPrivateFile(row.storagePath, start, boundedEnd), {
+        status: 206,
+        headers
+      });
     }
 
-    const start = match[1] ? Number(match[1]) : 0;
-    const end = match[2] ? Number(match[2]) : info.size - 1;
+    headers.set("Content-Length", String(info.size));
 
-    if (Number.isNaN(start) || Number.isNaN(end) || start > end || start >= info.size) {
-      headers.set("Content-Range", `bytes */${info.size}`);
-      return new Response("Requested range not satisfiable", { status: 416, headers });
-    }
-
-    const boundedEnd = Math.min(end, info.size - 1);
-    headers.set("Content-Range", `bytes ${start}-${boundedEnd}/${info.size}`);
-    headers.set("Content-Length", String(boundedEnd - start + 1));
-
-    return new Response(streamPrivateFile(row.storagePath, start, boundedEnd), {
-      status: 206,
+    return new Response(streamPrivateFile(row.storagePath), {
+      status: 200,
       headers
     });
+  } catch {
+    return new Response("Stored file is missing. Re-upload the document.", { status: 404 });
   }
-
-  headers.set("Content-Length", String(info.size));
-
-  return new Response(streamPrivateFile(row.storagePath), {
-    status: 200,
-    headers
-  });
 }

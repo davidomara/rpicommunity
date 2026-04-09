@@ -82,7 +82,7 @@ npm run build
   `DATABASE_URL`
   `AUTH_SECRET`
   `APP_URL`
-  `UPLOAD_ROOT=./storage/private`
+  `UPLOAD_ROOT=/data/private`
   `AUTH_TRUST_HOST=true`
 - Recommended build command:
   `npm run build`
@@ -117,7 +117,15 @@ npm run build
 
 ## Storage
 
-Protected files are stored under `storage/private` by default. This starter keeps file access behind authenticated routes. Move to object storage later if file volume grows.
+Protected files are stored under `storage/private` by default for local development.
+
+For Railway production, do not use app-local disk for protected uploads. Mount a persistent volume and point:
+
+`UPLOAD_ROOT=/data/private`
+
+This app now stores logical relative file keys in the database for new uploads, and resolves them against `UPLOAD_ROOT` at runtime. Existing older rows that stored absolute disk paths still work if those files still exist, but files previously written to ephemeral Railway local disk must be re-uploaded after you switch to a mounted volume.
+
+This keeps file access behind authenticated routes while making uploads survive redeploys and restarts. Move to object storage later if file volume or retention requirements grow.
 
 ## Notes
 
