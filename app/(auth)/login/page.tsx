@@ -72,7 +72,7 @@ export default async function LoginPage({
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-500">
               Demo admin: <strong>admin</strong> / <strong>Admin@123</strong><br />
               Demo treasurer: <strong>treasurer</strong> / <strong>Admin@123</strong><br />
-              Demo member: <strong>alice</strong> / <strong>Member@123</strong>
+              Demo member: <strong>first.middle.lastname@rpic.local</strong> / <strong>Member@123</strong>
             </div>
           </form>
         </section>

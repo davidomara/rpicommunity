@@ -29,6 +29,7 @@ This repo is a migration and modernization of the original Lango Community appli
 - protected bank statements
 - protected constitution/guidelines document
 - account settings
+- automatic member status rules based on arrears thresholds
 
 ## Getting started
 
@@ -49,6 +50,11 @@ This repo is a migration and modernization of the original Lango Community appli
 - Treasurer: `treasurer` / `Admin@123`
 - All onboarded members: default temporary PIN `Member@123`
 - `npm run prisma:seed` now creates the onboarding user list only. It does not insert demo contributions, withdrawals, transactions, or emergency requests.
+- Member status is now derived automatically from arrears months instead of manual selection.
+- Default automation rule:
+  `3` months in arrears => `WARNING`
+  `6` months in arrears => `CLOSED`
+- Admins can change these thresholds from `Account Settings` under `Member Status Automation`.
 - Community member ordering in views, selectors, and search results follows rank order:
   `CP`, `SSP`, `SP`, `ASP`, `AIP`, `CPL`, `PC`
 - Within the same rank, names are sorted alphabetically.
