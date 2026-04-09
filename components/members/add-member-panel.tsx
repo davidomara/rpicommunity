@@ -15,8 +15,6 @@ const initialState: CreateMemberFormState = {
   error: ""
 };
 
-const selectClassName = "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
-
 export function AddMemberPanel() {
   const [open, setOpen] = useState(false);
   const [state, formAction] = useFormState(createMemberAction, initialState);
@@ -67,14 +65,6 @@ export function AddMemberPanel() {
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
                 <Input id="email" name="email" type="email" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Member Status</Label>
-                <select id="status" name="status" defaultValue="ACTIVE" className={selectClassName} required>
-                  <option value="ACTIVE">Active</option>
-                  <option value="WARNING">Warning</option>
-                  <option value="CLOSED">Closed</option>
-                </select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="temporaryPin">Temporary PIN</Label>

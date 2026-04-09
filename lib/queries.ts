@@ -1,21 +1,13 @@
 import { EmergencyStatus, Prisma, Role } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { COMMUNITY_CONTRIBUTION_START, EXPECTED_MONTHLY_CONTRIBUTION } from "@/lib/settings";
+import { getCommunitySettings } from "@/lib/community-settings";
+import { resolveMemberStatus } from "@/lib/member-status";
 import { sortCommunityRows } from "@/lib/community-order";
 
 const communityRoles: Role[] = [Role.ADMIN, Role.TREASURER, Role.MEMBER];
 
-function getExpectedContributionMonths(now = new Date()) {
-  const startYear = COMMUNITY_CONTRIBUTION_START.getUTCFullYear();
-  const startMonth = COMMUNITY_CONTRIBUTION_START.getUTCMonth();
-  const currentYear = now.getUTCFullYear();
-  const currentMonth = now.getUTCMonth();
-
-  return Math.max(0, (currentYear - startYear) * 12 + (currentMonth - startMonth));
-}
-
 export async function getDashboardData() {
-  const [members, pendingRequests, totals] = await Promise.all([
+  const [members, pendingRequests, totals, statusSettings] = await Promise.all([
     prisma.user.findMany({
       where: { role: { in: communityRoles } },
       include: {
@@ -34,23 +26,23 @@ export async function getDashboardData() {
     }),
     prisma.transaction.aggregate({
       _sum: { amount: true }
-    })
+    }),
+    getCommunitySettings()
   ]);
 
   const memberRows = sortCommunityRows(members.map((member) => {
     const contributionTotal = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
     const withdrawalTotal = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
-    const monthsActive = getExpectedContributionMonths();
-    const expected = monthsActive * EXPECTED_MONTHLY_CONTRIBUTION;
+    const statusMeta = resolveMemberStatus(contributionTotal, statusSettings);
     return {
       id: member.id,
       name: member.name,
       email: member.email,
-      status: member.status,
+      status: statusMeta.status,
       role: member.role,
       totalContributions: contributionTotal,
       totalWithdrawals: withdrawalTotal,
-      missing: Math.max(0, expected - contributionTotal),
+      missing: statusMeta.arrearsAmount,
       pendingEmergencyRequests: member.emergencyRequests.length
     };
   }));

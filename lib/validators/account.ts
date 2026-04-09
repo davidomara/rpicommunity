@@ -31,10 +31,17 @@ export const createMemberSchema = z.object({
   name: z.string().min(2),
   username: z.string().min(3),
   email: z.string().email(),
-  status: z.enum(["ACTIVE", "WARNING", "CLOSED"]),
   temporaryPin: z.string().min(8),
   confirmTemporaryPin: z.string().min(8)
 }).refine((data) => data.temporaryPin === data.confirmTemporaryPin, {
   message: "PINs do not match",
   path: ["confirmTemporaryPin"]
+});
+
+export const updateMemberStatusThresholdsSchema = z.object({
+  warningAfterMonths: z.coerce.number().int().min(1),
+  closeAfterMonths: z.coerce.number().int().min(1)
+}).refine((data) => data.closeAfterMonths > data.warningAfterMonths, {
+  message: "Close threshold must be greater than warning threshold",
+  path: ["closeAfterMonths"]
 });

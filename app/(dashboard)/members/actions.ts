@@ -28,7 +28,6 @@ export async function createMemberAction(_: CreateMemberFormState, formData: For
     name: String(formData.get("name") || ""),
     username: String(formData.get("username") || ""),
     email: String(formData.get("email") || ""),
-    status: String(formData.get("status") || ""),
     temporaryPin: String(formData.get("temporaryPin") || ""),
     confirmTemporaryPin: String(formData.get("confirmTemporaryPin") || "")
   });
@@ -76,7 +75,7 @@ export async function createMemberAction(_: CreateMemberFormState, formData: For
       email,
       passwordHash: await bcrypt.hash(parsed.data.temporaryPin, 12),
       role: Role.MEMBER,
-      status: parsed.data.status as MemberStatus
+      status: MemberStatus.ACTIVE
     }
   });
 

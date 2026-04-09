@@ -67,6 +67,14 @@ model User {
   @@index([role, status])
 }
 
+model CommunitySettings {
+  id                 String   @id @default("community")
+  warningAfterMonths Int      @default(3)
+  closeAfterMonths   Int      @default(6)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
 model Contribution {
   id               String   @id @default(cuid())
   memberId         String

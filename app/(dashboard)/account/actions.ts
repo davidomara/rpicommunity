@@ -5,7 +5,7 @@ import { Role } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { canManageMembers } from "@/lib/rbac";
-import { resetMemberPinSchema, updateEmailSchema, updateMemberEmailSchema, updatePasswordSchema } from "@/lib/validators/account";
+import { resetMemberPinSchema, updateEmailSchema, updateMemberEmailSchema, updateMemberStatusThresholdsSchema, updatePasswordSchema } from "@/lib/validators/account";
 import { revalidatePath } from "next/cache";
 
 async function assertMemberTarget(memberId: string) {
@@ -84,4 +84,31 @@ export async function resetMemberPinAction(formData: FormData) {
   });
 
   revalidatePath("/account");
+}
+
+export async function updateMemberStatusThresholdsAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user || !canManageMembers(session.user.role)) throw new Error("Unauthorized");
+
+  const parsed = updateMemberStatusThresholdsSchema.parse({
+    warningAfterMonths: formData.get("warningAfterMonths"),
+    closeAfterMonths: formData.get("closeAfterMonths")
+  });
+
+  await prisma.communitySettings.upsert({
+    where: { id: "community" },
+    update: {
+      warningAfterMonths: parsed.warningAfterMonths,
+      closeAfterMonths: parsed.closeAfterMonths
+    },
+    create: {
+      id: "community",
+      warningAfterMonths: parsed.warningAfterMonths,
+      closeAfterMonths: parsed.closeAfterMonths
+    }
+  });
+
+  revalidatePath("/account");
+  revalidatePath("/dashboard");
+  revalidatePath("/members");
 }
