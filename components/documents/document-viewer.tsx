@@ -20,33 +20,20 @@ export function DocumentViewer({ src, mimeType, title }: { src: string; mimeType
   return (
     <div className="space-y-3">
       <div className="rounded-lg border bg-white">
-        <object
-          data={src}
-          type={mimeType}
-          aria-label={title}
-          className="h-[72vh] w-full rounded-lg bg-white sm:h-[78vh]"
-        >
-          <div className="flex h-full min-h-[320px] items-center justify-center p-6 text-center">
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-slate-900">Document preview unavailable.</p>
-              <p className="text-sm leading-6 text-slate-500">
-                Your browser could not display this document inline. Open it directly instead.
-              </p>
-              <a
-                href={src}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-[#2f5f93] px-4 text-sm font-medium text-white transition-colors hover:bg-[#274f79]"
-              >
-                Open full document
-              </a>
-            </div>
-          </div>
-        </object>
+        <iframe
+          src={src}
+          title={title}
+          className="h-[72vh] w-full rounded-lg border-0 bg-white sm:h-[78vh]"
+        />
       </div>
-      <a href={src} target="_blank" rel="noreferrer" className="inline-flex text-sm font-medium text-cyan-700 hover:text-cyan-800">
-        Open full document
-      </a>
+      <div className="flex flex-wrap gap-4 text-sm font-medium">
+        <a href={src} rel="noreferrer" className="inline-flex text-cyan-700 hover:text-cyan-800">
+          Open in this tab
+        </a>
+        <a href={src} target="_blank" rel="noreferrer" className="inline-flex text-cyan-700 hover:text-cyan-800">
+          Open in new tab
+        </a>
+      </div>
     </div>
   );
 }
