@@ -30,6 +30,7 @@ This repo is a migration and modernization of the original Lango Community appli
 - protected constitution/guidelines document
 - account settings
 - automatic member status rules based on arrears thresholds
+- admin-requested member status changes with Admin and Treasurer approval
 
 ## Getting started
 
@@ -55,6 +56,9 @@ This repo is a migration and modernization of the original Lango Community appli
   `3` months in arrears => `WARNING`
   `6` months in arrears => `CLOSED`
 - Admins can change these thresholds from `Account Settings` under `Member Status Automation`.
+- In `Members`, Admins can use the edit icon to request a manual member status change.
+- A requested member status change is only applied after both Admin and Treasurer approve it.
+- Once a manual status change is fully approved, that member is treated as a manual override until changed again.
 - Community member ordering in views, selectors, and search results follows rank order:
   `CP`, `SSP`, `SP`, `ASP`, `AIP`, `CPL`, `PC`
 - Within the same rank, names are sorted alphabetically.

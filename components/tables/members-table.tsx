@@ -1,13 +1,38 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { Role } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DataScroll } from "@/components/ui/data-scroll";
 import { formatMoney } from "@/lib/utils";
+import { MemberStatusActions } from "@/components/members/member-status-actions";
 
-export function MembersTable({ rows }: { rows: Array<{ id: string; name: string; email: string; status: string; contributions: number; withdrawals: number; pending: number; arrears: number }> }) {
+export function MembersTable({
+  rows,
+  role
+}: {
+  rows: Array<{
+    id: string;
+    name: string;
+    email: string;
+    status: string;
+    contributions: number;
+    withdrawals: number;
+    pending: number;
+    arrears: number;
+    pendingStatusChange?: {
+      id: string;
+      currentStatus: string;
+      requestedStatus: string;
+      adminApproved: boolean;
+      treasurerApproved: boolean;
+    } | null;
+  }>;
+  role?: Role;
+}) {
   const [query, setQuery] = useState("");
+  const showActions = role === "ADMIN" || role === "TREASURER";
   const filtered = useMemo(() => rows.filter((row) => {
     const q = query.trim().toLowerCase();
     if (!q) return true;
@@ -20,14 +45,15 @@ export function MembersTable({ rows }: { rows: Array<{ id: string; name: string;
       <div className="overflow-hidden rounded-lg border bg-white shadow-soft">
         <p className="scroll-hint px-4 pt-4 sm:px-6">Scroll sideways to view all member columns.</p>
         <DataScroll>
-          <table className="data-table min-w-[980px]">
+          <table className="data-table min-w-[1180px]">
             <colgroup>
-              <col className="w-[30%]" />
-              <col className="w-[14%]" />
-              <col className="w-[14%]" />
-              <col className="w-[14%]" />
-              <col className="w-[14%]" />
-              <col className="w-[14%]" />
+              <col className="w-[26%]" />
+              <col className="w-[12%]" />
+              <col className="w-[12%]" />
+              <col className="w-[12%]" />
+              <col className="w-[12%]" />
+              <col className="w-[10%]" />
+              {showActions ? <col className="w-[16%]" /> : null}
             </colgroup>
             <thead>
               <tr>
@@ -37,6 +63,7 @@ export function MembersTable({ rows }: { rows: Array<{ id: string; name: string;
                 <th className="whitespace-nowrap">Withdrawals</th>
                 <th className="whitespace-nowrap">Pending Emergency</th>
                 <th className="whitespace-nowrap">Status</th>
+                {showActions ? <th className="whitespace-nowrap">Actions</th> : null}
               </tr>
             </thead>
             <tbody>
@@ -51,6 +78,16 @@ export function MembersTable({ rows }: { rows: Array<{ id: string; name: string;
                   <td className="whitespace-nowrap pr-6 text-slate-900">{formatMoney(row.withdrawals)}</td>
                   <td className="whitespace-nowrap pr-6 text-slate-900">{row.pending}</td>
                   <td className="whitespace-nowrap"><Badge value={row.status} className="min-w-[88px] justify-center" /></td>
+                  {showActions ? (
+                    <td className="min-w-[220px]">
+                      <MemberStatusActions
+                        memberId={row.id}
+                        currentStatus={row.status}
+                        actorRole={role!}
+                        pendingChange={row.pendingStatusChange}
+                      />
+                    </td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>

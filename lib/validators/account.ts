@@ -45,3 +45,13 @@ export const updateMemberStatusThresholdsSchema = z.object({
   message: "Close threshold must be greater than warning threshold",
   path: ["closeAfterMonths"]
 });
+
+export const requestMemberStatusChangeSchema = z.object({
+  memberId: z.string().min(1),
+  requestedStatus: z.enum(["ACTIVE", "WARNING", "CLOSED"])
+});
+
+export const decideMemberStatusChangeSchema = z.object({
+  requestId: z.string().min(1),
+  decision: z.enum(["APPROVED", "REJECTED"])
+});

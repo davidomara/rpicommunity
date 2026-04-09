@@ -20,6 +20,17 @@ enum MemberStatus {
   CLOSED
 }
 
+enum StatusMode {
+  AUTO
+  MANUAL
+}
+
+enum ChangeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum EmergencyStatus {
   PENDING
   APPROVED
@@ -44,6 +55,7 @@ model User {
   passwordHash      String
   role              Role                @default(MEMBER)
   status            MemberStatus        @default(ACTIVE)
+  statusMode        StatusMode          @default(AUTO)
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   contributions     Contribution[]      @relation("ContributionMember")
@@ -62,6 +74,12 @@ model User {
   sessions          Session[]
   accounts          Account[]
   resetTokens       PasswordResetToken[]
+  targetedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeTarget")
+  requestedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeRequester")
+  adminApprovedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeAdminApprover")
+  treasurerApprovedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeTreasurerApprover")
+  rejectedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeRejector")
+  appliedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeApplier")
 
   @@index([role, name])
   @@index([role, status])
@@ -73,6 +91,36 @@ model CommunitySettings {
   closeAfterMonths   Int      @default(6)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+}
+
+model MemberStatusChangeRequest {
+  id                    String              @id @default(cuid())
+  memberId              String
+  member                User                @relation("MemberStatusChangeTarget", fields: [memberId], references: [id])
+  currentStatus         MemberStatus
+  requestedStatus       MemberStatus
+  status                ChangeRequestStatus @default(PENDING)
+  requestedById         String
+  requestedBy           User                @relation("MemberStatusChangeRequester", fields: [requestedById], references: [id])
+  adminApprovedAt       DateTime?
+  adminApprovedById     String?
+  adminApprovedBy       User?               @relation("MemberStatusChangeAdminApprover", fields: [adminApprovedById], references: [id])
+  treasurerApprovedAt   DateTime?
+  treasurerApprovedById String?
+  treasurerApprovedBy   User?               @relation("MemberStatusChangeTreasurerApprover", fields: [treasurerApprovedById], references: [id])
+  rejectedAt            DateTime?
+  rejectedById          String?
+  rejectedBy            User?               @relation("MemberStatusChangeRejector", fields: [rejectedById], references: [id])
+  appliedAt             DateTime?
+  appliedById           String?
+  appliedBy             User?               @relation("MemberStatusChangeApplier", fields: [appliedById], references: [id])
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([memberId, status, createdAt])
+  @@index([requestedById])
+  @@index([adminApprovedById])
+  @@index([treasurerApprovedById])
 }
 
 model Contribution {

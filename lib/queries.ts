@@ -1,13 +1,14 @@
 import { EmergencyStatus, Prisma, Role } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { getCommunitySettings } from "@/lib/community-settings";
-import { resolveMemberStatus } from "@/lib/member-status";
+import { getArrearsAmount } from "@/lib/member-status";
+import { syncAutoMemberStatuses } from "@/lib/member-status-sync";
 import { sortCommunityRows } from "@/lib/community-order";
 
 const communityRoles: Role[] = [Role.ADMIN, Role.TREASURER, Role.MEMBER];
 
 export async function getDashboardData() {
-  const [members, pendingRequests, totals, statusSettings] = await Promise.all([
+  await syncAutoMemberStatuses();
+  const [members, pendingRequests, totals] = await Promise.all([
     prisma.user.findMany({
       where: { role: { in: communityRoles } },
       include: {
@@ -26,23 +27,21 @@ export async function getDashboardData() {
     }),
     prisma.transaction.aggregate({
       _sum: { amount: true }
-    }),
-    getCommunitySettings()
+    })
   ]);
 
   const memberRows = sortCommunityRows(members.map((member) => {
     const contributionTotal = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
     const withdrawalTotal = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
-    const statusMeta = resolveMemberStatus(contributionTotal, statusSettings);
     return {
       id: member.id,
       name: member.name,
       email: member.email,
-      status: statusMeta.status,
+      status: member.status,
       role: member.role,
       totalContributions: contributionTotal,
       totalWithdrawals: withdrawalTotal,
-      missing: statusMeta.arrearsAmount,
+      missing: getArrearsAmount(contributionTotal),
       pendingEmergencyRequests: member.emergencyRequests.length
     };
   }));
@@ -79,6 +78,7 @@ export async function getDashboardData() {
 }
 
 export async function getMembersDirectory() {
+  await syncAutoMemberStatuses();
   const rows = await prisma.user.findMany({
     where: { role: { in: communityRoles } },
     include: {
@@ -86,6 +86,11 @@ export async function getMembersDirectory() {
       withdrawals: true,
       emergencyRequests: {
         where: { status: EmergencyStatus.PENDING }
+      },
+      targetedStatusChanges: {
+        where: { status: "PENDING" },
+        orderBy: { createdAt: "desc" },
+        take: 1
       }
     }
   });
