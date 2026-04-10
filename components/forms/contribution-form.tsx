@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useFormState } from "react-dom";
 import { createContributionAction, type ContributionFormState } from "@/app/(dashboard)/contributions/actions";
 import { SubmitButton } from "@/components/forms/submit-button";
+import { FormMessage } from "@/components/forms/form-message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,7 +66,10 @@ export function ContributionForm({
             <Input id="contributionDate" name="contributionDate" type="date" defaultValue={getTodayISODate()} max={getTodayISODate()} required />
           </div>
           <div className="mt-auto md:col-span-2">
-            {state.error ? <p className="mb-3 text-sm text-red-600">{state.error}</p> : null}
+            <div className="mb-3 space-y-3">
+              <FormMessage type="error" message={state.error} />
+              <FormMessage type="success" message={state.success ? "Contribution saved successfully." : ""} />
+            </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <SubmitButton label="Save Contribution" pendingLabel="Saving..." className="w-full sm:w-auto" />
               <Button type="reset" variant="outline" className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">

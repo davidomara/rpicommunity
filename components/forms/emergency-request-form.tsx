@@ -2,6 +2,7 @@
 
 import { RefObject } from "react";
 import { SubmitButton } from "@/components/forms/submit-button";
+import { FormMessage } from "@/components/forms/form-message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ export function EmergencyRequestForm({
   action,
   formRef,
   error,
+  successMessage,
   memberId,
   isAdmin,
   members,
@@ -20,6 +22,7 @@ export function EmergencyRequestForm({
   action: (formData: FormData) => void;
   formRef: RefObject<HTMLFormElement>;
   error: string;
+  successMessage?: string;
   memberId: string;
   isAdmin: boolean;
   members: Array<{ id: string; name: string }>;
@@ -50,7 +53,10 @@ export function EmergencyRequestForm({
               <Label htmlFor="reason">Reason</Label>
               <Textarea id="reason" name="reason" required />
             </div>
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            <div className="space-y-3">
+              <FormMessage type="error" message={error} />
+              <FormMessage type="success" message={successMessage} />
+            </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <SubmitButton label="Submit Request" pendingLabel="Submitting..." className="w-full sm:w-auto" />
               {onCancel ? (

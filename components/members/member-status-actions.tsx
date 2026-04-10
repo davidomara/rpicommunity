@@ -79,6 +79,7 @@ export function MemberStatusActions({
           <Pencil className="mr-1 h-4 w-4" />
           Edit
         </Button>
+        {!isOpen && requestState.success ? <p className="text-xs text-emerald-700">Status change request submitted.</p> : null}
         {!isOpen && requestState.error ? <p className="text-xs text-red-600">{requestState.error}</p> : null}
         {isOpen ? (
           <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/40 px-4">
@@ -157,6 +158,7 @@ export function MemberStatusActions({
           </ActionButton>
         </form>
       </div>
+      {decisionState.success ? <p className="text-xs text-emerald-700">Decision recorded successfully.</p> : null}
       {decisionState.error ? <p className="text-xs text-red-600">{decisionState.error}</p> : null}
     </div>
   );

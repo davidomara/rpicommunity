@@ -7,17 +7,26 @@ import { storePrivateFile } from "@/lib/storage";
 import { protectedDocumentUploadSchema } from "@/lib/validators/uploads";
 import { revalidatePath } from "next/cache";
 
-export async function uploadBankStatementAction(formData: FormData) {
+export type ProtectedUploadFormState = {
+  success: boolean;
+  error: string;
+  message: string;
+};
+
+export async function uploadBankStatementAction(
+  _: ProtectedUploadFormState,
+  formData: FormData
+): Promise<ProtectedUploadFormState> {
   const session = await auth();
   if (!session?.user || !canManageProtectedDocuments(session.user.role)) {
-    throw new Error("Unauthorized");
+    return { success: false, error: "Unauthorized", message: "" };
   }
 
   const parsed = protectedDocumentUploadSchema.safeParse({
     file: formData.get("file")
   });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message || "Invalid file");
+    return { success: false, error: parsed.error.issues[0]?.message || "Invalid file", message: "" };
   }
   const file = parsed.data.file;
 
@@ -41,4 +50,9 @@ export async function uploadBankStatementAction(formData: FormData) {
   });
 
   revalidatePath("/bank-statements");
+  return {
+    success: true,
+    error: "",
+    message: "Bank statement uploaded successfully."
+  };
 }

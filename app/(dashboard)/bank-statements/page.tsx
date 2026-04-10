@@ -4,7 +4,7 @@ import { canManageProtectedDocuments } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DocumentViewer } from "@/components/documents/document-viewer";
 import { uploadBankStatementAction } from "./actions";
-import { SubmitButton } from "@/components/forms/submit-button";
+import { ProtectedUploadForm } from "@/components/forms/protected-upload-form";
 
 export default async function BankStatementsPage() {
   const session = await auth();
@@ -23,11 +23,12 @@ export default async function BankStatementsPage() {
         <Card>
           <CardHeader><CardTitle>Upload Latest Statement</CardTitle></CardHeader>
           <CardContent>
-            <form action={uploadBankStatementAction} className="flex flex-col gap-4 md:flex-row md:items-center">
-              <input type="file" name="file" accept=".pdf,image/*" required className="upload-file-input md:flex-1" />
-              <SubmitButton label="Upload Statement" pendingLabel="Uploading..." className="w-full whitespace-nowrap md:w-auto" />
-            </form>
-            <p className="mt-3 text-xs text-slate-500">The latest statement becomes the current protected preview for logged-in users.</p>
+            <ProtectedUploadForm
+              action={uploadBankStatementAction}
+              submitLabel="Upload Statement"
+              pendingLabel="Uploading..."
+              hint="The latest statement becomes the current protected preview for logged-in users."
+            />
           </CardContent>
         </Card>
       ) : null}

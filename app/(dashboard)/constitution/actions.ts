@@ -6,18 +6,22 @@ import { canManageProtectedDocuments } from "@/lib/rbac";
 import { storePrivateFile } from "@/lib/storage";
 import { protectedDocumentUploadSchema } from "@/lib/validators/uploads";
 import { revalidatePath } from "next/cache";
+import type { ProtectedUploadFormState } from "../bank-statements/actions";
 
-export async function uploadConstitutionAction(formData: FormData) {
+export async function uploadConstitutionAction(
+  _: ProtectedUploadFormState,
+  formData: FormData
+): Promise<ProtectedUploadFormState> {
   const session = await auth();
   if (!session?.user || !canManageProtectedDocuments(session.user.role)) {
-    throw new Error("Unauthorized");
+    return { success: false, error: "Unauthorized", message: "" };
   }
 
   const parsed = protectedDocumentUploadSchema.safeParse({
     file: formData.get("file")
   });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message || "Invalid file");
+    return { success: false, error: parsed.error.issues[0]?.message || "Invalid file", message: "" };
   }
   const file = parsed.data.file;
 
@@ -46,4 +50,9 @@ export async function uploadConstitutionAction(formData: FormData) {
   });
 
   revalidatePath("/constitution");
+  return {
+    success: true,
+    error: "",
+    message: "Constitution uploaded successfully."
+  };
 }

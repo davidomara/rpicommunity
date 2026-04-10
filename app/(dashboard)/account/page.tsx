@@ -3,12 +3,13 @@ import { getCommunitySettings } from "@/lib/community-settings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMemberAccountDirectory } from "@/lib/queries";
 import { canManageMembers } from "@/lib/rbac";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { PasswordInput } from "@/components/ui/password-input";
-import { SubmitButton } from "@/components/forms/submit-button";
-import { Button } from "@/components/ui/button";
-import { resetMemberPinAction, updateEmailAction, updateMemberEmailAction, updateMemberStatusThresholdsAction, updatePasswordAction } from "./actions";
+import {
+  ChangePasswordForm,
+  MemberStatusAutomationForm,
+  ResetMemberPinForm,
+  UpdateEmailForm,
+  UpdateMemberEmailForm
+} from "@/components/account/account-forms";
 
 export default async function AccountPage() {
   const session = await auth();
@@ -30,27 +31,13 @@ export default async function AccountPage() {
         <Card>
           <CardHeader><CardTitle>Update Email</CardTitle></CardHeader>
           <CardContent>
-            <form action={updateEmailAction} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input id="email" name="email" type="email" defaultValue={session.user.email || ""} required />
-              </div>
-              <SubmitButton label="Save Email" pendingLabel="Saving..." className="w-full sm:w-auto" />
-            </form>
+            <UpdateEmailForm defaultEmail={session.user.email || ""} />
           </CardContent>
         </Card>
         <Card>
           <CardHeader><CardTitle>Change Password</CardTitle></CardHeader>
           <CardContent>
-            <form action={updatePasswordAction} className="space-y-4">
-              <div className="space-y-2"><Label htmlFor="currentPassword">Current Password</Label><PasswordInput id="currentPassword" name="currentPassword" required /></div>
-              <div className="space-y-2"><Label htmlFor="newPassword">New Password</Label><PasswordInput id="newPassword" name="newPassword" required /></div>
-              <div className="space-y-2"><Label htmlFor="confirmPassword">Confirm Password</Label><PasswordInput id="confirmPassword" name="confirmPassword" required /></div>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <SubmitButton label="Change Password" pendingLabel="Updating..." className="w-full sm:w-auto" />
-                <Button type="reset" variant="outline" className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">Clear</Button>
-              </div>
-            </form>
+            <ChangePasswordForm />
           </CardContent>
         </Card>
       </div>
@@ -63,54 +50,8 @@ export default async function AccountPage() {
             <CardContent>
               {members.length ? (
                 <div className="grid gap-6 lg:grid-cols-2">
-                  <form action={updateMemberEmailAction} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="memberEmailMemberId">Member</Label>
-                      <select id="memberEmailMemberId" name="memberId" defaultValue="" className={selectClassName} required>
-                        <option value="" disabled>Select member account</option>
-                        {members.map((member) => (
-                          <option key={member.id} value={member.id}>
-                            {member.name} ({member.username})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="memberEmail">New Member Email</Label>
-                      <Input id="memberEmail" name="email" type="email" placeholder="Enter the updated email address" required />
-                    </div>
-                    <p className="text-xs text-slate-500">Select the member, then enter the replacement email address to save.</p>
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                      <SubmitButton label="Update Member Email" pendingLabel="Saving..." className="w-full sm:w-auto" />
-                      <Button type="reset" variant="outline" className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">Clear</Button>
-                    </div>
-                  </form>
-                  <form action={resetMemberPinAction} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="memberPinMemberId">Member</Label>
-                      <select id="memberPinMemberId" name="memberId" defaultValue="" className={selectClassName} required>
-                        <option value="" disabled>Select member account</option>
-                        {members.map((member) => (
-                          <option key={member.id} value={member.id}>
-                            {member.name} ({member.username})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="newPin">Temporary PIN</Label>
-                      <PasswordInput id="newPin" name="newPin" defaultValue="Member@123" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPin">Confirm Temporary PIN</Label>
-                      <PasswordInput id="confirmPin" name="confirmPin" defaultValue="Member@123" required />
-                    </div>
-                    <p className="text-xs text-slate-500">Best option: use a temporary PIN, then share it directly with the member and have them change it after login.</p>
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                      <SubmitButton label="Reset Member PIN" pendingLabel="Resetting..." className="w-full sm:w-auto" />
-                      <Button type="reset" variant="outline" className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">Clear</Button>
-                    </div>
-                  </form>
+                  <UpdateMemberEmailForm members={members} selectClassName={selectClassName} />
+                  <ResetMemberPinForm members={members} selectClassName={selectClassName} />
                 </div>
               ) : (
                 <p className="text-sm text-slate-500">No member accounts exist yet. Add a member from the Members page first.</p>
@@ -122,25 +63,10 @@ export default async function AccountPage() {
               <CardTitle>Member Status Automation</CardTitle>
             </CardHeader>
             <CardContent>
-              <form action={updateMemberStatusThresholdsAction} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="warningAfterMonths">Warning After</Label>
-                  <Input id="warningAfterMonths" name="warningAfterMonths" type="number" min="1" defaultValue={statusSettings?.warningAfterMonths ?? 3} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="closeAfterMonths">Close After</Label>
-                  <Input id="closeAfterMonths" name="closeAfterMonths" type="number" min="1" defaultValue={statusSettings?.closeAfterMonths ?? 6} required />
-                </div>
-                <p className="text-xs leading-5 text-slate-500">
-                  Member status is derived automatically from full months in arrears. A member stays active below the warning
-                  threshold, moves to warning at the configured month gap, and closes automatically once the higher threshold is reached.
-                </p>
-                <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-600">
-                  Current rule: warning at <strong>{statusSettings?.warningAfterMonths ?? 3}</strong> months in arrears, close at{" "}
-                  <strong>{statusSettings?.closeAfterMonths ?? 6}</strong> months in arrears.
-                </div>
-                <SubmitButton label="Save Status Rules" pendingLabel="Saving..." className="w-full sm:w-auto" />
-              </form>
+              <MemberStatusAutomationForm
+                warningAfterMonths={statusSettings?.warningAfterMonths ?? 3}
+                closeAfterMonths={statusSettings?.closeAfterMonths ?? 6}
+              />
             </CardContent>
           </Card>
         </div>

@@ -47,7 +47,6 @@ export function EmergencyRequestPanel({
           >
             {open ? "Hide Request Form" : "Submit Emergency Request"}
           </Button>
-          {state.success ? <p className="max-w-xs text-sm text-emerald-700 sm:text-right">Emergency request submitted successfully.</p> : null}
         </div>
       </div>
 
@@ -56,6 +55,7 @@ export function EmergencyRequestPanel({
           action={formAction}
           formRef={formRef}
           error={state.error}
+          successMessage={state.success ? "Emergency request submitted successfully." : ""}
           memberId={memberId}
           isAdmin={isAdmin}
           members={members}
