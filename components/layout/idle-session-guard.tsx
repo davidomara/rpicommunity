@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { IDLE_TIMEOUT_MS } from "@/lib/settings";
+import { BROWSER_SESSION_KEY, IDLE_TIMEOUT_MS, LAST_ACTIVITY_KEY } from "@/lib/settings";
 
 export function IdleSessionGuard() {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -13,23 +13,33 @@ export function IdleSessionGuard() {
   useEffect(() => {
     if (pathname === "/login") return;
 
-    const storageKey = "rpic:last-activity-at";
     const appScrollContainer = document.querySelector<HTMLElement>("[data-app-scroll-container='true']");
 
     const markActivity = () => {
       try {
-        localStorage.setItem(storageKey, String(Date.now()));
+        sessionStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
       } catch {}
     };
 
     const forceLogout = () => {
       if (timer.current) clearTimeout(timer.current);
+      try {
+        sessionStorage.removeItem(LAST_ACTIVITY_KEY);
+      } catch {}
       signOut({ callbackUrl: "/login" });
+    };
+
+    const hasBrowserSession = () => {
+      try {
+        return sessionStorage.getItem(BROWSER_SESSION_KEY) === "1";
+      } catch {
+        return false;
+      }
     };
 
     const hasExpired = () => {
       try {
-        const raw = localStorage.getItem(storageKey);
+        const raw = sessionStorage.getItem(LAST_ACTIVITY_KEY);
         if (!raw) return false;
         const last = Number(raw);
         if (!Number.isFinite(last)) return false;
@@ -74,6 +84,11 @@ export function IdleSessionGuard() {
       markActivity();
     };
 
+    if (!hasBrowserSession()) {
+      forceLogout();
+      return () => {};
+    }
+
     ["mousemove", "keydown", "click", "touchstart"].forEach((event) => {
       window.addEventListener(event, reset, { passive: true });
     });
@@ -96,6 +111,7 @@ export function IdleSessionGuard() {
       });
       appScrollContainer?.removeEventListener("scroll", reset);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pageshow", onPageShow);
       window.removeEventListener("pagehide", onPageHide);
     };
   }, []);

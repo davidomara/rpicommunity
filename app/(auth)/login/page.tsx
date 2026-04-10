@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { SubmitButton } from "@/components/forms/submit-button";
+import { BrowserSessionMarker } from "@/components/auth/browser-session-marker";
 
 const loginErrors: Record<string, string> = {
   CredentialsSignin: "Invalid username/email or password.",
@@ -26,6 +27,7 @@ export default async function LoginPage({
 
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-[linear-gradient(180deg,#dbe7f4_0%,#e7eef7_48%,#dce6f3_100%)] px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <BrowserSessionMarker />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-70"
