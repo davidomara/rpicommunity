@@ -155,7 +155,7 @@ export function MobileDashboardNav({
         aria-hidden={!open}
       >
         <div className="mb-6 flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             <div className="flex h-16 w-16 items-center justify-center">
               <Image
                 src="/branding/rpic-logo.svg"
@@ -167,7 +167,7 @@ export function MobileDashboardNav({
             </div>
             <div>
               <div className="text-sm font-medium text-cyan-100">{APP_NAME}</div>
-              <div className="text-xs text-slate-400">{APP_SUBTITLE}</div>
+              <div className="text-xs leading-4 whitespace-nowrap text-slate-400">{APP_SUBTITLE}</div>
             </div>
           </div>
           <Button type="button" variant="ghost" size="sm" className="text-slate-200 hover:bg-white/5" onClick={() => setOpen(false)}>
