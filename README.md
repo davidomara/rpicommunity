@@ -90,6 +90,7 @@ npm run build
   `npm run start`
 - Recommended migration flow:
   Run `npx prisma migrate deploy` manually from a Railway shell or CI job when you intentionally want to apply pending production migrations.
+- cd /home/nord/projects/RPICCommunityApp wsl
 - Example production migration commands from your own terminal:
   `DATABASE_URL='postgresql://...production...?sslmode=require' npx prisma migrate deploy`
   `DATABASE_URL='postgresql://...production...?sslmode=require' npx prisma migrate status`
