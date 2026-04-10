@@ -5,6 +5,7 @@ import { getMemberAccountDirectory } from "@/lib/queries";
 import { canManageMembers } from "@/lib/rbac";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { Button } from "@/components/ui/button";
 import { resetMemberPinAction, updateEmailAction, updateMemberEmailAction, updateMemberStatusThresholdsAction, updatePasswordAction } from "./actions";
@@ -42,9 +43,9 @@ export default async function AccountPage() {
           <CardHeader><CardTitle>Change Password</CardTitle></CardHeader>
           <CardContent>
             <form action={updatePasswordAction} className="space-y-4">
-              <div className="space-y-2"><Label htmlFor="currentPassword">Current Password</Label><Input id="currentPassword" name="currentPassword" type="password" required /></div>
-              <div className="space-y-2"><Label htmlFor="newPassword">New Password</Label><Input id="newPassword" name="newPassword" type="password" required /></div>
-              <div className="space-y-2"><Label htmlFor="confirmPassword">Confirm Password</Label><Input id="confirmPassword" name="confirmPassword" type="password" required /></div>
+              <div className="space-y-2"><Label htmlFor="currentPassword">Current Password</Label><PasswordInput id="currentPassword" name="currentPassword" required /></div>
+              <div className="space-y-2"><Label htmlFor="newPassword">New Password</Label><PasswordInput id="newPassword" name="newPassword" required /></div>
+              <div className="space-y-2"><Label htmlFor="confirmPassword">Confirm Password</Label><PasswordInput id="confirmPassword" name="confirmPassword" required /></div>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <SubmitButton label="Change Password" pendingLabel="Updating..." className="w-full sm:w-auto" />
                 <Button type="reset" variant="outline" className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">Clear</Button>
@@ -98,11 +99,11 @@ export default async function AccountPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="newPin">Temporary PIN</Label>
-                      <Input id="newPin" name="newPin" type="password" defaultValue="Member@123" required />
+                      <PasswordInput id="newPin" name="newPin" defaultValue="Member@123" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirmPin">Confirm Temporary PIN</Label>
-                      <Input id="confirmPin" name="confirmPin" type="password" defaultValue="Member@123" required />
+                      <PasswordInput id="confirmPin" name="confirmPin" defaultValue="Member@123" required />
                     </div>
                     <p className="text-xs text-slate-500">Best option: use a temporary PIN, then share it directly with the member and have them change it after login.</p>
                     <div className="flex flex-col gap-3 sm:flex-row">

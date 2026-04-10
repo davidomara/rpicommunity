@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 
 const initialState: CreateMemberFormState = {
   success: false,
@@ -68,11 +69,11 @@ export function AddMemberPanel() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="temporaryPin">Temporary PIN</Label>
-                <Input id="temporaryPin" name="temporaryPin" type="password" defaultValue="Member@123" required />
+                <PasswordInput id="temporaryPin" name="temporaryPin" defaultValue="Member@123" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmTemporaryPin">Confirm Temporary PIN</Label>
-                <Input id="confirmTemporaryPin" name="confirmTemporaryPin" type="password" defaultValue="Member@123" required />
+                <PasswordInput id="confirmTemporaryPin" name="confirmTemporaryPin" defaultValue="Member@123" required />
               </div>
               <div className="md:col-span-2 xl:col-span-3">
                 <p className="mb-4 text-xs text-slate-500">Best option: create the member with a temporary PIN, then ask them to change it from Account Settings after first login.</p>

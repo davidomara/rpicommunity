@@ -6,6 +6,7 @@ import { loginAction } from "./actions";
 import { APP_FULL_NAME } from "@/lib/settings";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { SubmitButton } from "@/components/forms/submit-button";
 
 const loginErrors: Record<string, string> = {
@@ -73,7 +74,7 @@ export default async function LoginPage({
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" autoComplete="current-password" required />
+              <PasswordInput id="password" name="password" autoComplete="current-password" required />
             </div>
             <div className="flex items-center justify-between text-sm">
               <a href="/forgot-password" className="font-medium text-cyan-700 hover:text-cyan-800">Forgot password?</a>
