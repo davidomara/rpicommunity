@@ -24,8 +24,18 @@ export default async function LoginPage({
   const errorMessage = params?.error ? loginErrors[params.error] || "Sign-in failed. Please try again." : "";
 
   return (
-    <main className="grid min-h-screen place-items-center bg-hero px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-      <div className="grid w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft lg:max-w-6xl lg:grid-cols-[0.95fr_1.05fr]">
+    <main className="relative grid min-h-screen place-items-center overflow-hidden bg-[linear-gradient(180deg,#dbe7f4_0%,#e7eef7_48%,#dce6f3_100%)] px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, rgba(15,23,42,0.05) 1px, transparent 0), linear-gradient(135deg, rgba(18,58,104,0.08), transparent 42%), radial-gradient(circle at top left, rgba(255,255,255,0.5), transparent 34%)",
+          backgroundSize: "26px 26px, 100% 100%, 100% 100%",
+          backgroundPosition: "center, center, center"
+        }}
+      />
+      <div className="relative grid w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft lg:max-w-6xl lg:grid-cols-[0.95fr_1.05fr]">
         <section className="hidden bg-slate-950 px-8 py-10 text-slate-100 lg:block lg:px-12 lg:py-12">
           <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cyan-200">RPIC Community</div>
           <h1 className="mt-5 max-w-xl text-4xl font-semibold tracking-tight xl:text-5xl">{APP_FULL_NAME}</h1>
@@ -69,11 +79,6 @@ export default async function LoginPage({
               <a href="/forgot-password" className="font-medium text-cyan-700 hover:text-cyan-800">Forgot password?</a>
             </div>
             <SubmitButton label="Sign in" pendingLabel="Signing in..." className="w-full sm:w-auto" />
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-500">
-              Demo admin: <strong>admin</strong> / <strong>Admin@123</strong><br />
-              Demo treasurer: <strong>treasurer</strong> / <strong>Admin@123</strong><br />
-              Demo member: <strong>first.middle.lastname@rpic.local</strong> / <strong>Member@123</strong>
-            </div>
           </form>
         </section>
       </div>
