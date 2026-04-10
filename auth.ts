@@ -19,6 +19,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/login"
   },
+  baseUrl: process.env.APP_URL,
   providers: [
     Credentials({
       name: "Credentials",
