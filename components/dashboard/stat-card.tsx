@@ -6,7 +6,7 @@ export function StatCard({
   title,
   value,
   note,
-  tone = "neutral"
+  tone = "closed"
 }: {
   title: string;
   value: string;
