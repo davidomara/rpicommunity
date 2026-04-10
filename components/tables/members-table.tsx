@@ -43,7 +43,7 @@ export function MembersTable({
     <div className="min-w-0 space-y-4">
       <Input placeholder="Search members by name or email" value={query} onChange={(event) => setQuery(event.target.value)} />
       <div className="min-w-0 rounded-lg border bg-white shadow-soft">
-        <DataScroll className="scroll-y max-h-[520px] overflow-y-auto px-0">
+        <DataScroll className="px-0 md:scroll-y md:max-h-[520px] md:overflow-y-auto">
           <table className="data-table min-w-[1180px]">
             <colgroup>
               <col className="w-[6%]" />
