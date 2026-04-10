@@ -1,13 +1,18 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { IDLE_TIMEOUT_MS } from "@/lib/settings";
 
 export function IdleSessionGuard() {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const pathname = usePathname();
+
   useEffect(() => {
+    if (pathname === "/login") return;
+
     const storageKey = "rpic:last-activity-at";
     const appScrollContainer = document.querySelector<HTMLElement>("[data-app-scroll-container='true']");
 
@@ -57,6 +62,14 @@ export function IdleSessionGuard() {
       }
     };
 
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted && hasExpired()) {
+        forceLogout();
+        return;
+      }
+      reset();
+    };
+
     const onPageHide = () => {
       markActivity();
     };
@@ -66,6 +79,7 @@ export function IdleSessionGuard() {
     });
     appScrollContainer?.addEventListener("scroll", reset, { passive: true });
     document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pageshow", onPageShow, { passive: true });
     window.addEventListener("pagehide", onPageHide, { passive: true });
 
     if (hasExpired()) {
