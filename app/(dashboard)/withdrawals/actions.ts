@@ -34,6 +34,17 @@ export async function createWithdrawalAction(_: WithdrawalFormState, formData: F
     };
   }
 
+  const member = await prisma.user.findUnique({
+    where: { id: parsed.data.memberId },
+    select: { id: true }
+  });
+  if (!member) {
+    return {
+      success: false,
+      error: "Selected member was not found"
+    };
+  }
+
   const withdrawal = await prisma.withdrawal.create({
     data: {
       memberId: parsed.data.memberId,

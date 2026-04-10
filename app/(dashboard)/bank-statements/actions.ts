@@ -4,9 +4,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { canManageProtectedDocuments } from "@/lib/rbac";
 import { storePrivateFile } from "@/lib/storage";
+import { protectedDocumentUploadSchema } from "@/lib/validators/uploads";
 import { revalidatePath } from "next/cache";
-
-const MAX_BYTES = 8 * 1024 * 1024;
 
 export async function uploadBankStatementAction(formData: FormData) {
   const session = await auth();
@@ -14,14 +13,13 @@ export async function uploadBankStatementAction(formData: FormData) {
     throw new Error("Unauthorized");
   }
 
-  const file = formData.get("file");
-  if (!(file instanceof File)) {
-    throw new Error("File is required");
+  const parsed = protectedDocumentUploadSchema.safeParse({
+    file: formData.get("file")
+  });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message || "Invalid file");
   }
-
-  if (file.size > MAX_BYTES) {
-    throw new Error("File exceeds 8MB limit");
-  }
+  const file = parsed.data.file;
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const stored = await storePrivateFile({

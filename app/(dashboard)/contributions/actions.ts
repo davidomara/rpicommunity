@@ -33,6 +33,17 @@ export async function createContributionAction(_: ContributionFormState, formDat
     };
   }
 
+  const member = await prisma.user.findUnique({
+    where: { id: parsed.data.memberId },
+    select: { id: true }
+  });
+  if (!member) {
+    return {
+      success: false,
+      error: "Selected member was not found"
+    };
+  }
+
   const contribution = await prisma.contribution.create({
     data: {
       memberId: parsed.data.memberId,

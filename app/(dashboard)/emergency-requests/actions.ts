@@ -38,6 +38,16 @@ export async function createEmergencyRequestAction(
   }
 
   const memberId = canManageMembers(session.user.role) ? parsed.data.memberId : session.user.id;
+  const member = await prisma.user.findUnique({
+    where: { id: memberId },
+    select: { id: true }
+  });
+  if (!member) {
+    return {
+      success: false,
+      error: "Selected member was not found"
+    };
+  }
 
   await prisma.emergencyRequest.create({
     data: {

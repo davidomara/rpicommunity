@@ -1,34 +1,41 @@
 import { z } from "zod";
 import { getTodayISODate } from "@/lib/utils";
 
+const requiredId = z.string().trim().min(1, "Selection is required");
+const isoDate = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "A valid date is required");
+const positiveAmount = z.coerce.number().positive("Amount must be greater than zero");
+
 export const contributionSchema = z.object({
-  memberId: z.string().min(1),
-  amount: z.coerce.number().positive(),
-  contributionDate: z.string().refine((value) => value <= getTodayISODate(), {
+  memberId: requiredId,
+  amount: positiveAmount,
+  contributionDate: isoDate.refine((value) => value <= getTodayISODate(), {
     message: "Contribution date cannot be in the future"
   })
 });
 
 export const withdrawalSchema = z.object({
-  memberId: z.string().min(1),
-  amount: z.coerce.number().positive(),
-  reason: z.string().min(3),
-  withdrawalDate: z.string().refine((value) => value <= getTodayISODate(), {
+  memberId: requiredId,
+  amount: positiveAmount,
+  reason: z.string().trim().min(3, "Reason must be at least 3 characters"),
+  withdrawalDate: isoDate.refine((value) => value <= getTodayISODate(), {
     message: "Withdrawal date cannot be in the future"
   })
 });
 
 export const emergencyRequestSchema = z.object({
-  memberId: z.string().min(1),
-  amount: z.coerce.number().positive(),
-  reason: z.string().min(5)
+  memberId: requiredId,
+  amount: positiveAmount,
+  reason: z.string().trim().min(5, "Reason must be at least 5 characters")
 });
 
 export const emergencyDecisionSchema = z.object({
-  requestId: z.string().min(1),
+  requestId: requiredId,
   status: z.enum(["APPROVED", "REJECTED"]),
   disbursementAmount: z.preprocess(
     (value) => (value === "" || value == null ? undefined : value),
-    z.coerce.number().positive().optional()
+    positiveAmount.optional()
   )
 });
