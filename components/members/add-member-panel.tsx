@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { formatMoney } from "@/lib/utils";
 
 const initialState: CreateMemberFormState = {
   success: false,
@@ -16,7 +17,7 @@ const initialState: CreateMemberFormState = {
   error: ""
 };
 
-export function AddMemberPanel() {
+export function AddMemberPanel({ expectedPerMemberToDate }: { expectedPerMemberToDate: number }) {
   const [open, setOpen] = useState(false);
   const [state, formAction] = useFormState(createMemberAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -30,11 +31,20 @@ export function AddMemberPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-cyan-700">Community Directory</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Members</h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">View contribution and withdrawal standing for each RPIC Community member.</p>
+          <div className="mt-1 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Members</h1>
+            <span className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-800">
+              April 2026
+            </span>
+          </div>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+            View Member Standings. Expected per member to date
+            <span className="font-medium text-slate-600"> (since May 2026): </span>
+            <span className="font-semibold text-slate-950">{formatMoney(expectedPerMemberToDate)}</span>
+          </p>
         </div>
         <div className="flex flex-col gap-2 sm:items-end">
           <Button

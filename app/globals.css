@@ -90,7 +90,7 @@ body {
 }
 
 .data-table th {
-  @apply bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600;
+  @apply bg-slate-100 text-left text-xs font-bold uppercase tracking-wide text-slate-800;
 }
 
 .data-table th,

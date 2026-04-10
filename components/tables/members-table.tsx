@@ -43,10 +43,10 @@ export function MembersTable({
     <div className="min-w-0 space-y-4">
       <Input placeholder="Search members by name or email" value={query} onChange={(event) => setQuery(event.target.value)} />
       <div className="min-w-0 rounded-lg border bg-white shadow-soft">
-        <p className="scroll-hint px-4 pt-4 sm:px-6">Scroll sideways to view all member columns.</p>
         <DataScroll className="scroll-y max-h-[520px] overflow-y-auto px-0">
           <table className="data-table min-w-[1180px]">
             <colgroup>
+              <col className="w-[6%]" />
               <col className="w-[26%]" />
               <col className="w-[12%]" />
               <col className="w-[12%]" />
@@ -57,6 +57,7 @@ export function MembersTable({
             </colgroup>
             <thead>
               <tr>
+                <th className="whitespace-nowrap">S/N</th>
                 <th className="whitespace-nowrap">Member</th>
                 <th className="whitespace-nowrap">Contributions</th>
                 <th className="whitespace-nowrap">Arrears</th>
@@ -67,8 +68,9 @@ export function MembersTable({
               </tr>
             </thead>
             <tbody>
-              {filtered.map((row) => (
+              {filtered.map((row, index) => (
                 <tr key={row.id}>
+                  <td className="whitespace-nowrap pr-4 text-slate-500">{index + 1}</td>
                   <td className="min-w-[260px] pr-6">
                     <div className="font-medium text-slate-900">{row.name}</div>
                     <div className="mt-1 text-xs text-slate-500">{row.email}</div>
