@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { canManageProtectedDocuments } from "@/lib/rbac";
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
       mimeType: file.type || (statementType === "PDF" ? "application/pdf" : "image/jpeg"),
       sizeBytes: file.size,
       storagePath: stored.storagePath,
+      data: buffer,
       statementType,
       uploadedById: session.user.id
     }

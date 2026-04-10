@@ -209,6 +209,7 @@ model BankStatement {
   mimeType      String
   sizeBytes     Int
   storagePath   String
+  data          Bytes?
   statementType StatementType
   statementDate DateTime?
   statementPeriod String?
@@ -226,6 +227,7 @@ model GoverningDocument {
   originalName String
   mimeType     String
   storagePath  String
+  data         Bytes?
   isActive     Boolean  @default(true)
   uploadedById String?
   uploadedBy   User?    @relation(fields: [uploadedById], references: [id])

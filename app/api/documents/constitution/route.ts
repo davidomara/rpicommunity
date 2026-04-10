@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { getPrivateFileStat, streamPrivateFile } from "@/lib/storage";
@@ -59,6 +60,39 @@ export async function GET(request: Request) {
       headers
     });
   } catch {
+    if (doc.data) {
+      const bytes = Buffer.from(doc.data);
+      const range = request.headers.get("range");
+      const headers = new Headers({
+        "Content-Type": doc.mimeType,
+        "Content-Disposition": `inline; filename="${doc.originalName}"`,
+        "Cache-Control": "private, max-age=60, stale-while-revalidate=300",
+        "X-Content-Type-Options": "nosniff",
+        "Accept-Ranges": "bytes"
+      });
+
+      if (range) {
+        const match = /bytes=(\d*)-(\d*)/.exec(range);
+        if (match) {
+          const start = match[1] ? Number(match[1]) : 0;
+          const end = match[2] ? Number(match[2]) : bytes.length - 1;
+          if (!Number.isNaN(start) && !Number.isNaN(end) && start <= end && start < bytes.length) {
+            const boundedEnd = Math.min(end, bytes.length - 1);
+            headers.set("Content-Range", `bytes ${start}-${boundedEnd}/${bytes.length}`);
+            headers.set("Content-Length", String(boundedEnd - start + 1));
+            return new Response(bytes.subarray(start, boundedEnd + 1), {
+              status: 206,
+              headers
+            });
+          }
+        }
+        headers.set("Content-Range", `bytes */${bytes.length}`);
+        return new Response("Requested range not satisfiable", { status: 416, headers });
+      }
+
+      headers.set("Content-Length", String(bytes.length));
+      return new Response(bytes, { status: 200, headers });
+    }
     return new Response("Stored file is missing. Re-upload the document.", { status: 404 });
   }
 }

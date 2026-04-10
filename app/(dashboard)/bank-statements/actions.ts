@@ -44,6 +44,7 @@ export async function uploadBankStatementAction(
       mimeType: file.type || "application/octet-stream",
       sizeBytes: file.size,
       storagePath: stored.storagePath,
+      data: buffer,
       statementType: file.type === "application/pdf" ? "PDF" : "IMAGE",
       uploadedById: session.user.id,
     },
