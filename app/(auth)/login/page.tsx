@@ -50,13 +50,13 @@ export default async function LoginPage({
         </section>
         <section className="mx-auto flex w-full max-w-md flex-col justify-center px-6 py-6 sm:px-8 sm:py-7 lg:max-w-none lg:px-12 lg:py-12">
           <div className="mb-5 lg:mb-6">
-            <div className="mb-2.5 flex items-center gap-3">
+            <div className="mb-2.5 flex items-center gap-2">
               <Image
                 src="/branding/rpic-logo.svg"
                 alt="RPIC Community logo"
-                width={72}
-                height={72}
-                className="h-14 w-14 shrink-0 object-contain"
+                width={96}
+                height={96}
+                className="h-24 w-24 shrink-0 object-contain"
               />
               <div className="min-w-0">
                 <p className="text-xl font-semibold leading-6 text-slate-950">RPIC Community Members</p>

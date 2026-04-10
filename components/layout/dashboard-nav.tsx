@@ -156,13 +156,13 @@ export function MobileDashboardNav({
       >
         <div className="mb-6 flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-            <div className="flex h-14 w-14 items-center justify-center">
+            <div className="flex h-16 w-16 items-center justify-center">
               <Image
                 src="/branding/rpic-logo.svg"
                 alt="RPIC logo"
-                width={56}
-                height={56}
-                className="h-14 w-14 object-contain"
+                width={64}
+                height={64}
+                className="h-16 w-16 object-contain"
               />
             </div>
             <div>

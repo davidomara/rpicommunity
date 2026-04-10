@@ -50,6 +50,11 @@ export function IdleSessionGuard() {
     };
 
     const reset = () => {
+      if (!hasBrowserSession()) {
+        forceLogout();
+        return;
+      }
+
       markActivity();
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
@@ -64,7 +69,7 @@ export function IdleSessionGuard() {
       }
 
       if (document.visibilityState === "visible") {
-        if (hasExpired()) {
+        if (!hasBrowserSession() || hasExpired()) {
           forceLogout();
           return;
         }
@@ -73,7 +78,7 @@ export function IdleSessionGuard() {
     };
 
     const onPageShow = (event: PageTransitionEvent) => {
-      if (event.persisted && hasExpired()) {
+      if (!hasBrowserSession() || (event.persisted && hasExpired())) {
         forceLogout();
         return;
       }
