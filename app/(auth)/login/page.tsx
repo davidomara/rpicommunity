@@ -52,7 +52,7 @@ export default async function LoginPage({
           <div className="mb-5 lg:mb-6">
             <div className="mb-2.5 flex items-center gap-2">
               <Image
-                src="/branding/rpic-logo.svg"
+                src="/branding/rpic-logo.png"
                 alt="RPIC Community logo"
                 width={96}
                 height={96}
