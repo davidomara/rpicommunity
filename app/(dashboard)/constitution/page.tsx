@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import { getActiveConstitution } from "@/lib/queries";
 import { canManageProtectedDocuments } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +9,7 @@ import { ProtectedUploadForm } from "@/components/forms/protected-upload-form";
 
 export default async function ConstitutionPage() {
   const session = await auth();
-  if (!session?.user) return null;
+  if (!session?.user) redirect("/login");
 
   const doc = await getActiveConstitution();
   const canUpload = canManageProtectedDocuments(session.user.role);
