@@ -63,7 +63,7 @@ This repo is a migration and modernization of the original Lango Community appli
   `CP`, `SSP`, `SP`, `ASP`, `AIP`, `CPL`, `PC`
 - Within the same rank, names are sorted alphabetically.
 
-## WSL 
+## WSL New 
 
 Then redeploy Railway.
 
