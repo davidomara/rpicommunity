@@ -154,8 +154,8 @@ export function MobileDashboardNav({
         )}
         aria-hidden={!open}
       >
-        <div className="mb-6 flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+        <div className="mb-2 flex items-start justify-between gap-1">
+          <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             <div className="flex h-16 w-16 items-center justify-center">
               <Image
                 src="/branding/rpic-logo.svg"
@@ -174,11 +174,6 @@ export function MobileDashboardNav({
             <X className="h-4 w-4" />
             <span className="sr-only">Close menu</span>
           </Button>
-        </div>
-
-        <div className="mb-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Signed in</p>
-          <p className="mt-1 text-sm font-medium text-white">{name}</p>
         </div>
 
         <div className="flex-1 overflow-y-auto">

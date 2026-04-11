@@ -21,7 +21,7 @@ export function AppShell({
   return (
     <div className="page-shell h-screen overflow-hidden">
       <aside className="hidden h-screen w-72 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-950 px-5 py-6 text-slate-100 lg:block">
-        <div className="mb-8 flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+        <div className="mb-2 flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center">
             <Image
               src="/branding/rpic-logo.svg"
