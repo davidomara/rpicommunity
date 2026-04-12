@@ -13,17 +13,20 @@ import { getTodayISODate } from "@/lib/utils";
 
 const initialState: ContributionFormState = {
   success: false,
-  error: ""
+  error: "",
+  message: ""
 };
 
 export function ContributionForm({
   members,
   selectedMemberId,
-  onSelectedMemberChange
+  onSelectedMemberChange,
+  memberLocked = false
 }: {
   members: Array<{ id: string; name: string; username: string }>;
   selectedMemberId?: string;
   onSelectedMemberChange?: (memberId: string) => void;
+  memberLocked?: boolean;
 }) {
   const [state, formAction] = useFormState(createContributionAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -43,20 +46,33 @@ export function ContributionForm({
           onReset={() => onSelectedMemberChange?.("")}
           className="grid flex-1 content-start gap-4 md:grid-cols-2"
         >
-          <div className="grid gap-2 md:col-span-2">
-            <Label htmlFor="memberId">Member</Label>
-            <select
-              id="memberId"
-              name="memberId"
-              value={selectedMemberId || ""}
-              onChange={(event) => onSelectedMemberChange?.(event.target.value)}
-              required
-              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm"
-            >
-              <option value="">Select member</option>
-              {members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
-            </select>
-          </div>
+          {memberLocked ? (
+            <div className="grid gap-2 md:col-span-2">
+              <Label htmlFor="memberName">Member</Label>
+              <Input
+                id="memberName"
+                value={members[0]?.name || ""}
+                readOnly
+                className="bg-slate-50"
+              />
+              <input type="hidden" name="memberId" value={members[0]?.id || ""} />
+            </div>
+          ) : (
+            <div className="grid gap-2 md:col-span-2">
+              <Label htmlFor="memberId">Member</Label>
+              <select
+                id="memberId"
+                name="memberId"
+                value={selectedMemberId || ""}
+                onChange={(event) => onSelectedMemberChange?.(event.target.value)}
+                required
+                className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm"
+              >
+                <option value="">Select member</option>
+                {members.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
+              </select>
+            </div>
+          )}
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="amount">Amount</Label>
             <Input id="amount" name="amount" type="number" min="1" step="0.01" required />
@@ -68,10 +84,10 @@ export function ContributionForm({
           <div className="mt-auto md:col-span-2">
             <div className="mb-3 space-y-3">
               <FormMessage type="error" message={state.error} />
-              <FormMessage type="success" message={state.success ? "Contribution saved successfully." : ""} />
+              <FormMessage type="success" message={state.success ? state.message : ""} />
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <SubmitButton label="Save Contribution" pendingLabel="Saving..." className="w-full sm:w-auto" />
+              <SubmitButton label={memberLocked ? "Submit Contribution" : "Save Contribution"} pendingLabel={memberLocked ? "Submitting..." : "Saving..."} className="w-full sm:w-auto" />
               <Button type="reset" variant="outline" className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">
                 Clear
               </Button>

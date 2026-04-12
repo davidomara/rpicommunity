@@ -16,6 +16,10 @@ export function canManageFinance(role?: Role | null) {
   return isStaff(role);
 }
 
+export function canAccessContributions(role?: Role | null) {
+  return isStaff(role) || role === "MEMBER";
+}
+
 export function canManageMembers(role?: Role | null) {
   return isStaff(role);
 }
@@ -26,6 +30,10 @@ export function canManageProtectedDocuments(role?: Role | null) {
 
 export function canApproveEmergencyDisbursements(role?: Role | null) {
   return isStaff(role);
+}
+
+export function canReviewContributionNotifications(role?: Role | null) {
+  return isAdmin(role);
 }
 
 export function canViewProtectedDocuments(role?: Role | null) {

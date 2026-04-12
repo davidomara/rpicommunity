@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { createPortal } from "react-dom";
 import {
   FileText,
+  Bell,
   HandCoins,
   Home,
   Landmark,
@@ -28,6 +29,8 @@ type NavRole = Role;
 const baseItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/members", label: "Members", icon: Users },
+  { href: "/contributions", label: "Contributions", icon: HandCoins },
+  { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/emergency-requests", label: "Emergency Requests", icon: ShieldAlert },
   { href: "/bank-statements", label: "Bank Statements", icon: FileText },
   { href: "/constitution", label: "Constitution", icon: ScrollText },
@@ -35,7 +38,6 @@ const baseItems = [
 ];
 
 const financeItems = [
-  { href: "/contributions", label: "Contributions", icon: HandCoins },
   { href: "/withdrawals", label: "Withdrawals", icon: Landmark }
 ];
 

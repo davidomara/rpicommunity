@@ -37,6 +37,12 @@ enum EmergencyStatus {
   REJECTED
 }
 
+enum ContributionApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum TransactionType {
   CONTRIBUTION
   WITHDRAWAL
@@ -62,6 +68,8 @@ model User {
   withdrawals       Withdrawal[]        @relation("WithdrawalMember")
   emergencyRequests EmergencyRequest[]  @relation("EmergencyRequestMember")
   createdContribs   Contribution[]      @relation("ContributionActor")
+  approvedContribs  Contribution[]      @relation("ContributionApprover")
+  rejectedContribs  Contribution[]      @relation("ContributionRejector")
   createdWithdraws  Withdrawal[]        @relation("WithdrawalActor")
   adminApprovedRequests EmergencyRequest[] @relation("EmergencyAdminApprover")
   treasurerApprovedRequests EmergencyRequest[] @relation("EmergencyTreasurerApprover")
@@ -124,17 +132,27 @@ model MemberStatusChangeRequest {
 }
 
 model Contribution {
-  id               String   @id @default(cuid())
+  id               String                     @id @default(cuid())
   memberId         String
-  member           User     @relation("ContributionMember", fields: [memberId], references: [id])
-  amount           Decimal  @db.Decimal(12, 2)
+  member           User                       @relation("ContributionMember", fields: [memberId], references: [id])
+  amount           Decimal                    @db.Decimal(12, 2)
   contributionDate DateTime
+  approvalStatus   ContributionApprovalStatus @default(APPROVED)
   createdById      String?
-  createdBy        User?    @relation("ContributionActor", fields: [createdById], references: [id])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdBy        User?                      @relation("ContributionActor", fields: [createdById], references: [id])
+  approvedAt       DateTime?
+  approvedById     String?
+  approvedBy       User?                      @relation("ContributionApprover", fields: [approvedById], references: [id])
+  rejectedAt       DateTime?
+  rejectedById     String?
+  rejectedBy       User?                      @relation("ContributionRejector", fields: [rejectedById], references: [id])
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
 
   @@index([memberId, contributionDate])
+  @@index([approvalStatus, contributionDate])
+  @@index([approvedById])
+  @@index([rejectedById])
   @@index([createdAt])
 }
 

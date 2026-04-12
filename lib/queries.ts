@@ -1,8 +1,9 @@
-import { EmergencyStatus, Prisma, Role } from "@prisma/client";
+import { ContributionApprovalStatus, EmergencyStatus, Role } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getArrearsAmount } from "@/lib/member-status";
 import { syncAutoMemberStatuses } from "@/lib/member-status-sync";
 import { sortCommunityRows } from "@/lib/community-order";
+import { canManageFinance, canReviewContributionNotifications } from "@/lib/rbac";
 
 const communityRoles: Role[] = [Role.ADMIN, Role.TREASURER, Role.MEMBER];
 
@@ -12,7 +13,9 @@ export async function getDashboardData() {
     prisma.user.findMany({
       where: { role: { in: communityRoles } },
       include: {
-        contributions: true,
+        contributions: {
+          where: { approvalStatus: ContributionApprovalStatus.APPROVED }
+        },
         withdrawals: true,
         emergencyRequests: {
           where: { status: EmergencyStatus.PENDING }
@@ -82,7 +85,9 @@ export async function getMembersDirectory() {
   const rows = await prisma.user.findMany({
     where: { role: { in: communityRoles } },
     include: {
-      contributions: true,
+      contributions: {
+        where: { approvalStatus: ContributionApprovalStatus.APPROVED }
+      },
       withdrawals: true,
       emergencyRequests: {
         where: { status: EmergencyStatus.PENDING }
@@ -113,24 +118,64 @@ export async function getMemberAccountDirectory() {
   return sortCommunityRows(rows);
 }
 
-export async function getContributionContext() {
+export async function getContributionContextForRole(role: Role, userId: string) {
+  const staffView = canManageFinance(role);
+  const memberWhere = staffView
+    ? { role: { in: communityRoles } }
+    : { id: userId };
+
   const members = await prisma.user.findMany({
-    where: { role: { in: communityRoles } },
+    where: memberWhere,
     select: { id: true, name: true, username: true }
   });
 
   const rows = await prisma.contribution.findMany({
+    where: staffView
+      ? { approvalStatus: ContributionApprovalStatus.APPROVED }
+      : { memberId: userId },
     orderBy: [{ contributionDate: "desc" }, { createdAt: "desc" }],
     take: 200,
     select: {
       id: true,
       memberId: true,
       amount: true,
-      contributionDate: true
+      contributionDate: true,
+      approvalStatus: true,
+      createdAt: true
     }
   });
 
-  return { members: sortCommunityRows(members), rows };
+  return { members: sortCommunityRows(members), rows, staffView };
+}
+
+export async function getContributionNotifications(role: Role, userId: string) {
+  const adminReview = canReviewContributionNotifications(role);
+
+  const rows = await prisma.contribution.findMany({
+    where: adminReview
+      ? { approvalStatus: ContributionApprovalStatus.PENDING }
+      : {
+          memberId: userId,
+          approvalStatus: { in: [ContributionApprovalStatus.PENDING, ContributionApprovalStatus.REJECTED] }
+        },
+    include: {
+      member: {
+        select: { id: true, name: true, username: true }
+      },
+      createdBy: {
+        select: { id: true, name: true, username: true }
+      },
+      approvedBy: {
+        select: { id: true, name: true, username: true }
+      },
+      rejectedBy: {
+        select: { id: true, name: true, username: true }
+      }
+    },
+    orderBy: [{ createdAt: "desc" }]
+  });
+
+  return { rows, adminReview };
 }
 
 export async function getWithdrawalContext() {
