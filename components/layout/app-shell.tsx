@@ -10,10 +10,12 @@ import { BackToTopButton } from "@/components/ui/back-to-top-button";
 export function AppShell({
   role,
   name,
+  notificationCount,
   children
 }: {
   role: Role;
   name: string;
+  notificationCount: number;
   children: React.ReactNode;
 }) {
   const logoutButtonClassName = "gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800";
@@ -36,7 +38,7 @@ export function AppShell({
             <div className="text-xs leading-4 whitespace-nowrap text-slate-400">{APP_SUBTITLE}</div>
           </div>
         </div>
-        <DesktopDashboardNav role={role} />
+        <DesktopDashboardNav role={role} notificationCount={notificationCount} />
       </aside>
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         <header className="border-b border-slate-200 bg-[linear-gradient(180deg,rgba(238,244,251,0.99)_0%,rgba(224,234,245,0.99)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.68)] backdrop-blur">
@@ -45,6 +47,7 @@ export function AppShell({
               <MobileDashboardNav
                 role={role}
                 name={name}
+                notificationCount={notificationCount}
                 actions={
                   <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}>
                     <Button variant="outline" className={`w-full justify-center ${logoutButtonClassName}`}>

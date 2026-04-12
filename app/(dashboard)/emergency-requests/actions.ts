@@ -59,6 +59,7 @@ export async function createEmergencyRequestAction(
 
   revalidatePath("/dashboard");
   revalidatePath("/emergency-requests");
+  revalidatePath("/notifications");
 
   return {
     success: true,
@@ -209,6 +210,7 @@ export async function decideEmergencyRequestAction(formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidatePath("/emergency-requests");
+  revalidatePath("/notifications");
   revalidatePath("/withdrawals");
   revalidatePath("/members");
 }

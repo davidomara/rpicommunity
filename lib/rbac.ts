@@ -33,7 +33,7 @@ export function canApproveEmergencyDisbursements(role?: Role | null) {
 }
 
 export function canReviewContributionNotifications(role?: Role | null) {
-  return isAdmin(role);
+  return isStaff(role);
 }
 
 export function canViewProtectedDocuments(role?: Role | null) {

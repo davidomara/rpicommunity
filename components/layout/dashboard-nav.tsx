@@ -51,9 +51,11 @@ function isActive(pathname: string, href: string) {
 
 function NavLinks({
   role,
+  notificationCount,
   onNavigate
 }: {
   role: NavRole;
+  notificationCount: number;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -84,6 +86,18 @@ function NavLinks({
           >
             <Icon className={cn("h-4 w-4", active ? "text-cyan-200" : "text-slate-400")} />
             <span>{item.label}</span>
+            {item.href === "/notifications" && notificationCount > 0 ? (
+              <span
+                className={cn(
+                  "ml-auto inline-flex min-w-[1.4rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-semibold",
+                  active
+                    ? "bg-cyan-200 text-slate-950"
+                    : "bg-amber-400 text-slate-950"
+                )}
+              >
+                {notificationCount}
+              </span>
+            ) : null}
           </Link>
         );
       })}
@@ -91,17 +105,19 @@ function NavLinks({
   );
 }
 
-export function DesktopDashboardNav({ role }: { role: NavRole }) {
-  return <NavLinks role={role} />;
+export function DesktopDashboardNav({ role, notificationCount }: { role: NavRole; notificationCount: number }) {
+  return <NavLinks role={role} notificationCount={notificationCount} />;
 }
 
 export function MobileDashboardNav({
   role,
   name,
+  notificationCount,
   actions
 }: {
   role: NavRole;
   name: string;
+  notificationCount: number;
   actions: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -179,7 +195,7 @@ export function MobileDashboardNav({
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          <NavLinks role={role} onNavigate={() => setOpen(false)} />
+          <NavLinks role={role} notificationCount={notificationCount} onNavigate={() => setOpen(false)} />
         </div>
 
         <div

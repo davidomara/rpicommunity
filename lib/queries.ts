@@ -152,12 +152,7 @@ export async function getContributionNotifications(role: Role, userId: string) {
   const adminReview = canReviewContributionNotifications(role);
 
   const rows = await prisma.contribution.findMany({
-    where: adminReview
-      ? { approvalStatus: ContributionApprovalStatus.PENDING }
-      : {
-          memberId: userId,
-          approvalStatus: { in: [ContributionApprovalStatus.PENDING, ContributionApprovalStatus.REJECTED] }
-        },
+    where: { approvalStatus: ContributionApprovalStatus.PENDING },
     include: {
       member: {
         select: { id: true, name: true, username: true }
@@ -176,6 +171,19 @@ export async function getContributionNotifications(role: Role, userId: string) {
   });
 
   return { rows, adminReview };
+}
+
+export async function getNotificationCount(role: Role, userId: string) {
+  const [pendingContributionCount, pendingEmergencyCount] = await Promise.all([
+    prisma.contribution.count({
+      where: { approvalStatus: ContributionApprovalStatus.PENDING }
+    }),
+    prisma.emergencyRequest.count({
+      where: { status: EmergencyStatus.PENDING }
+    })
+  ]);
+
+  return pendingContributionCount + pendingEmergencyCount;
 }
 
 export async function getWithdrawalContext() {
