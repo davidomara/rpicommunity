@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useFormState } from "react-dom";
+import { useRouter } from "next/navigation";
 import { createContributionAction, type ContributionFormState } from "@/app/(dashboard)/contributions/actions";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { FormMessage } from "@/components/forms/form-message";
@@ -30,11 +31,13 @@ export function ContributionForm({
 }) {
   const [state, formAction] = useFormState(createContributionAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (!state.success) return;
     formRef.current?.reset();
-  }, [state.success]);
+    router.refresh();
+  }, [router, state.success]);
 
   return (
     <Card className="min-w-0 h-full min-h-[34rem]">

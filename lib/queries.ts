@@ -131,7 +131,7 @@ export async function getContributionContextForRole(role: Role, userId: string) 
 
   const rows = await prisma.contribution.findMany({
     where: staffView
-      ? { approvalStatus: ContributionApprovalStatus.APPROVED }
+      ? undefined
       : { memberId: userId },
     orderBy: [{ contributionDate: "desc" }, { createdAt: "desc" }],
     take: 200,

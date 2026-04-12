@@ -30,7 +30,10 @@ export function ContributionsAdminClient({
   rows: ContributionRow[];
   staffView: boolean;
 }) {
-  const [selectedMemberId, setSelectedMemberId] = useState(staffView ? "" : members[0]?.id || "");
+  const defaultMemberId = staffView
+    ? rows[0]?.memberId || members[0]?.id || ""
+    : members[0]?.id || "";
+  const [selectedMemberId, setSelectedMemberId] = useState(defaultMemberId);
   const deferredSelectedMemberId = useDeferredValue(selectedMemberId);
   const selectedMember = members.find((member) => member.id === deferredSelectedMemberId);
   const filteredRows = deferredSelectedMemberId
@@ -92,18 +95,18 @@ export function ContributionsAdminClient({
             <p className="scroll-hint">Scroll sideways to view all contribution columns.</p>
             <DataScroll className="mt-2">
               <table className="data-table min-w-[560px]">
-                <thead><tr><th>S/N</th><th>Amount</th><th>Date</th>{!staffView ? <th>Status</th> : null}</tr></thead>
+                <thead><tr><th>S/N</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
                 <tbody>
                   {filteredRows.length ? filteredRows.map((row, index) => (
                     <tr key={row.id}>
                       <td className="whitespace-nowrap">{filteredRows.length - index}</td>
                       <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
                       <td className="whitespace-nowrap">{formatDate(row.contributionDate)}</td>
-                      {!staffView ? <td className="whitespace-nowrap">{row.approvalStatus}</td> : null}
+                      <td className="whitespace-nowrap">{row.approvalStatus}</td>
                     </tr>
                   )) : (
                     <tr>
-                      <td colSpan={!staffView ? 4 : 3} className="text-sm text-slate-500">
+                      <td colSpan={4} className="text-sm text-slate-500">
                         {selectedMemberId ? "No contributions found for the selected member." : "No member selected."}
                       </td>
                     </tr>
