@@ -18,6 +18,7 @@ export default async function MembersPage() {
     id: member.id,
     name: member.name,
     email: member.email,
+    role: member.role,
     status: member.status,
     contributions: member.contributions.reduce((sum, row) => sum + Number(row.amount), 0),
     withdrawals: member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0),

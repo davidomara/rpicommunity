@@ -4,13 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Pencil } from "lucide-react";
 import type { Role } from "@prisma/client";
-import { decideMemberStatusChangeAction, requestMemberStatusChangeAction, type MemberStatusChangeFormState } from "@/app/(dashboard)/members/actions";
+import { decideMemberStatusChangeAction, updateMemberRoleAndStatusAction, type MemberStatusChangeFormState } from "@/app/(dashboard)/members/actions";
 import { Button } from "@/components/ui/button";
+import { FormMessage } from "@/components/forms/form-message";
 
 const MEMBER_STATUSES = ["ACTIVE", "WARNING", "CLOSED"] as const;
+const COMMUNITY_ROLES: Role[] = ["ADMIN", "TREASURER", "MEMBER"];
 const initialState: MemberStatusChangeFormState = {
   success: false,
-  error: ""
+  error: "",
+  message: ""
 };
 
 function ActionButton({
@@ -35,11 +38,13 @@ function ActionButton({
 
 export function MemberStatusActions({
   memberId,
+  currentRole,
   currentStatus,
   actorRole,
   pendingChange
 }: {
   memberId: string;
+  currentRole: Role;
   currentStatus: string;
   actorRole: Role;
   pendingChange?: {
@@ -50,17 +55,23 @@ export function MemberStatusActions({
     treasurerApproved: boolean;
   } | null;
 }) {
-  const [requestState, requestAction] = useFormState(requestMemberStatusChangeAction, initialState);
+  const [editState, editAction] = useFormState(updateMemberRoleAndStatusAction, initialState);
   const [decisionState, decisionAction] = useFormState(decideMemberStatusChangeAction, initialState);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
+  const [selectedRole, setSelectedRole] = useState<Role>(currentRole);
   const requestedStatusRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (requestState.success) {
+    if (editState.success) {
       setIsOpen(false);
     }
-  }, [requestState.success]);
+  }, [editState.success]);
+
+  const roleChanged = selectedRole !== currentRole;
+  const statusChanged = selectedStatus !== currentStatus;
+  const canSubmitEdit = roleChanged || statusChanged;
+  const canRequestStatusChange = selectedRole === "MEMBER";
 
   if (!pendingChange) {
     if (actorRole !== "ADMIN") return <span className="text-xs text-slate-400">No action</span>;
@@ -72,6 +83,7 @@ export function MemberStatusActions({
           variant="outline"
           type="button"
           onClick={() => {
+            setSelectedRole(currentRole);
             setSelectedStatus(currentStatus);
             setIsOpen(true);
           }}
@@ -79,28 +91,47 @@ export function MemberStatusActions({
           <Pencil className="mr-1 h-4 w-4" />
           Edit
         </Button>
-        {!isOpen && requestState.success ? <p className="text-xs text-emerald-700">Status change request submitted.</p> : null}
-        {!isOpen && requestState.error ? <p className="text-xs text-red-600">{requestState.error}</p> : null}
+        {!isOpen ? <FormMessage type="success" message={editState.message} className="text-xs" /> : null}
+        {!isOpen ? <FormMessage type="error" message={editState.error} className="text-xs" /> : null}
         {isOpen ? (
           <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/40 px-4">
             <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
               <div className="space-y-2">
-                <p className="text-sm font-semibold text-slate-950">Change Member Status</p>
+                <p className="text-sm font-semibold text-slate-950">Edit Member Access</p>
                 <p className="text-sm leading-6 text-slate-500">
-                  Request a manual status change for this member. The change is only applied after Admin and Treasurer approval.
+                  Update the user role immediately. If the person remains a member, you can also submit a manual status change request for approval.
                 </p>
               </div>
-              <form action={requestAction} className="mt-5 space-y-4">
+              <form action={editAction} className="mt-5 space-y-4">
                 <input type="hidden" name="memberId" value={memberId} />
                 <input ref={requestedStatusRef} type="hidden" name="requestedStatus" value={selectedStatus} />
                 <div className="space-y-2">
+                  <label htmlFor={`member-role-${memberId}`} className="text-sm font-medium text-slate-700">
+                    Role
+                  </label>
+                  <select
+                    id={`member-role-${memberId}`}
+                    name="role"
+                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    value={selectedRole}
+                    onChange={(event) => setSelectedRole(event.target.value as Role)}
+                  >
+                    {COMMUNITY_ROLES.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
                   <label htmlFor={`member-status-${memberId}`} className="text-sm font-medium text-slate-700">
-                    New Status
+                    Requested Status
                   </label>
                   <select
                     id={`member-status-${memberId}`}
                     className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     value={selectedStatus}
+                    disabled={!canRequestStatusChange}
                     onChange={(event) => {
                       setSelectedStatus(event.target.value);
                       if (requestedStatusRef.current) {
@@ -115,7 +146,12 @@ export function MemberStatusActions({
                     ))}
                   </select>
                 </div>
-                {requestState.error ? <p className="text-xs text-red-600">{requestState.error}</p> : null}
+                {!canRequestStatusChange ? (
+                  <p className="text-xs text-slate-500">Manual status changes apply only when the selected role is MEMBER.</p>
+                ) : (
+                  <p className="text-xs text-slate-500">Status changes follow the existing Admin and Treasurer approval flow.</p>
+                )}
+                <FormMessage type="error" message={editState.error} className="text-xs" />
                 <div className="flex flex-wrap justify-end gap-2">
                   <Button
                     type="button"
@@ -125,7 +161,7 @@ export function MemberStatusActions({
                   >
                     Cancel
                   </Button>
-                  <ActionButton disabled={selectedStatus === currentStatus}>Submit Request</ActionButton>
+                  <ActionButton disabled={!canSubmitEdit}>Save Changes</ActionButton>
                 </div>
               </form>
             </div>

@@ -16,6 +16,7 @@ export function MembersTable({
     id: string;
     name: string;
     email: string;
+    role: Role;
     status: string;
     contributions: number;
     withdrawals: number;
@@ -74,6 +75,7 @@ export function MembersTable({
                   <td className="min-w-[260px] pr-6">
                     <div className="font-medium text-slate-900">{row.name}</div>
                     <div className="mt-1 text-xs text-slate-500">{row.email}</div>
+                    <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{row.role}</div>
                   </td>
                   <td className="whitespace-nowrap pr-6 text-slate-900">{formatMoney(row.contributions)}</td>
                   <td className="whitespace-nowrap pr-6 text-slate-900">{formatMoney(row.arrears)}</td>
@@ -84,6 +86,7 @@ export function MembersTable({
                     <td className="min-w-[220px]">
                       <MemberStatusActions
                         memberId={row.id}
+                        currentRole={row.role}
                         currentStatus={row.status}
                         actorRole={role!}
                         pendingChange={row.pendingStatusChange}

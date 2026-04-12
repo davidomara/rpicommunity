@@ -31,30 +31,49 @@ export function AddMemberPanel({ expectedPerMemberToDate }: { expectedPerMemberT
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-cyan-700">Community Directory</p>
-          <div className="mt-1 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Members</h1>
-            <span className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-800">
-              April 2026
-            </span>
+      <div className="space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-cyan-700">Community Directory</p>
+            <div className="mt-1 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                  <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Members</h1>
+                  <span className="inline-flex w-fit items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-800">
+                    April 2026
+                  </span>
+                </div>
+              </div>
+              <div className="hidden sm:flex sm:flex-col sm:items-end sm:gap-2">
+                <Button
+                  type="button"
+                  onClick={() => setOpen((value) => !value)}
+                  className="whitespace-nowrap px-5"
+                >
+                  {open ? "Hide Add Member Form" : "Add New Member"}
+                </Button>
+                {state.success && state.message ? <p className="max-w-xs text-right text-sm text-emerald-700">{state.message}</p> : null}
+              </div>
+            </div>
           </div>
+          <div className="flex flex-col gap-2 sm:hidden">
+            <Button
+              type="button"
+              onClick={() => setOpen((value) => !value)}
+              className="self-start whitespace-nowrap px-5"
+            >
+              {open ? "Hide Add Member Form" : "Add New Member"}
+            </Button>
+            {state.success && state.message ? <p className="max-w-xs text-sm text-emerald-700">{state.message}</p> : null}
+          </div>
+        </div>
+
+        <div className="min-w-0">
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
             View Member Standings. Expected per member to date
             <span className="font-medium text-slate-600"> (since May 2026): </span>
             <span className="font-semibold text-slate-950">{formatMoney(expectedPerMemberToDate)}</span>
           </p>
-        </div>
-        <div className="flex flex-col gap-2 sm:items-end">
-          <Button
-            type="button"
-            onClick={() => setOpen((value) => !value)}
-            className="self-start whitespace-nowrap px-5 sm:self-auto"
-          >
-            {open ? "Hide Add Member Form" : "Add New Member"}
-          </Button>
-          {state.success && state.message ? <p className="max-w-xs text-sm text-emerald-700 sm:text-right">{state.message}</p> : null}
         </div>
       </div>
 

@@ -53,6 +53,12 @@ export const requestMemberStatusChangeSchema = z.object({
   requestedStatus: z.enum(["ACTIVE", "WARNING", "CLOSED"])
 });
 
+export const updateMemberRoleAndStatusSchema = z.object({
+  memberId: requiredId,
+  role: z.enum(["ADMIN", "TREASURER", "MEMBER"]),
+  requestedStatus: z.enum(["ACTIVE", "WARNING", "CLOSED"])
+});
+
 export const decideMemberStatusChangeSchema = z.object({
   requestId: requiredId,
   decision: z.enum(["APPROVED", "REJECTED"])

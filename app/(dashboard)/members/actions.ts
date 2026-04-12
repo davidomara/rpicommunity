@@ -5,7 +5,7 @@ import { ChangeRequestStatus, MemberStatus, Role } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { canManageMembers, isAdmin, isTreasurer } from "@/lib/rbac";
-import { createMemberSchema, decideMemberStatusChangeSchema, requestMemberStatusChangeSchema } from "@/lib/validators/account";
+import { createMemberSchema, decideMemberStatusChangeSchema, requestMemberStatusChangeSchema, updateMemberRoleAndStatusSchema } from "@/lib/validators/account";
 import { revalidatePath } from "next/cache";
 
 export type CreateMemberFormState = {
@@ -17,6 +17,7 @@ export type CreateMemberFormState = {
 export type MemberStatusChangeFormState = {
   success: boolean;
   error: string;
+  message?: string;
 };
 
 export async function createMemberAction(_: CreateMemberFormState, formData: FormData): Promise<CreateMemberFormState> {
@@ -169,6 +170,121 @@ export async function requestMemberStatusChangeAction(_: MemberStatusChangeFormS
   return {
     success: true,
     error: ""
+  };
+}
+
+export async function updateMemberRoleAndStatusAction(_: MemberStatusChangeFormState, formData: FormData): Promise<MemberStatusChangeFormState> {
+  const session = await auth();
+  if (!session?.user || !isAdmin(session.user.role)) {
+    return {
+      success: false,
+      error: "Unauthorized",
+      message: ""
+    };
+  }
+
+  const parsed = updateMemberRoleAndStatusSchema.safeParse({
+    memberId: String(formData.get("memberId") || ""),
+    role: String(formData.get("role") || ""),
+    requestedStatus: String(formData.get("requestedStatus") || "")
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message || "Invalid member update",
+      message: ""
+    };
+  }
+
+  const member = await prisma.user.findUnique({
+    where: { id: parsed.data.memberId },
+    select: { id: true, role: true, status: true }
+  });
+
+  if (!member || ![Role.ADMIN, Role.TREASURER, Role.MEMBER].includes(member.role)) {
+    return {
+      success: false,
+      error: "Member not found",
+      message: ""
+    };
+  }
+
+  if (member.id === session.user.id && member.role !== parsed.data.role) {
+    return {
+      success: false,
+      error: "You cannot change your own role",
+      message: ""
+    };
+  }
+
+  const nextRole = parsed.data.role as Role;
+  const nextStatus = parsed.data.requestedStatus as MemberStatus;
+  const roleChanged = member.role !== nextRole;
+  const statusChanged = member.status !== nextStatus;
+
+  if (!roleChanged && !statusChanged) {
+    return {
+      success: false,
+      error: "No changes to save",
+      message: ""
+    };
+  }
+
+  const existingPending = await prisma.memberStatusChangeRequest.findFirst({
+    where: {
+      memberId: member.id,
+      status: ChangeRequestStatus.PENDING
+    },
+    select: { id: true }
+  });
+
+  if (statusChanged && nextRole === Role.MEMBER && existingPending) {
+    return {
+      success: false,
+      error: "A pending status change already exists for this member",
+      message: ""
+    };
+  }
+
+  const messages: string[] = [];
+
+  await prisma.$transaction(async (tx) => {
+    if (roleChanged) {
+      await tx.user.update({
+        where: { id: member.id },
+        data: { role: nextRole }
+      });
+      messages.push(`Role updated to ${nextRole}.`);
+    }
+
+    if (!statusChanged) return;
+
+    if (nextRole !== Role.MEMBER) {
+      messages.push("Status was not changed because only members use manual status requests.");
+      return;
+    }
+
+    await tx.memberStatusChangeRequest.create({
+      data: {
+        memberId: member.id,
+        currentStatus: member.status,
+        requestedStatus: nextStatus,
+        requestedById: session.user.id,
+        adminApprovedAt: new Date(),
+        adminApprovedById: session.user.id
+      }
+    });
+    messages.push("Status change request submitted.");
+  });
+
+  revalidatePath("/members");
+  revalidatePath("/dashboard");
+
+  return {
+    success: true,
+    error: "",
+    message: messages.join(" ")
   };
 }
 
