@@ -91,21 +91,18 @@ npx prisma generate
 npm run build
 ```
 
-Manual Windows -> WSL sync commands for this feature:
+Manual Windows -> WSL sync commands :
 
 ```bash
 
-rsync -a '/mnt/d/.Nord APP/RPICCommunityApp/prisma/schema.prisma' '/home/nord/projects/RPICCommunityApp/prisma/schema.prisma'
-rsync -a '/mnt/d/.Nord APP/RPICCommunityApp/lib/rbac.ts' '/home/nord/projects/RPICCommunityApp/lib/rbac.ts'
-rsync -a '/mnt/d/.Nord APP/RPICCommunityApp/lib/queries.ts' '/home/nord/projects/RPICCommunityApp/lib/queries.ts'
-rsync -a '/mnt/d/.Nord APP/RPICCommunityApp/components/layout/dashboard-nav.tsx' '/home/nord/projects/RPICCommunityApp/components/layout/dashboard-nav.tsx'
-rsync -a '/mnt/d/.Nord APP/RPICCommunityApp/app/(dashboard)/contributions/page.tsx' '/home/nord/projects/RPICCommunityApp/app/(dashboard)/contributions/page.tsx'
-rsync -a '/mnt/d/.Nord APP/RPICCommunityApp/app/(dashboard)/contributions/actions.ts' '/home/nord/projects/RPICCommunityApp/app/(dashboard)/contributions/actions.ts'
-rsync -a '/mnt/d/.Nord APP/RPICCommunityApp/components/admin/contributions-admin-client.tsx' '/home/nord/projects/RPICCommunityApp/components/admin/contributions-admin-client.tsx'
-rsync -a '/mnt/d/.Nord APP/RPICCommunityApp/components/forms/contribution-form.tsx' '/home/nord/projects/RPICCommunityApp/components/forms/contribution-form.tsx'
-rsync -a '/mnt/d/.Nord APP/RPICCommunityApp/app/(dashboard)/notifications/' '/home/nord/projects/RPICCommunityApp/app/(dashboard)/notifications/'
-rsync -a '/mnt/d/.Nord APP/RPICCommunityApp/prisma/migrations/20260412111500_add_contribution_notifications/' '/home/nord/projects/RPICCommunityApp/prisma/migrations/20260412111500_add_contribution_notifications/'
-```
+-- Manual command to do the same offline:
+
+rsync -a --delete --exclude '.git/' --exclude 'node_modules/' --exclude '.next/' --exclude 'storage/' '/mnt/d/.Nord APP/RPICCommunityApp/' '/home/nord/projects/RPICCommunityApp/'
+
+-- Manual verification command:
+
+rsync -ani --delete --exclude '.git/' --exclude 'node_modules/' --exclude '.next/' --exclude 'storage/' '/mnt/d/.Nord APP/RPICCommunityApp/' '/home/nord/projects/RPICCommunityApp/'
+
 
 If `npm run build` fails again after `npx prisma generate`, paste the next error block.
 
