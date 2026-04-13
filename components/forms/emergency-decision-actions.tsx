@@ -1,14 +1,14 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import {
   approveEmergencyRequestAction,
   rejectEmergencyRequestAction,
   type EmergencyDecisionFormState
 } from "@/app/(dashboard)/emergency-requests/actions";
-import { FormMessage } from "@/components/forms/form-message";
 import { Button } from "@/components/ui/button";
+import { showToast } from "@/components/ui/toaster";
 import { formatMoney } from "@/lib/utils";
 import { Role } from "@prisma/client";
 
@@ -62,9 +62,18 @@ export function EmergencyDecisionActions({
   const secondApproval = actorRole === "ADMIN" ? treasurerApproved : adminApproved;
   const defaultAmount = approvedAmount ?? amount;
 
+  useEffect(() => {
+    if (approveState.error) showToast({ type: "error", message: approveState.error });
+    if (approveState.message) showToast({ type: "success", message: approveState.message });
+  }, [approveState]);
+
+  useEffect(() => {
+    if (rejectState.error) showToast({ type: "error", message: rejectState.error });
+    if (rejectState.message) showToast({ type: "success", message: rejectState.message });
+  }, [rejectState]);
+
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2">
         <form action={approveAction}>
           <input type="hidden" name="requestId" value={requestId} />
           <input type="hidden" name="status" value="APPROVED" />
@@ -119,9 +128,6 @@ export function EmergencyDecisionActions({
           <input type="hidden" name="status" value="REJECTED" />
           <DecisionButton variant="destructive" disabled={alreadyApproved}>Reject</DecisionButton>
         </form>
-      </div>
-      <FormMessage type="error" message={approveState.error || rejectState.error} className="max-w-md" />
-      <FormMessage type="success" message={approveState.message || rejectState.message} className="max-w-md" />
     </div>
   );
 }

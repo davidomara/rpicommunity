@@ -45,17 +45,7 @@ export function MembersTable({
       <Input placeholder="Search members by name or email" value={query} onChange={(event) => setQuery(event.target.value)} />
       <div className="min-w-0 rounded-lg border bg-white shadow-soft">
         <DataScroll className="px-0 max-h-[520px] overflow-auto touch-auto">
-          <table className="data-table min-w-[1180px]">
-            <colgroup>
-              <col className="w-[6%]" />
-              <col className="w-[26%]" />
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
-              <col className="w-[10%]" />
-              {showActions ? <col className="w-[16%]" /> : null}
-            </colgroup>
+          <table className="data-table w-full table-auto">
             <thead>
               <tr>
                 <th className="whitespace-nowrap">S/N</th>
@@ -71,17 +61,17 @@ export function MembersTable({
             <tbody>
               {filtered.map((row, index) => (
                 <tr key={row.id}>
-                  <td className="whitespace-nowrap pr-4 text-slate-500">{index + 1}</td>
-                  <td className="min-w-[260px] pr-6">
+                  <td className="whitespace-nowrap pr-3 text-slate-500">{index + 1}</td>
+                  <td className="min-w-[240px] pr-4">
                     <div className="font-medium text-slate-900">{row.name}</div>
                     <div className="mt-1 text-xs text-slate-500">{row.email}</div>
                     <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{row.role}</div>
                   </td>
-                  <td className="whitespace-nowrap pr-6 text-slate-900">{formatMoney(row.contributions)}</td>
-                  <td className="whitespace-nowrap pr-6 text-slate-900">{formatMoney(row.arrears)}</td>
-                  <td className="whitespace-nowrap pr-6 text-slate-900">{formatMoney(row.withdrawals)}</td>
-                  <td className="whitespace-nowrap pr-6 text-slate-900">{row.pending}</td>
-                  <td className="whitespace-nowrap"><Badge value={row.status} className="min-w-[88px] justify-center" /></td>
+                  <td className="whitespace-nowrap pr-4 text-slate-900">{formatMoney(row.contributions)}</td>
+                  <td className="whitespace-nowrap pr-4 text-slate-900">{formatMoney(row.arrears)}</td>
+                  <td className="whitespace-nowrap pr-4 text-slate-900">{formatMoney(row.withdrawals)}</td>
+                  <td className="whitespace-nowrap pr-4 text-slate-900">{row.pending}</td>
+                  <td className="whitespace-nowrap pr-3"><Badge value={row.status} className="min-w-[88px] justify-center" /></td>
                   {showActions ? (
                     <td className="min-w-[220px]">
                       <MemberStatusActions
