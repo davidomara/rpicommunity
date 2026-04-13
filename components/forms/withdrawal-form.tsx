@@ -14,7 +14,8 @@ import { getTodayISODate } from "@/lib/utils";
 
 const initialState: WithdrawalFormState = {
   success: false,
-  error: ""
+  error: "",
+  message: ""
 };
 
 export function WithdrawalForm({
@@ -79,7 +80,7 @@ export function WithdrawalForm({
           <div className="mt-auto md:col-span-2">
             <div className="mb-3 space-y-3">
               <FormMessage type="error" message={state.error} />
-              <FormMessage type="success" message={state.success ? "Withdrawal saved successfully." : ""} />
+              <FormMessage type="success" message={state.success ? state.message : ""} />
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <SubmitButton label="Save Withdrawal" pendingLabel="Saving..." className="w-full sm:w-auto" />

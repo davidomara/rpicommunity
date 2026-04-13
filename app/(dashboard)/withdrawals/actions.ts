@@ -1,14 +1,17 @@
 "use server";
 
 import { auth } from "@/auth";
+import { getCommunityBalance } from "@/lib/community-balance";
 import { prisma } from "@/lib/db";
 import { canManageFinance } from "@/lib/rbac";
+import { formatMoney } from "@/lib/utils";
 import { withdrawalSchema } from "@/lib/validators/finance";
 import { revalidatePath } from "next/cache";
 
 export type WithdrawalFormState = {
   success: boolean;
   error: string;
+  message: string;
 };
 
 export async function createWithdrawalAction(_: WithdrawalFormState, formData: FormData): Promise<WithdrawalFormState> {
@@ -16,7 +19,8 @@ export async function createWithdrawalAction(_: WithdrawalFormState, formData: F
   if (!session?.user || !canManageFinance(session.user.role)) {
     return {
       success: false,
-      error: "Unauthorized"
+      error: "Unauthorized",
+      message: ""
     };
   }
 
@@ -30,7 +34,8 @@ export async function createWithdrawalAction(_: WithdrawalFormState, formData: F
   if (!parsed.success) {
     return {
       success: false,
-      error: parsed.error.issues[0]?.message || "Invalid withdrawal details"
+      error: parsed.error.issues[0]?.message || "Invalid withdrawal details",
+      message: ""
     };
   }
 
@@ -41,37 +46,60 @@ export async function createWithdrawalAction(_: WithdrawalFormState, formData: F
   if (!member) {
     return {
       success: false,
-      error: "Selected member was not found"
+      error: "Selected member was not found",
+      message: ""
     };
   }
 
-  const withdrawal = await prisma.withdrawal.create({
-    data: {
-      memberId: parsed.data.memberId,
-      amount: parsed.data.amount,
-      reason: parsed.data.reason,
-      withdrawalDate: new Date(`${parsed.data.withdrawalDate}T00:00:00.000Z`),
-      createdById: session.user.id
+  const result = await prisma.$transaction(async (tx) => {
+    const currentBalance = await getCommunityBalance(tx);
+    const requestedAmount = parsed.data.amount;
+
+    if (requestedAmount > currentBalance) {
+      return {
+        success: false,
+        error: `Insufficient community balance. Available: ${formatMoney(currentBalance)}. Requested: ${formatMoney(requestedAmount)}.`,
+        message: ""
+      };
     }
+
+    const withdrawal = await tx.withdrawal.create({
+      data: {
+        memberId: parsed.data.memberId,
+        amount: parsed.data.amount,
+        reason: parsed.data.reason,
+        withdrawalDate: new Date(`${parsed.data.withdrawalDate}T00:00:00.000Z`),
+        createdById: session.user.id
+      }
+    });
+
+    await tx.transaction.create({
+      data: {
+        memberId: parsed.data.memberId,
+        type: "WITHDRAWAL",
+        amount: parsed.data.amount,
+        eventDate: withdrawal.withdrawalDate,
+        actorId: session.user.id,
+        notes: parsed.data.reason
+      }
+    });
+
+    const remainingBalance = currentBalance - requestedAmount;
+
+    return {
+      success: true,
+      error: "",
+      message: `Withdrawal saved successfully. Remaining balance: ${formatMoney(remainingBalance)}.`
+    };
   });
 
-  await prisma.transaction.create({
-    data: {
-      memberId: parsed.data.memberId,
-      type: "WITHDRAWAL",
-      amount: parsed.data.amount,
-      eventDate: withdrawal.withdrawalDate,
-      actorId: session.user.id,
-      notes: parsed.data.reason
-    }
-  });
+  if (!result.success) {
+    return result;
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/members");
   revalidatePath("/withdrawals");
 
-  return {
-    success: true,
-    error: ""
-  };
+  return result;
 }
