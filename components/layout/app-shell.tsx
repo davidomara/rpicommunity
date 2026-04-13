@@ -66,7 +66,7 @@ export function AppShell({
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2 self-start sm:self-center">
-              <Button asChild variant="outline" size="icon" className={notificationLinkClassName}>
+              <Button asChild variant="outline" className={notificationLinkClassName}>
                 <Link href="/notifications" aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount})` : ""}`}>
                   <Bell className="h-5 w-5" />
                   {notificationCount > 0 ? (
