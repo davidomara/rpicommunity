@@ -78,7 +78,8 @@ export async function getDashboardData() {
     pendingRequests,
     summary: {
       ...summary,
-      balance: summary.totalContributions - summary.totalWithdrawals
+      balance: summary.totalContributions - summary.totalWithdrawals,
+      availableBalance: Math.max(0, summary.totalContributions - summary.totalWithdrawals - summary.totalSavings)
     }
   };
 }

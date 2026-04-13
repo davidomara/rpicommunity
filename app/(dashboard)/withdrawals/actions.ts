@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { getCommunityBalance } from "@/lib/community-balance";
+import { getAvailableCommunityBalance } from "@/lib/community-balance";
 import { prisma } from "@/lib/db";
 import { canManageFinance } from "@/lib/rbac";
 import { formatMoney } from "@/lib/utils";
@@ -52,13 +52,13 @@ export async function createWithdrawalAction(_: WithdrawalFormState, formData: F
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    const currentBalance = await getCommunityBalance(tx);
+    const currentBalance = await getAvailableCommunityBalance(tx);
     const requestedAmount = parsed.data.amount;
 
     if (requestedAmount > currentBalance) {
       return {
         success: false,
-        error: `Insufficient community balance. Available: ${formatMoney(currentBalance)}. Requested: ${formatMoney(requestedAmount)}.`,
+        error: `Insufficient available balance. Available: ${formatMoney(currentBalance)}. Requested: ${formatMoney(requestedAmount)}.`,
         message: ""
       };
     }
@@ -89,7 +89,7 @@ export async function createWithdrawalAction(_: WithdrawalFormState, formData: F
     return {
       success: true,
       error: "",
-      message: `Withdrawal saved successfully. Remaining balance: ${formatMoney(remainingBalance)}.`
+      message: `Withdrawal saved successfully. Remaining available balance: ${formatMoney(remainingBalance)}.`
     };
   });
 

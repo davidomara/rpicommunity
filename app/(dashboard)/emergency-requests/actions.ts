@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { getCommunityBalance } from "@/lib/community-balance";
+import { getAvailableCommunityBalance } from "@/lib/community-balance";
 import { prisma } from "@/lib/db";
 import { canApproveEmergencyDisbursements, canManageMembers, isAdmin, isTreasurer } from "@/lib/rbac";
 import { formatMoney } from "@/lib/utils";
@@ -186,12 +186,12 @@ async function decideEmergencyRequestSubmission(formData: FormData): Promise<Eme
     }
 
     if (completingApproval) {
-      const currentBalance = await getCommunityBalance(tx);
+      const currentBalance = await getAvailableCommunityBalance(tx);
 
       if (proposedAmount > currentBalance) {
         return {
           success: false,
-          error: `Insufficient community balance for this disbursement. Available: ${formatMoney(currentBalance)}. Requested: ${formatMoney(proposedAmount)}.`,
+          error: `Insufficient available balance for this disbursement. Available: ${formatMoney(currentBalance)}. Requested: ${formatMoney(proposedAmount)}.`,
           message: ""
         };
       }
@@ -246,7 +246,7 @@ async function decideEmergencyRequestSubmission(formData: FormData): Promise<Eme
     }
 
     const disbursedAmount = Number(current.approvedAmount ?? current.amount);
-    const currentBalance = await getCommunityBalance(tx);
+    const currentBalance = await getAvailableCommunityBalance(tx);
 
     const amountNote =
       disbursedAmount === requestedAmount
@@ -300,7 +300,7 @@ async function decideEmergencyRequestSubmission(formData: FormData): Promise<Eme
     return {
       success: true,
       error: "",
-      message: `Emergency request approved and disbursed. Remaining balance: ${formatMoney(currentBalance - disbursedAmount)}.`
+      message: `Emergency request approved and disbursed. Remaining available balance: ${formatMoney(currentBalance - disbursedAmount)}.`
     };
   });
 

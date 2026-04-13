@@ -26,12 +26,12 @@ export default async function DashboardPage() {
       <Card className="overflow-hidden">
         <CardContent className="p-3 sm:p-5">
           <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <StatCard title="Current Balance" value={formatMoney(data.summary.balance)} note="Contributions minus withdrawals" tone="balance" />
+            <StatCard title="Total Balance" value={formatMoney(data.summary.balance)} note="Contributions minus withdrawals" tone="balance" />
             <StatCard title="Total Contributions" value={formatMoney(data.summary.totalContributions)} note="All-time community contributions" tone="contributions" />
             <StatCard title="Total Withdrawals" value={formatMoney(data.summary.totalWithdrawals)} note="All-time approved withdrawals" tone="withdrawals" />
             <StatCard title="Arrears" value={formatMoney(data.summary.totalArrears)} note="Outstanding member contribution gap" tone="arrears" />
             <StatCard title="Active Members" value={String(data.summary.active)} note={`Out of ${data.summary.members} members`} tone="active" />
-            <StatCard title="Warning Status" value={String(data.summary.warning)} note="Members needing follow-up" tone="warning" />
+            <StatCard title="Available Balance" value={formatMoney(data.summary.availableBalance)} note="Required contributions minus withdrawals, excluding savings" tone="warning" />
             <StatCard title="Savings" value={formatMoney(data.summary.totalSavings)} note="Total amount contributed above the required monthly 10,000" tone="savings" />
             <StatCard title="Pending Emergency Requests" value={String(data.summary.pendingEmergencyRequests)} note="Awaiting approval workflow" tone="emergency" />
           </section>
