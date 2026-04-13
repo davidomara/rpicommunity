@@ -1,6 +1,6 @@
 import { ContributionApprovalStatus, EmergencyStatus, Role } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { getArrearsAmount } from "@/lib/member-status";
+import { getArrearsAmount, getSavingsAmount } from "@/lib/member-status";
 import { syncAutoMemberStatuses } from "@/lib/member-status-sync";
 import { sortCommunityRows } from "@/lib/community-order";
 import { canManageFinance, canReviewContributionNotifications } from "@/lib/rbac";
@@ -45,6 +45,7 @@ export async function getDashboardData() {
       totalContributions: contributionTotal,
       totalWithdrawals: withdrawalTotal,
       missing: getArrearsAmount(contributionTotal),
+      savings: getSavingsAmount(contributionTotal),
       pendingEmergencyRequests: member.emergencyRequests.length
     };
   }));
@@ -53,6 +54,7 @@ export async function getDashboardData() {
     acc.totalContributions += row.totalContributions;
     acc.totalWithdrawals += row.totalWithdrawals;
     acc.totalArrears += row.missing;
+    acc.totalSavings += row.savings;
     acc.pendingEmergencyRequests += row.pendingEmergencyRequests;
     acc.members += 1;
     if (row.status === "ACTIVE") acc.active += 1;
@@ -63,6 +65,7 @@ export async function getDashboardData() {
     totalContributions: 0,
     totalWithdrawals: 0,
     totalArrears: 0,
+    totalSavings: 0,
     pendingEmergencyRequests: 0,
     members: 0,
     active: 0,

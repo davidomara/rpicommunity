@@ -20,7 +20,7 @@ export function MembersTable({
     status: string;
     contributions: number;
     withdrawals: number;
-    pending: number;
+    savings: number;
     arrears: number;
     pendingStatusChange?: {
       id: string;
@@ -53,7 +53,7 @@ export function MembersTable({
                 <th className="whitespace-nowrap">Contributions</th>
                 <th className="whitespace-nowrap">Arrears</th>
                 <th className="whitespace-nowrap">Withdrawals</th>
-                <th className="whitespace-nowrap">Requests</th>
+                <th className="whitespace-nowrap">Savings</th>
                 <th className="whitespace-nowrap">Status</th>
                 {showActions ? <th className="whitespace-nowrap">Actions</th> : null}
               </tr>
@@ -70,7 +70,7 @@ export function MembersTable({
                   <td className="whitespace-nowrap pr-4 text-slate-900">{formatMoney(row.contributions)}</td>
                   <td className="whitespace-nowrap pr-4 text-slate-900">{formatMoney(row.arrears)}</td>
                   <td className="whitespace-nowrap pr-4 text-slate-900">{formatMoney(row.withdrawals)}</td>
-                  <td className="whitespace-nowrap pr-4 text-slate-900">{row.pending}</td>
+                  <td className="whitespace-nowrap pr-4 text-slate-900">{formatMoney(row.savings)}</td>
                   <td className="whitespace-nowrap pr-3"><Badge value={row.status} className="min-w-[88px] justify-center" /></td>
                   {showActions ? (
                     <td className="min-w-[220px]">

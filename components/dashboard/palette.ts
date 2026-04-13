@@ -31,6 +31,14 @@ export const dashboardPalette = {
     value: "text-amber-950",
     note: "text-amber-900/70"
   },
+  savings: {
+    bar: "#7c3aed",
+    card: "border-fuchsia-200/80 bg-gradient-to-br from-fuchsia-50 via-white to-fuchsia-50/70",
+    accent: "bg-fuchsia-600",
+    title: "text-fuchsia-700",
+    value: "text-fuchsia-950",
+    note: "text-fuchsia-900/70"
+  },
   emergency: {
     bar: "#8b5cf6",
     card: "border-violet-200/80 bg-gradient-to-br from-violet-50 via-white to-violet-50/70",

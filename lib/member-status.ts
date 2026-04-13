@@ -28,6 +28,10 @@ export function getArrearsAmount(totalContributions: number, now = new Date()) {
   return Math.max(0, getExpectedContributionAmount(now) - totalContributions);
 }
 
+export function getSavingsAmount(totalContributions: number, now = new Date()) {
+  return Math.max(0, totalContributions - getExpectedContributionAmount(now));
+}
+
 export function getArrearsMonthsFromAmount(arrearsAmount: number) {
   if (EXPECTED_MONTHLY_CONTRIBUTION <= 0) return 0;
   return Math.floor(arrearsAmount / EXPECTED_MONTHLY_CONTRIBUTION);

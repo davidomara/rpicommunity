@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AddMemberPanel } from "@/components/members/add-member-panel";
-import { getArrearsAmount, getExpectedContributionAmount } from "@/lib/member-status";
+import { getArrearsAmount, getExpectedContributionAmount, getSavingsAmount } from "@/lib/member-status";
 import { getMembersDirectory } from "@/lib/queries";
 import { canManageMembers } from "@/lib/rbac";
 import { MembersTable } from "@/components/tables/members-table";
@@ -22,7 +22,7 @@ export default async function MembersPage() {
     status: member.status,
     contributions: member.contributions.reduce((sum, row) => sum + Number(row.amount), 0),
     withdrawals: member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0),
-    pending: member.emergencyRequests.length,
+    savings: getSavingsAmount(member.contributions.reduce((sum, row) => sum + Number(row.amount), 0)),
     arrears: getArrearsAmount(member.contributions.reduce((sum, row) => sum + Number(row.amount), 0)),
     pendingStatusChange: member.targetedStatusChanges[0]
       ? {
@@ -49,7 +49,9 @@ export default async function MembersPage() {
             </span>
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-            View Member Standings. Expected per member to date
+            View member standings. The required emergency contribution is
+            <span className="font-medium text-slate-600"> 10,000 per month, </span>
+            and any extra approved contribution counts as savings. Expected per member to date
             <span className="font-medium text-slate-600"> (since May 2026): </span>
             <span className="font-semibold text-slate-950">{formatMoney(expectedPerMemberToDate)}</span>
           </p>

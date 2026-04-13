@@ -12,7 +12,8 @@ export default async function DashboardPage() {
     name: member.name,
     contributions: member.totalContributions,
     missing: member.missing,
-    withdrawals: member.totalWithdrawals
+    withdrawals: member.totalWithdrawals,
+    savings: member.savings
   }));
 
   return (
@@ -20,7 +21,7 @@ export default async function DashboardPage() {
       <div>
         <p className="text-sm font-medium text-cyan-700">RPIC Community Overview</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Dashboard</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Monitor contributions, withdrawals, community member status, and pending emergency assistance requests.</p>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Monitor required monthly contributions, member savings, withdrawals, status, and pending emergency assistance requests.</p>
       </div>
       <Card className="overflow-hidden">
         <CardContent className="p-3 sm:p-5">
@@ -31,7 +32,7 @@ export default async function DashboardPage() {
             <StatCard title="Arrears" value={formatMoney(data.summary.totalArrears)} note="Outstanding member contribution gap" tone="arrears" />
             <StatCard title="Active Members" value={String(data.summary.active)} note={`Out of ${data.summary.members} members`} tone="active" />
             <StatCard title="Warning Status" value={String(data.summary.warning)} note="Members needing follow-up" tone="warning" />
-            <StatCard title="Closed Members" value={String(data.summary.closed)} note="No longer active" tone="closed" />
+            <StatCard title="Savings" value={formatMoney(data.summary.totalSavings)} note="Total amount contributed above the required monthly 10,000" tone="savings" />
             <StatCard title="Pending Emergency Requests" value={String(data.summary.pendingEmergencyRequests)} note="Awaiting approval workflow" tone="emergency" />
           </section>
         </CardContent>

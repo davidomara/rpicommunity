@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { dashboardPalette } from "@/components/dashboard/palette";
 import { DataScroll } from "@/components/ui/data-scroll";
 
-export function SummaryChart({ data }: { data: Array<{ name: string; contributions: number; missing: number; withdrawals: number }> }) {
+export function SummaryChart({ data }: { data: Array<{ name: string; contributions: number; missing: number; withdrawals: number; savings: number }> }) {
   const chartHeight = Math.max(320, data.length * 44);
 
   return (
@@ -24,6 +24,7 @@ export function SummaryChart({ data }: { data: Array<{ name: string; contributio
                   <YAxis type="category" dataKey="name" width={132} tick={{ fontSize: 12 }} />
                   <Tooltip />
                   <Bar dataKey="contributions" fill={dashboardPalette.contributions.bar} radius={3} />
+                  <Bar dataKey="savings" fill={dashboardPalette.savings.bar} radius={3} />
                   <Bar dataKey="missing" fill={dashboardPalette.warning.bar} radius={3} />
                   <Bar dataKey="withdrawals" fill={dashboardPalette.withdrawals.bar} radius={3} />
                 </BarChart>
