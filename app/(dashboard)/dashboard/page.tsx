@@ -1,6 +1,7 @@
 import { getDashboardData } from "@/lib/queries";
 import { formatMoney } from "@/lib/utils";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { MemberStatusCard } from "@/components/dashboard/member-status-card";
 import { SummaryChart } from "@/components/dashboard/summary-chart";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,13 +27,18 @@ export default async function DashboardPage() {
       <Card className="overflow-hidden">
         <CardContent className="p-3 sm:p-5">
           <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <StatCard title="Available Balance" value={formatMoney(data.summary.availableBalance)} note="Required contributions minus withdrawals, excluding savings" tone="warning" />
             <StatCard title="Total Balance" value={formatMoney(data.summary.balance)} note="Contributions minus withdrawals" tone="balance" />
             <StatCard title="Total Contributions" value={formatMoney(data.summary.totalContributions)} note="All-time community contributions" tone="contributions" />
             <StatCard title="Total Withdrawals" value={formatMoney(data.summary.totalWithdrawals)} note="All-time approved withdrawals" tone="withdrawals" />
+            <StatCard title="Total Savings" value={formatMoney(data.summary.totalSavings)} note="Total amount contributed above the required monthly 10,000" tone="savings" />
             <StatCard title="Arrears" value={formatMoney(data.summary.totalArrears)} note="Outstanding member contribution gap" tone="arrears" />
-            <StatCard title="Active Members" value={String(data.summary.active)} note={`Out of ${data.summary.members} members`} tone="active" />
-            <StatCard title="Available Balance" value={formatMoney(data.summary.availableBalance)} note="Required contributions minus withdrawals, excluding savings" tone="warning" />
-            <StatCard title="Savings" value={formatMoney(data.summary.totalSavings)} note="Total amount contributed above the required monthly 10,000" tone="savings" />
+            <MemberStatusCard
+              active={data.summary.active}
+              warning={data.summary.warning}
+              closed={data.summary.closed}
+              total={data.summary.members}
+            />
             <StatCard title="Pending Emergency Requests" value={String(data.summary.pendingEmergencyRequests)} note="Awaiting approval workflow" tone="emergency" />
           </section>
         </CardContent>
