@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
+import { ContributionApprovalStatus, EmergencyStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { getContributionNotifications, getEmergencyContext } from "@/lib/queries";
-import { canApproveEmergencyDisbursements, canManageMembers, canReviewContributionNotifications } from "@/lib/rbac";
+import { canApproveEmergencyDisbursements, canReviewContributionNotifications } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataScroll } from "@/components/ui/data-scroll";
 import { Button } from "@/components/ui/button";
@@ -10,16 +11,30 @@ import { approveContributionNotificationAction, rejectContributionNotificationAc
 import { Badge } from "@/components/ui/badge";
 import { EmergencyDecisionActions } from "@/components/forms/emergency-decision-actions";
 
+function getEmergencyApprovalLabel(
+  approvedAt: Date | string | null,
+  rowStatus: EmergencyStatus,
+  pendingLabel: string
+) {
+  if (approvedAt) {
+    return `Approved ${formatDate(approvedAt)}`;
+  }
+
+  if (rowStatus === EmergencyStatus.REJECTED) {
+    return "Not approved";
+  }
+
+  return pendingLabel;
+}
+
 export default async function NotificationsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const { rows, adminReview } = await getContributionNotifications(session.user.role, session.user.id);
-  const staffEmergencyView = canManageMembers(session.user.role);
+  const { rows, adminReview } = await getContributionNotifications(session.user.role);
   const contributionCanAct = canReviewContributionNotifications(session.user.role);
   const emergencyCanAct = canApproveEmergencyDisbursements(session.user.role);
-  const { rows: emergencyRows } = await getEmergencyContext(staffEmergencyView ? undefined : session.user.id, staffEmergencyView);
-  const pendingEmergencyRows = emergencyRows.filter((row) => row.status === "PENDING");
+  const { rows: emergencyRows } = await getEmergencyContext(undefined, true);
 
   return (
     <div className="space-y-6">
@@ -28,8 +43,8 @@ export default async function NotificationsPage() {
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Notifications</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
           {adminReview
-            ? "Review new contribution and emergency workflow items before they are finalized."
-            : "View new contribution and emergency workflow items across the community."}
+            ? "Review shared contribution and emergency workflow activity across the community and act on items that are still pending."
+            : "View the shared contribution and emergency workflow activity across the community."}
         </p>
       </div>
 
@@ -65,16 +80,18 @@ export default async function NotificationsPage() {
                     </td>
                     {contributionCanAct ? (
                       <td className="whitespace-nowrap">
-                        <div className="flex flex-wrap gap-2">
-                          <form action={approveContributionNotificationAction}>
-                            <input type="hidden" name="contributionId" value={row.id} />
-                            <Button type="submit" size="sm">Approve</Button>
-                          </form>
-                          <form action={rejectContributionNotificationAction}>
-                            <input type="hidden" name="contributionId" value={row.id} />
-                            <Button type="submit" size="sm" variant="outline" className="border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100">Reject</Button>
-                          </form>
-                        </div>
+                        {row.approvalStatus === ContributionApprovalStatus.PENDING ? (
+                          <div className="flex flex-wrap gap-2">
+                            <form action={approveContributionNotificationAction}>
+                              <input type="hidden" name="contributionId" value={row.id} />
+                              <Button type="submit" size="sm">Approve</Button>
+                            </form>
+                            <form action={rejectContributionNotificationAction}>
+                              <input type="hidden" name="contributionId" value={row.id} />
+                              <Button type="submit" size="sm" variant="outline" className="border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100">Reject</Button>
+                            </form>
+                          </div>
+                        ) : "-"}
                       </td>
                     ) : null}
                   </tr>
@@ -113,7 +130,7 @@ export default async function NotificationsPage() {
                 </tr>
               </thead>
               <tbody>
-                {pendingEmergencyRows.length ? pendingEmergencyRows.map((row) => (
+                {emergencyRows.length ? emergencyRows.map((row) => (
                   <tr key={row.id}>
                     <td className="min-w-[180px]">{row.member.name}</td>
                     <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
@@ -126,20 +143,22 @@ export default async function NotificationsPage() {
                     </td>
                     <td className="min-w-[240px]">{row.reason}</td>
                     <td className="whitespace-nowrap"><Badge value={row.status} /></td>
-                    <td className="whitespace-nowrap">{row.adminApprovedAt ? `Approved ${formatDate(row.adminApprovedAt)}` : "Awaiting Admin"}</td>
-                    <td className="whitespace-nowrap">{row.treasurerApprovedAt ? `Approved ${formatDate(row.treasurerApprovedAt)}` : "Awaiting Treasurer"}</td>
+                    <td className="whitespace-nowrap">{getEmergencyApprovalLabel(row.adminApprovedAt, row.status, "Awaiting Admin")}</td>
+                    <td className="whitespace-nowrap">{getEmergencyApprovalLabel(row.treasurerApprovedAt, row.status, "Awaiting Treasurer")}</td>
                     <td className="whitespace-nowrap">{formatDate(row.requestDate)}</td>
                     {emergencyCanAct ? (
                       <td className="whitespace-nowrap">
-                        <EmergencyDecisionActions
-                          requestId={row.id}
-                          memberName={row.member.name || row.member.username}
-                          amount={Number(row.amount)}
-                          approvedAmount={row.approvedAmount ? Number(row.approvedAmount) : null}
-                          actorRole={session.user.role}
-                          adminApproved={Boolean(row.adminApprovedAt)}
-                          treasurerApproved={Boolean(row.treasurerApprovedAt)}
-                        />
+                        {row.status === EmergencyStatus.PENDING ? (
+                          <EmergencyDecisionActions
+                            requestId={row.id}
+                            memberName={row.member.name || row.member.username}
+                            amount={Number(row.amount)}
+                            approvedAmount={row.approvedAmount ? Number(row.approvedAmount) : null}
+                            actorRole={session.user.role}
+                            adminApproved={Boolean(row.adminApprovedAt)}
+                            treasurerApproved={Boolean(row.treasurerApprovedAt)}
+                          />
+                        ) : "-"}
                       </td>
                     ) : null}
                   </tr>

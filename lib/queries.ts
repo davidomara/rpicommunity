@@ -148,11 +148,8 @@ export async function getContributionContextForRole(role: Role, userId: string) 
   return { members: sortCommunityRows(members), rows, staffView };
 }
 
-export async function getContributionNotifications(role: Role, userId: string) {
-  const adminReview = canReviewContributionNotifications(role);
-
+export async function getContributionNotifications(role: Role) {
   const rows = await prisma.contribution.findMany({
-    where: { approvalStatus: ContributionApprovalStatus.PENDING },
     include: {
       member: {
         select: { id: true, name: true, username: true }
@@ -167,10 +164,11 @@ export async function getContributionNotifications(role: Role, userId: string) {
         select: { id: true, name: true, username: true }
       }
     },
-    orderBy: [{ createdAt: "desc" }]
+    orderBy: [{ createdAt: "desc" }],
+    take: 200
   });
 
-  return { rows, adminReview };
+  return { rows, adminReview: canReviewContributionNotifications(role) };
 }
 
 export async function getNotificationCount(role: Role, userId: string) {
