@@ -35,6 +35,8 @@ export default async function NotificationsPage() {
   const contributionCanAct = canReviewContributionNotifications(session.user.role);
   const emergencyCanAct = canApproveEmergencyDisbursements(session.user.role);
   const { rows: emergencyRows } = await getEmergencyContext(undefined, true);
+  const pendingContributionRows = rows.filter((row) => row.approvalStatus === ContributionApprovalStatus.PENDING);
+  const pendingEmergencyRows = emergencyRows.filter((row) => row.status === EmergencyStatus.PENDING);
 
   return (
     <div className="space-y-6">
@@ -68,7 +70,7 @@ export default async function NotificationsPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.length ? rows.map((row) => (
+                {pendingContributionRows.length ? pendingContributionRows.map((row) => (
                   <tr key={row.id}>
                     <td className="min-w-[180px]">{row.member.name || row.member.username}</td>
                     <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>
@@ -130,7 +132,7 @@ export default async function NotificationsPage() {
                 </tr>
               </thead>
               <tbody>
-                {emergencyRows.length ? emergencyRows.map((row) => (
+                {pendingEmergencyRows.length ? pendingEmergencyRows.map((row) => (
                   <tr key={row.id}>
                     <td className="min-w-[180px]">{row.member.name}</td>
                     <td className="whitespace-nowrap">{formatMoney(Number(row.amount))}</td>

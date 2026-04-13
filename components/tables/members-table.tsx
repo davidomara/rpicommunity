@@ -63,7 +63,7 @@ export function MembersTable({
                 <th className="whitespace-nowrap">Contributions</th>
                 <th className="whitespace-nowrap">Arrears</th>
                 <th className="whitespace-nowrap">Withdrawals</th>
-                <th className="whitespace-nowrap">Pending Emergency</th>
+                <th className="whitespace-nowrap">Requests</th>
                 <th className="whitespace-nowrap">Status</th>
                 {showActions ? <th className="whitespace-nowrap">Actions</th> : null}
               </tr>
