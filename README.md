@@ -150,6 +150,45 @@ If `npm run build` fails again after `npx prisma generate`, paste the next error
 - Railway CLI example:
   `railway up`
 
+## Windows Server deployment
+
+For a Windows Server deployment, use standalone output in Next.js. This repo uses `next.config.mjs`, so set:
+
+```js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: "standalone"
+}
+```
+
+Production environment example:
+
+```env
+NEXTAUTH_URL=http://10.20.70.138
+```
+
+If you are deploying behind IIS with URL Rewrite and Application Request Routing, create the reverse-proxy rule in IIS.
+
+After you create the reverse-proxy rule, IIS may write the rule for you. If you want to place it manually, save this as:
+
+`C:\sites\rpic-community-app\web.config`
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <system.webServer>
+    <rewrite>
+      <rules>
+        <rule name="ReverseProxyInboundRule" stopProcessing="true">
+          <match url="(.*)" />
+          <action type="Rewrite" url="http://127.0.0.1:3000/{R:1}" />
+        </rule>
+      </rules>
+    </rewrite>
+  </system.webServer>
+</configuration>
+```
+
 ## Storage
 
 Protected files are stored under `storage/private` by default for local development.
