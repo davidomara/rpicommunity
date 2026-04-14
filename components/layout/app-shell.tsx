@@ -20,7 +20,7 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const logoutButtonClassName = "gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800";
-  const notificationLinkClassName = "relative h-10 w-10 rounded-xl border border-slate-200 bg-white/85 text-slate-700 hover:bg-white hover:text-slate-950";
+  const notificationLinkClassName = "relative h-12 w-12 rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-sm hover:bg-slate-50 hover:text-slate-950";
 
   return (
     <div className="page-shell h-screen overflow-hidden">
@@ -68,7 +68,7 @@ export function AppShell({
             <div className="flex shrink-0 items-center gap-2 self-start sm:self-center">
               <Button asChild variant="outline" className={notificationLinkClassName}>
                 <Link href="/notifications" aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount})` : ""}`}>
-                  <Bell className="h-5 w-5" />
+                  <Bell className="h-6 w-6 stroke-[2.4]" />
                   {notificationCount > 0 ? (
                     <span className="absolute -right-1.5 -top-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-amber-400 px-1 py-0.5 text-[10px] font-bold leading-none text-slate-950">
                       {notificationCount}
