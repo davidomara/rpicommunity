@@ -14,26 +14,31 @@ export default async function MembersPage() {
   const admin = canManageMembers(session.user.role);
   const members = await getMembersDirectory();
   const expectedPerMemberToDate = getExpectedContributionAmount();
-  const rows = members.map((member) => ({
-    id: member.id,
-    name: member.name,
-    email: member.email,
-    role: member.role,
-    status: member.status,
-    contributions: member.contributions.reduce((sum, row) => sum + Number(row.amount), 0),
-    withdrawals: member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0),
-    savings: getSavingsAmount(member.contributions.reduce((sum, row) => sum + Number(row.amount), 0)),
-    arrears: getArrearsAmount(member.contributions.reduce((sum, row) => sum + Number(row.amount), 0)),
-    pendingStatusChange: member.targetedStatusChanges[0]
-      ? {
-          id: member.targetedStatusChanges[0].id,
-          currentStatus: member.targetedStatusChanges[0].currentStatus,
-          requestedStatus: member.targetedStatusChanges[0].requestedStatus,
-          adminApproved: Boolean(member.targetedStatusChanges[0].adminApprovedAt),
-          treasurerApproved: Boolean(member.targetedStatusChanges[0].treasurerApprovedAt)
-        }
-      : null
-  }));
+  const rows = members.map((member) => {
+    const contributionTotal = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
+    const withdrawalTotal = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
+
+    return {
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      role: member.role,
+      status: member.status,
+      contributions: contributionTotal,
+      withdrawals: withdrawalTotal,
+      savings: getSavingsAmount(contributionTotal),
+      arrears: getArrearsAmount(contributionTotal),
+      pendingStatusChange: member.targetedStatusChanges[0]
+        ? {
+            id: member.targetedStatusChanges[0].id,
+            currentStatus: member.targetedStatusChanges[0].currentStatus,
+            requestedStatus: member.targetedStatusChanges[0].requestedStatus,
+            adminApproved: Boolean(member.targetedStatusChanges[0].adminApprovedAt),
+            treasurerApproved: Boolean(member.targetedStatusChanges[0].treasurerApprovedAt)
+          }
+        : null
+    };
+  });
 
   return (
     <div className="space-y-6">

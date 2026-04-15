@@ -3,7 +3,22 @@ import { ROLE } from "@/lib/domain-types";
 import { getCommunitySettings } from "@/lib/community-settings";
 import { resolveMemberStatus } from "@/lib/member-status";
 
+const STATUS_SYNC_INTERVAL_MS = 60_000;
+
+let lastStatusSyncAt = 0;
+let inFlightStatusSync: Promise<Awaited<ReturnType<typeof getCommunitySettings>>> | null = null;
+
 export async function syncAutoMemberStatuses() {
+  const now = Date.now();
+  if (lastStatusSyncAt && now - lastStatusSyncAt < STATUS_SYNC_INTERVAL_MS) {
+    return getCommunitySettings();
+  }
+
+  if (inFlightStatusSync) {
+    return inFlightStatusSync;
+  }
+
+  inFlightStatusSync = (async () => {
   const [settings, members] = await Promise.all([
     getCommunitySettings(),
     prisma.user.findMany({
@@ -35,5 +50,13 @@ export async function syncAutoMemberStatuses() {
     await prisma.$transaction(updates);
   }
 
-  return settings;
+    lastStatusSyncAt = Date.now();
+    return settings;
+  })();
+
+  try {
+    return await inFlightStatusSync;
+  } finally {
+    inFlightStatusSync = null;
+  }
 }

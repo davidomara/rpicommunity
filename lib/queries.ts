@@ -9,7 +9,7 @@ const communityRoles: Role[] = [ROLE.ADMIN, ROLE.TREASURER, ROLE.MEMBER];
 
 export async function getDashboardData() {
   await syncAutoMemberStatuses();
-  const [members, pendingRequests, totals] = await Promise.all([
+  const [members, pendingRequests] = await Promise.all([
     prisma.user.findMany({
       where: { role: { in: communityRoles } },
       include: {
@@ -27,9 +27,6 @@ export async function getDashboardData() {
       include: { member: true },
       orderBy: { requestDate: "desc" },
       take: 20
-    }),
-    prisma.transaction.aggregate({
-      _sum: { amount: true }
     })
   ]);
 
