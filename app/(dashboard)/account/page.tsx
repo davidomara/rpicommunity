@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { appRoute } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 import { getCommunitySettings } from "@/lib/community-settings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +14,7 @@ import {
 
 export default async function AccountPage() {
   const session = await auth();
-  if (!session?.user) redirect(appRoute("/login"));
+  if (!session?.user) redirect("/login");
   const admin = canManageMembers(session.user.role);
   const [members, statusSettings] = await Promise.all([
     admin ? getMemberAccountDirectory() : [],
