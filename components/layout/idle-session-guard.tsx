@@ -10,9 +10,10 @@ export function IdleSessionGuard() {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const pathname = usePathname();
+  const loginPath = withBasePath("/login");
 
   useEffect(() => {
-    if (pathname === "/login") return;
+    if (pathname === "/login" || pathname === loginPath || pathname.endsWith("/login")) return;
 
     const appScrollContainer = document.querySelector<HTMLElement>("[data-app-scroll-container='true']");
 
@@ -120,7 +121,7 @@ export function IdleSessionGuard() {
       window.removeEventListener("pageshow", onPageShow);
       window.removeEventListener("pagehide", onPageHide);
     };
-  }, []);
+  }, [loginPath, pathname]);
 
   return null;
 }
