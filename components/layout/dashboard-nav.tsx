@@ -18,6 +18,7 @@ import {
   Users,
   X
 } from "lucide-react";
+import { withBasePath } from "@/lib/app-path";
 import { APP_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,7 @@ export function MobileDashboardNav({
   const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const asideRef = useRef<HTMLElement | null>(null);
+  const logoSrc = withBasePath("/branding/rpic-logo.svg");
 
   useEffect(() => {
     setMounted(true);
@@ -176,7 +178,7 @@ export function MobileDashboardNav({
           <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             <div className="flex h-16 w-16 items-center justify-center">
               <Image
-                src="/branding/rpic-logo.svg"
+                src={logoSrc}
                 alt="RPIC logo"
                 width={64}
                 height={64}

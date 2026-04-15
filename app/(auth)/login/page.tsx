@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/auth";
+import { withBasePath } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { loginAction } from "./actions";
@@ -25,6 +26,7 @@ export default async function LoginPage({
   if (session?.user) redirect("/dashboard");
   const params = await searchParams;
   const errorMessage = params?.error ? loginErrors[params.error] || "Sign-in failed. Please try again." : "";
+  const logoSrc = withBasePath("/branding/rpic-logo.png");
 
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-[linear-gradient(180deg,#dbe7f4_0%,#e7eef7_48%,#dce6f3_100%)] px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
@@ -53,7 +55,7 @@ export default async function LoginPage({
           <div className="mb-5 lg:mb-6">
             <div className="mb-2.5 flex items-center gap-2">
               <Image
-                src="/branding/rpic-logo.png"
+                src={logoSrc}
                 alt="RPIC Community logo"
                 width={96}
                 height={96}

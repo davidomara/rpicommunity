@@ -28,7 +28,9 @@ export function IdleSessionGuard() {
       try {
         sessionStorage.removeItem(LAST_ACTIVITY_KEY);
       } catch {}
-      signOut({ callbackUrl: `${window.location.origin}${loginPath}` });
+      signOut({ redirect: false }).finally(() => {
+        window.location.assign(loginPath);
+      });
     };
 
     const hasBrowserSession = () => {

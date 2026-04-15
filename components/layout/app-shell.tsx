@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Bell, LogOut } from "lucide-react";
-import { headers } from "next/headers";
 import { signOut } from "@/auth";
 import { withBasePath } from "@/lib/app-path";
 import { type Role } from "@/lib/domain-types";
@@ -9,6 +8,7 @@ import { APP_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { Button } from "@/components/ui/button";
 import { DesktopDashboardNav, MobileDashboardNav } from "@/components/layout/dashboard-nav";
 import { BackToTopButton } from "@/components/ui/back-to-top-button";
+import { redirect } from "next/navigation";
 
 export function AppShell({
   role,
@@ -24,17 +24,7 @@ export function AppShell({
   const logoutButtonClassName = "gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800";
   const notificationLinkClassName = "relative h-12 w-12 rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-sm hover:bg-slate-50 hover:text-slate-950";
   const loginPath = withBasePath("/login");
-
-  async function getLogoutRedirectUrl() {
-    "use server";
-
-    const requestHeaders = headers();
-    const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-    const proto = requestHeaders.get("x-forwarded-proto") ?? (host?.startsWith("127.0.0.1") || host?.startsWith("localhost") ? "http" : "http");
-
-    if (!host) return loginPath;
-    return `${proto}://${host}${loginPath}`;
-  }
+  const logoSrc = withBasePath("/branding/rpic-logo.svg");
 
   return (
     <div className="page-shell h-screen overflow-hidden">
@@ -42,7 +32,7 @@ export function AppShell({
         <div className="mb-2 flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center">
             <Image
-              src="/branding/rpic-logo.svg"
+              src={logoSrc}
               alt="RPIC logo"
               width={64}
               height={64}
@@ -67,7 +57,8 @@ export function AppShell({
                 actions={
                   <form action={async () => {
                     "use server";
-                    await signOut({ redirectTo: await getLogoutRedirectUrl() });
+                    await signOut({ redirect: false });
+                    redirect("/login");
                   }}>
                     <Button variant="outline" className={`w-full justify-center ${logoutButtonClassName}`}>
                       <LogOut className="h-4 w-4" />
@@ -95,7 +86,8 @@ export function AppShell({
               </Button>
               <form action={async () => {
                 "use server";
-                await signOut({ redirectTo: await getLogoutRedirectUrl() });
+                await signOut({ redirect: false });
+                redirect("/login");
               }} className="hidden sm:block">
                 <Button variant="outline" className={logoutButtonClassName}><LogOut className="h-4 w-4" />Logout</Button>
               </form>
