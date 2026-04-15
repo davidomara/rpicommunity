@@ -119,13 +119,7 @@ export async function getMemberAccountDirectory() {
     }
   });
 
-  return sortCommunityRows(rows) as Array<{
-    id: string;
-    name: string;
-    username: string;
-    email: string;
-    status: string;
-  }>;
+  return sortCommunityRows(rows);
 }
 
 export async function getContributionContextForRole(role: Role, userId: string) {
@@ -155,15 +149,7 @@ export async function getContributionContextForRole(role: Role, userId: string) 
     }
   });
 
-  return {
-    members: sortCommunityRows(members) as Array<{
-      id: string;
-      name: string;
-      username: string;
-    }>,
-    rows,
-    staffView
-  };
+  return { members: sortCommunityRows(members), rows, staffView };
 }
 
 export async function getContributionNotifications(role: Role) {
