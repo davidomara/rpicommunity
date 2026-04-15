@@ -155,7 +155,15 @@ export async function getContributionContextForRole(role: Role, userId: string) 
     }
   });
 
-  return { members: sortCommunityRows(members), rows, staffView };
+  return {
+    members: sortCommunityRows(members) as Array<{
+      id: string;
+      name: string;
+      username: string;
+    }>,
+    rows,
+    staffView
+  };
 }
 
 export async function getContributionNotifications(role: Role) {
