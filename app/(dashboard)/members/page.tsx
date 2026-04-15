@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { withBasePath } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 import { AddMemberPanel } from "@/components/members/add-member-panel";
 import { getArrearsAmount, getExpectedContributionAmount, getSavingsAmount } from "@/lib/member-status";
@@ -9,7 +10,7 @@ import { formatMoney } from "@/lib/utils";
 
 export default async function MembersPage() {
   const session = await auth();
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect(withBasePath("/login"));
 
   const admin = canManageMembers(session.user.role);
   const members = await getMembersDirectory();

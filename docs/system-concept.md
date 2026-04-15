@@ -87,8 +87,12 @@ The RPIC Community App is a modern migration of a community welfare, emergency s
   - `DATABASE_URL`
   - `AUTH_SECRET`
   - `APP_URL`
+  - `NEXT_PUBLIC_APP_URL`
+  - `AUTH_URL`
+  - `NEXTAUTH_URL`
   - `UPLOAD_ROOT=./storage/private`
   - `AUTH_TRUST_HOST=true`
+- When deploying under an IIS subpath such as `/rpicommunity`, keep `APP_URL` and `NEXT_PUBLIC_APP_URL` on the app root, and point `AUTH_URL` and `NEXTAUTH_URL` to `/api/auth` under that same base path.
 - Production migration workflow prefers `npx prisma migrate deploy` run manually
 
 ## Protected File Handling

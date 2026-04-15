@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { withBasePath } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 import { getLatestBankStatement } from "@/lib/queries";
 import { canManageProtectedDocuments } from "@/lib/rbac";
@@ -9,7 +10,7 @@ import { ProtectedUploadForm } from "@/components/forms/protected-upload-form";
 
 export default async function BankStatementsPage() {
   const session = await auth();
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect(withBasePath("/login"));
 
   const latest = await getLatestBankStatement();
   const canUpload = canManageProtectedDocuments(session.user.role);

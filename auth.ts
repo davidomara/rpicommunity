@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { loginSchema } from "@/lib/validators/auth";
 import { prisma } from "@/lib/db";
+import { withBasePath } from "@/lib/app-path";
 import { IDLE_TIMEOUT_MS } from "@/lib/settings";
 import type { Role, MemberStatus } from "@prisma/client";
 
@@ -17,7 +18,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     maxAge: Math.floor(IDLE_TIMEOUT_MS / 1000)
   },
   pages: {
-    signIn: "/login"
+    signIn: withBasePath("/login")
   },
   providers: [
     Credentials({

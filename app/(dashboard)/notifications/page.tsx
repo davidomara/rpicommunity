@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { ContributionApprovalStatus, EmergencyStatus } from "@prisma/client";
+import { withBasePath } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 import { getContributionNotifications, getEmergencyContext } from "@/lib/queries";
 import { canApproveEmergencyDisbursements, canReviewContributionNotifications } from "@/lib/rbac";
@@ -29,7 +30,7 @@ function getEmergencyApprovalLabel(
 
 export default async function NotificationsPage() {
   const session = await auth();
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect(withBasePath("/login"));
 
   const { rows, adminReview } = await getContributionNotifications(session.user.role);
   const contributionCanAct = canReviewContributionNotifications(session.user.role);

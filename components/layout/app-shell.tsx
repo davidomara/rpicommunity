@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Bell, LogOut } from "lucide-react";
 import { signOut } from "@/auth";
+import { withBasePath } from "@/lib/app-path";
 import { APP_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { Role } from "@prisma/client";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,7 @@ export function AppShell({
                 name={name}
                 notificationCount={notificationCount}
                 actions={
-                  <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}>
+                  <form action={async () => { "use server"; await signOut({ redirectTo: withBasePath("/login") }); }}>
                     <Button variant="outline" className={`w-full justify-center ${logoutButtonClassName}`}>
                       <LogOut className="h-4 w-4" />
                       Logout
@@ -76,7 +77,7 @@ export function AppShell({
                   ) : null}
                 </Link>
               </Button>
-              <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }} className="hidden sm:block">
+              <form action={async () => { "use server"; await signOut({ redirectTo: withBasePath("/login") }); }} className="hidden sm:block">
                 <Button variant="outline" className={logoutButtonClassName}><LogOut className="h-4 w-4" />Logout</Button>
               </form>
             </div>

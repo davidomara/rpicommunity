@@ -72,11 +72,19 @@ Set the app URLs to the IIS subpath:
 ```env
 AUTH_TRUST_HOST=true
 APP_URL=http://10.20.70.138/rpicommunity
+NEXT_PUBLIC_APP_URL=http://10.20.70.138/rpicommunity
+AUTH_URL=http://10.20.70.138/rpicommunity/api/auth
 UPLOAD_ROOT=./data/private
-NEXTAUTH_URL=http://10.20.70.138/rpicommunity
+NEXTAUTH_URL=http://10.20.70.138/rpicommunity/api/auth
 ```
 
 Keep sensitive values such as `DATABASE_URL` and `AUTH_SECRET` in the real file, but do not document live credentials in notes.
+
+Use:
+
+- `APP_URL` for the app root under IIS
+- `NEXT_PUBLIC_APP_URL` for client-side base-path aware links
+- `AUTH_URL` and `NEXTAUTH_URL` for the Auth.js endpoint under `/rpicommunity/api/auth`
 
 ## Step 4: Build the app
 
@@ -185,16 +193,22 @@ Inspect recent log output:
 Get-Content C:\inetpub\wwwroot\rpicommunity\logs\nextjs.log -Tail 30
 ```
 
-## a new task for the wwwroot version
+## Step 11: Optional startup task for the `wwwroot` deployment
 
+Create the scheduled task:
+
+```powershell
 schtasks /create /tn "RPIC WWW" /sc onstart /ru "WIN-PBCMT0QQ9B9\svc_gitdeploy" /rp * /tr "cmd.exe /c C:\inetpub\wwwroot\rpicommunity\start-next.cmd" /f
+```
 
-Then test it with:
+Then test it:
 
+```powershell
 schtasks /run /tn "RPIC WWW"
 Start-Sleep -Seconds 5
 Test-NetConnection 127.0.0.1 -Port 3000
 schtasks /query /tn "RPIC WWW" /fo list /v
+```
 
 Useful verification commands:
 

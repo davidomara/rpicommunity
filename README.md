@@ -111,11 +111,14 @@ If `npm run build` fails again after `npx prisma generate`, paste the next error
 - Create one Railway PostgreSQL service
 - Create one Railway web service for this app
 - Root directory: repo root. Leave it blank if this repository is deployed directly to Railway because `package.json` is already at the project root.
-- Set `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, and `UPLOAD_ROOT`
+- Set `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, `NEXT_PUBLIC_APP_URL`, `AUTH_URL`, `NEXTAUTH_URL`, and `UPLOAD_ROOT`
 - Recommended Railway variables:
   `DATABASE_URL`
   `AUTH_SECRET`
   `APP_URL`
+  `NEXT_PUBLIC_APP_URL`
+  `AUTH_URL`
+  `NEXTAUTH_URL`
   `UPLOAD_ROOT=/data/private`
   `AUTH_TRUST_HOST=true`
 - Recommended build command:
@@ -164,7 +167,10 @@ const nextConfig = {
 Production environment example:
 
 ```env
-NEXTAUTH_URL=http://10.20.70.138
+APP_URL=http://10.20.70.138/rpicommunity
+NEXT_PUBLIC_APP_URL=http://10.20.70.138/rpicommunity
+AUTH_URL=http://10.20.70.138/rpicommunity/api/auth
+NEXTAUTH_URL=http://10.20.70.138/rpicommunity/api/auth
 ```
 
 If you are deploying behind IIS with URL Rewrite and Application Request Routing, create the reverse-proxy rule in IIS.

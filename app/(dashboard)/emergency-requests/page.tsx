@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { withBasePath } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 import { canApproveEmergencyDisbursements, canManageMembers } from "@/lib/rbac";
 import { getEmergencyContext } from "@/lib/queries";
@@ -11,7 +12,7 @@ import { formatMoney, formatDate } from "@/lib/utils";
 
 export default async function EmergencyRequestsPage() {
   const session = await auth();
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect(withBasePath("/login"));
   const admin = canManageMembers(session.user.role);
   const canApprove = canApproveEmergencyDisbursements(session.user.role);
   const { members, rows } = await getEmergencyContext(admin ? undefined : session.user.id, admin);
