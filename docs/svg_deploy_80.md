@@ -185,6 +185,17 @@ Inspect recent log output:
 Get-Content C:\inetpub\wwwroot\rpicommunity\logs\nextjs.log -Tail 30
 ```
 
+## a new task for the wwwroot version
+
+schtasks /create /tn "RPIC WWW" /sc onstart /ru "WIN-PBCMT0QQ9B9\svc_gitdeploy" /rp * /tr "cmd.exe /c C:\inetpub\wwwroot\rpicommunity\start-next.cmd" /f
+
+Then test it with:
+
+schtasks /run /tn "RPIC WWW"
+Start-Sleep -Seconds 5
+Test-NetConnection 127.0.0.1 -Port 3000
+schtasks /query /tn "RPIC WWW" /fo list /v
+
 Useful verification commands:
 
 ```powershell
