@@ -115,7 +115,86 @@ Test-Path C:\inetpub\wwwroot\rpicommunity\public
 Test-Path C:\inetpub\wwwroot\rpicommunity\.next\static
 ```
 
+## Step 7: Create the startup script
+
+Create the startup script in the live folder.
+
+Run this as `svc_gitdeploy`:
+
+```powershell
+@'
+@echo off
+setlocal
+cd /d C:\inetpub\wwwroot\rpicommunity
+if not exist logs mkdir logs
+set NODE_ENV=production
+set HOSTNAME=127.0.0.1
+set PORT=3000
+node server.js >> logs\nextjs.log 2>&1
+'@ | Set-Content C:\inetpub\wwwroot\rpicommunity\start-next.cmd -Encoding ASCII
+```
+
+Verify the script:
+
+```powershell
+Get-Content C:\inetpub\wwwroot\rpicommunity\start-next.cmd
+```
+
+## Step 8: Start the app
+
+Start it manually first:
+
+```powershell
+cmd /c C:\inetpub\wwwroot\rpicommunity\start-next.cmd
+```
+
+If you are using a scheduled task, run and verify it:
+
+```powershell
+schtasks /run /tn "RPIC Next.js"
+Start-Sleep -Seconds 5
+Test-NetConnection 127.0.0.1 -Port 3000
+schtasks /query /tn "RPIC Next.js" /fo list /v
+```
+
+## Step 9: Test the app
+
+Test the local Node endpoint:
+
+```powershell
+Invoke-WebRequest http://127.0.0.1:3000/rpicommunity -UseBasicParsing
+```
+
+Test through IIS on port `80`:
+
+```powershell
+Invoke-WebRequest http://10.20.70.138/rpicommunity -UseBasicParsing
+```
+
+## Step 10: Logs and troubleshooting
+
+Clear the app log before a fresh test run:
+
+```powershell
+Clear-Content C:\inetpub\wwwroot\rpicommunity\logs\nextjs.log
+```
+
+Inspect recent log output:
+
+```powershell
+Get-Content C:\inetpub\wwwroot\rpicommunity\logs\nextjs.log -Tail 30
+```
+
+Useful verification commands:
+
+```powershell
+Get-Process node
+Test-NetConnection 127.0.0.1 -Port 3000
+Invoke-WebRequest http://10.20.70.138/rpicommunity -UseBasicParsing
+```
+
 ## Notes
 
 - The old scratch note referenced `/community`, but the repo is currently set to `/rpicommunity`.
 - If you change the subpath later, update both `basePath` in `next.config.mjs` and the URL values in `.env.production`.
+- If the app does not load under IIS, first confirm the Node process is listening on `127.0.0.1:3000`, then check the IIS site bindings and reverse proxy configuration.
