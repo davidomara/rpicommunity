@@ -8,9 +8,9 @@ import {
   type EmergencyDecisionFormState
 } from "@/app/(dashboard)/emergency-requests/actions";
 import { Button } from "@/components/ui/button";
+import { type Role } from "@/lib/domain-types";
 import { showToast } from "@/components/ui/toaster";
 import { formatMoney } from "@/lib/utils";
-import { Role } from "@prisma/client";
 
 const initialState: EmergencyDecisionFormState = {
   success: false,

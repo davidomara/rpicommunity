@@ -1,9 +1,9 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { Role } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { ROLE } from "@/lib/domain-types";
 import { canManageMembers } from "@/lib/rbac";
 import { resetMemberPinSchema, updateEmailSchema, updateMemberEmailSchema, updateMemberStatusThresholdsSchema, updatePasswordSchema } from "@/lib/validators/account";
 import { revalidatePath } from "next/cache";
@@ -20,7 +20,7 @@ async function assertMemberTarget(memberId: string) {
     select: { id: true, role: true }
   });
 
-  if (!member || member.role !== Role.MEMBER) {
+  if (!member || member.role !== ROLE.MEMBER) {
     return false;
   }
 

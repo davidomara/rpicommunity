@@ -4,10 +4,10 @@ import { auth } from "@/auth";
 import { getAvailableCommunityBalance } from "@/lib/community-balance";
 import { prisma } from "@/lib/db";
 import { canApproveEmergencyDisbursements, canManageMembers, isAdmin, isTreasurer } from "@/lib/rbac";
+import { type Role } from "@/lib/domain-types";
 import { formatMoney } from "@/lib/utils";
 import { emergencyRequestSchema, emergencyDecisionSchema } from "@/lib/validators/finance";
 import { revalidatePath } from "next/cache";
-import { Role } from "@prisma/client";
 
 export type EmergencyRequestFormState = {
   success: boolean;

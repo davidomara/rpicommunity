@@ -1,5 +1,6 @@
-import { ContributionApprovalStatus, TransactionType, type Prisma } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { CONTRIBUTION_APPROVAL_STATUS, TRANSACTION_TYPE } from "@/lib/domain-types";
 import { getExpectedContributionAmount } from "@/lib/member-status";
 
 type BalanceClient = Prisma.TransactionClient | typeof prisma;
@@ -7,11 +8,11 @@ type BalanceClient = Prisma.TransactionClient | typeof prisma;
 export async function getCommunityBalance(db: BalanceClient) {
   const [contributions, withdrawals] = await Promise.all([
     db.transaction.aggregate({
-      where: { type: TransactionType.CONTRIBUTION },
+      where: { type: TRANSACTION_TYPE.CONTRIBUTION },
       _sum: { amount: true }
     }),
     db.transaction.aggregate({
-      where: { type: TransactionType.WITHDRAWAL },
+      where: { type: TRANSACTION_TYPE.WITHDRAWAL },
       _sum: { amount: true }
     })
   ]);
@@ -23,11 +24,11 @@ export async function getAvailableCommunityBalance(db: BalanceClient, now = new 
   const [contributionTotals, withdrawals] = await Promise.all([
     db.contribution.groupBy({
       by: ["memberId"],
-      where: { approvalStatus: ContributionApprovalStatus.APPROVED },
+      where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED },
       _sum: { amount: true }
     }),
     db.transaction.aggregate({
-      where: { type: TransactionType.WITHDRAWAL },
+      where: { type: TRANSACTION_TYPE.WITHDRAWAL },
       _sum: { amount: true }
     })
   ]);

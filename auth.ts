@@ -5,8 +5,8 @@ import bcrypt from "bcryptjs";
 import { loginSchema } from "@/lib/validators/auth";
 import { prisma } from "@/lib/db";
 import { withBasePath } from "@/lib/app-path";
+import type { MemberStatus, Role } from "@/lib/domain-types";
 import { IDLE_TIMEOUT_MS } from "@/lib/settings";
-import type { Role, MemberStatus } from "@prisma/client";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),

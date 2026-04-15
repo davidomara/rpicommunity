@@ -2,10 +2,10 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { CONTRIBUTION_APPROVAL_STATUS } from "@/lib/domain-types";
 import { canAccessContributions, canManageFinance } from "@/lib/rbac";
 import { contributionSchema } from "@/lib/validators/finance";
 import { revalidatePath } from "next/cache";
-import { ContributionApprovalStatus } from "@prisma/client";
 
 export type ContributionFormState = {
   success: boolean;
@@ -60,7 +60,7 @@ export async function createContributionAction(_: ContributionFormState, formDat
         memberId: parsed.data.memberId,
         amount: parsed.data.amount,
         contributionDate,
-        approvalStatus: ContributionApprovalStatus.APPROVED,
+        approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED,
         createdById: session.user.id,
         approvedAt: new Date(),
         approvedById: session.user.id
@@ -95,7 +95,7 @@ export async function createContributionAction(_: ContributionFormState, formDat
       memberId: session.user.id,
       amount: parsed.data.amount,
       contributionDate,
-      approvalStatus: ContributionApprovalStatus.PENDING,
+      approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING,
       createdById: session.user.id
     }
   });

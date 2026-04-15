@@ -1,4 +1,4 @@
-import { MemberStatus } from "@prisma/client";
+import { MEMBER_STATUS, type MemberStatus } from "@/lib/domain-types";
 import { COMMUNITY_CONTRIBUTION_START, EXPECTED_MONTHLY_CONTRIBUTION } from "@/lib/settings";
 
 export type MemberStatusThresholds = {
@@ -45,11 +45,11 @@ export function resolveMemberStatus(
   const arrearsAmount = getArrearsAmount(totalContributions, now);
   const arrearsMonths = getArrearsMonthsFromAmount(arrearsAmount);
 
-  let status: MemberStatus = MemberStatus.ACTIVE;
+  let status: MemberStatus = MEMBER_STATUS.ACTIVE;
   if (arrearsMonths >= thresholds.closeAfterMonths) {
-    status = MemberStatus.CLOSED;
+    status = MEMBER_STATUS.CLOSED;
   } else if (arrearsMonths >= thresholds.warningAfterMonths) {
-    status = MemberStatus.WARNING;
+    status = MEMBER_STATUS.WARNING;
   }
 
   return {

@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import { ContributionApprovalStatus, EmergencyStatus } from "@prisma/client";
 import { withBasePath } from "@/lib/app-path";
+import { CONTRIBUTION_APPROVAL_STATUS, EMERGENCY_STATUS, type EmergencyStatus } from "@/lib/domain-types";
 import { redirect } from "next/navigation";
 import { getContributionNotifications, getEmergencyContext } from "@/lib/queries";
 import { canApproveEmergencyDisbursements, canReviewContributionNotifications } from "@/lib/rbac";
@@ -21,7 +21,7 @@ function getEmergencyApprovalLabel(
     return `Approved ${formatDate(approvedAt)}`;
   }
 
-  if (rowStatus === EmergencyStatus.REJECTED) {
+  if (rowStatus === EMERGENCY_STATUS.REJECTED) {
     return "Not approved";
   }
 
@@ -36,8 +36,8 @@ export default async function NotificationsPage() {
   const contributionCanAct = canReviewContributionNotifications(session.user.role);
   const emergencyCanAct = canApproveEmergencyDisbursements(session.user.role);
   const { rows: emergencyRows } = await getEmergencyContext(undefined, true);
-  const pendingContributionRows = rows.filter((row) => row.approvalStatus === ContributionApprovalStatus.PENDING);
-  const pendingEmergencyRows = emergencyRows.filter((row) => row.status === EmergencyStatus.PENDING);
+  const pendingContributionRows = rows.filter((row) => row.approvalStatus === CONTRIBUTION_APPROVAL_STATUS.PENDING);
+  const pendingEmergencyRows = emergencyRows.filter((row) => row.status === EMERGENCY_STATUS.PENDING);
 
   return (
     <div className="space-y-6">
@@ -83,7 +83,7 @@ export default async function NotificationsPage() {
                     </td>
                     {contributionCanAct ? (
                       <td className="whitespace-nowrap">
-                        {row.approvalStatus === ContributionApprovalStatus.PENDING ? (
+                        {row.approvalStatus === CONTRIBUTION_APPROVAL_STATUS.PENDING ? (
                           <div className="flex flex-wrap gap-2">
                             <form action={approveContributionNotificationAction}>
                               <input type="hidden" name="contributionId" value={row.id} />
@@ -151,7 +151,7 @@ export default async function NotificationsPage() {
                     <td className="whitespace-nowrap">{formatDate(row.requestDate)}</td>
                     {emergencyCanAct ? (
                       <td className="whitespace-nowrap">
-                        {row.status === EmergencyStatus.PENDING ? (
+                        {row.status === EMERGENCY_STATUS.PENDING ? (
                           <EmergencyDecisionActions
                             requestId={row.id}
                             memberName={row.member.name || row.member.username}

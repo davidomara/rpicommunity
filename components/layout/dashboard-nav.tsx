@@ -21,8 +21,8 @@ import {
 import { APP_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import type { Role } from "@/lib/domain-types";
 import { canManageFinance } from "@/lib/rbac";
-import type { Role } from "@prisma/client";
 
 type NavRole = Role;
 

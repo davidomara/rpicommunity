@@ -1,14 +1,14 @@
 import { prisma } from "@/lib/db";
+import { ROLE } from "@/lib/domain-types";
 import { getCommunitySettings } from "@/lib/community-settings";
 import { resolveMemberStatus } from "@/lib/member-status";
-import { Role } from "@prisma/client";
 
 export async function syncAutoMemberStatuses() {
   const [settings, members] = await Promise.all([
     getCommunitySettings(),
     prisma.user.findMany({
       where: {
-        role: { in: [Role.ADMIN, Role.TREASURER, Role.MEMBER] },
+        role: { in: [ROLE.ADMIN, ROLE.TREASURER, ROLE.MEMBER] },
         statusMode: "AUTO"
       },
       include: {

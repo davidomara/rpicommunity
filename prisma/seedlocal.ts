@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
-import { EmergencyStatus, MemberStatus, PrismaClient, Role, StatementType, TransactionType } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { EMERGENCY_STATUS, MEMBER_STATUS, ROLE, TRANSACTION_TYPE } from "@/lib/domain-types";
 
 const prisma = new PrismaClient();
 
@@ -24,8 +25,8 @@ async function main() {
       username: "admin",
       email: "admin@rpic.local",
       passwordHash,
-      role: Role.ADMIN,
-      status: MemberStatus.ACTIVE
+      role: ROLE.ADMIN,
+      status: MEMBER_STATUS.ACTIVE
     }
   });
 
@@ -35,8 +36,8 @@ async function main() {
       username: "treasurer",
       email: "treasurer@rpic.local",
       passwordHash,
-      role: Role.TREASURER,
-      status: MemberStatus.ACTIVE
+      role: ROLE.TREASURER,
+      status: MEMBER_STATUS.ACTIVE
     }
   });
 
@@ -47,8 +48,8 @@ async function main() {
         username: "alice",
         email: "alice@rpic.local",
         passwordHash: memberHash,
-        role: Role.MEMBER,
-        status: MemberStatus.ACTIVE
+        role: ROLE.MEMBER,
+        status: MEMBER_STATUS.ACTIVE
       }
     }),
     prisma.user.create({
@@ -57,8 +58,8 @@ async function main() {
         username: "brian",
         email: "brian@rpic.local",
         passwordHash: memberHash,
-        role: Role.MEMBER,
-        status: MemberStatus.WARNING
+        role: ROLE.MEMBER,
+        status: MEMBER_STATUS.WARNING
       }
     }),
     prisma.user.create({
@@ -67,8 +68,8 @@ async function main() {
         username: "catherine",
         email: "catherine@rpic.local",
         passwordHash: memberHash,
-        role: Role.MEMBER,
-        status: MemberStatus.ACTIVE
+        role: ROLE.MEMBER,
+        status: MEMBER_STATUS.ACTIVE
       }
     })
   ]);
@@ -86,7 +87,7 @@ async function main() {
     await prisma.transaction.create({
       data: {
         memberId: member.id,
-        type: TransactionType.CONTRIBUTION,
+        type: TRANSACTION_TYPE.CONTRIBUTION,
         amount: contribution.amount,
         eventDate: contribution.contributionDate,
         actorId: admin.id,
@@ -108,7 +109,7 @@ async function main() {
   await prisma.transaction.create({
     data: {
       memberId: members[1].id,
-      type: TransactionType.WITHDRAWAL,
+      type: TRANSACTION_TYPE.WITHDRAWAL,
       amount: withdrawal.amount,
       eventDate: withdrawal.withdrawalDate,
       actorId: admin.id,
@@ -121,7 +122,7 @@ async function main() {
       memberId: members[0].id,
       amount: 200000,
       reason: "Emergency medical bill support",
-      status: EmergencyStatus.PENDING,
+      status: EMERGENCY_STATUS.PENDING,
       requestDate: new Date("2026-03-18T00:00:00.000Z")
     }
   });
@@ -132,7 +133,7 @@ async function main() {
       amount: 120000,
       approvedAmount: 120000,
       reason: "Funeral contribution support",
-      status: EmergencyStatus.APPROVED,
+      status: EMERGENCY_STATUS.APPROVED,
       requestDate: new Date("2026-02-22T00:00:00.000Z"),
       adminApprovedAt: new Date("2026-02-23T00:00:00.000Z"),
       adminApprovedById: admin.id,

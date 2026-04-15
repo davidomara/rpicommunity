@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Role } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DataScroll } from "@/components/ui/data-scroll";
+import type { Role } from "@/lib/domain-types";
 import { formatMoney } from "@/lib/utils";
 import { MemberStatusActions } from "@/components/members/member-status-actions";
 

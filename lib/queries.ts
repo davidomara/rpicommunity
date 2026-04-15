@@ -1,11 +1,11 @@
-import { ContributionApprovalStatus, EmergencyStatus, Role } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { CONTRIBUTION_APPROVAL_STATUS, EMERGENCY_STATUS, ROLE, type Role } from "@/lib/domain-types";
 import { getArrearsAmount, getSavingsAmount } from "@/lib/member-status";
 import { syncAutoMemberStatuses } from "@/lib/member-status-sync";
 import { sortCommunityRows } from "@/lib/community-order";
 import { canManageFinance, canReviewContributionNotifications } from "@/lib/rbac";
 
-const communityRoles: Role[] = [Role.ADMIN, Role.TREASURER, Role.MEMBER];
+const communityRoles: Role[] = [ROLE.ADMIN, ROLE.TREASURER, ROLE.MEMBER];
 
 export async function getDashboardData() {
   await syncAutoMemberStatuses();
@@ -14,16 +14,16 @@ export async function getDashboardData() {
       where: { role: { in: communityRoles } },
       include: {
         contributions: {
-          where: { approvalStatus: ContributionApprovalStatus.APPROVED }
+          where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED }
         },
         withdrawals: true,
         emergencyRequests: {
-          where: { status: EmergencyStatus.PENDING }
+          where: { status: EMERGENCY_STATUS.PENDING }
         }
       }
     }),
     prisma.emergencyRequest.findMany({
-      where: { status: EmergencyStatus.PENDING },
+      where: { status: EMERGENCY_STATUS.PENDING },
       include: { member: true },
       orderBy: { requestDate: "desc" },
       take: 20
@@ -90,11 +90,11 @@ export async function getMembersDirectory() {
     where: { role: { in: communityRoles } },
     include: {
       contributions: {
-        where: { approvalStatus: ContributionApprovalStatus.APPROVED }
+        where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED }
       },
       withdrawals: true,
       emergencyRequests: {
-        where: { status: EmergencyStatus.PENDING }
+        where: { status: EMERGENCY_STATUS.PENDING }
       },
       targetedStatusChanges: {
         where: { status: "PENDING" },
@@ -109,7 +109,7 @@ export async function getMembersDirectory() {
 
 export async function getMemberAccountDirectory() {
   const rows = await prisma.user.findMany({
-    where: { role: Role.MEMBER },
+    where: { role: ROLE.MEMBER },
     select: {
       id: true,
       name: true,
@@ -178,10 +178,10 @@ export async function getContributionNotifications(role: Role) {
 export async function getNotificationCount(role: Role, userId: string) {
   const [pendingContributionCount, pendingEmergencyCount] = await Promise.all([
     prisma.contribution.count({
-      where: { approvalStatus: ContributionApprovalStatus.PENDING }
+      where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING }
     }),
     prisma.emergencyRequest.count({
-      where: { status: EmergencyStatus.PENDING }
+      where: { status: EMERGENCY_STATUS.PENDING }
     })
   ]);
 

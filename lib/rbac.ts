@@ -1,4 +1,4 @@
-import type { Role } from "@prisma/client";
+import type { Role } from "@/lib/domain-types";
 
 export function isAdmin(role?: Role | null) {
   return role === "ADMIN";
