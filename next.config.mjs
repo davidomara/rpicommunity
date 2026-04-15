@@ -1,10 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  basePath: "/rpicommunity",
   experimental: {
     serverActions: {
       bodySizeLimit: "8mb",
-      allowedOrigins: ["10.20.70.138:8080"]
+      allowedOrigins: ["10.20.70.138"]
     }
   },
   async redirects() {
