@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { withBasePath } from "@/lib/app-path";
+import { appRoute } from "@/lib/app-path";
 import { CONTRIBUTION_APPROVAL_STATUS, EMERGENCY_STATUS, type EmergencyStatus } from "@/lib/domain-types";
 import { redirect } from "next/navigation";
 import { getContributionNotifications, getEmergencyContext } from "@/lib/queries";
@@ -30,7 +30,7 @@ function getEmergencyApprovalLabel(
 
 export default async function NotificationsPage() {
   const session = await auth();
-  if (!session?.user) redirect(withBasePath("/login"));
+  if (!session?.user) redirect(appRoute("/login"));
 
   const { rows, adminReview } = await getContributionNotifications(session.user.role);
   const contributionCanAct = canReviewContributionNotifications(session.user.role);

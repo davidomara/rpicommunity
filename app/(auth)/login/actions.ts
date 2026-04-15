@@ -1,7 +1,7 @@
 "use server";
 
 import { signIn } from "@/auth";
-import { withBasePath } from "@/lib/app-path";
+import { appRoute } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 
 export async function loginAction(formData: FormData) {
@@ -12,7 +12,7 @@ export async function loginAction(formData: FormData) {
     await signIn("credentials", {
       identifier,
       password,
-      redirectTo: withBasePath("/dashboard")
+      redirectTo: appRoute("/dashboard")
     });
   } catch (error: unknown) {
     if (
@@ -21,7 +21,7 @@ export async function loginAction(formData: FormData) {
       "type" in error &&
       typeof (error as { type: unknown }).type === "string"
     ) {
-      redirect(withBasePath(`/login?error=${(error as { type: string }).type}`));
+      redirect(appRoute(`/login?error=${(error as { type: string }).type}`));
     }
 
     throw error;

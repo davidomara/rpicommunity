@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/auth";
-import { withBasePath } from "@/lib/app-path";
+import { appRoute } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { loginAction } from "./actions";
@@ -23,7 +23,7 @@ export default async function LoginPage({
   searchParams?: Promise<{ error?: string }>;
 }) {
   const session = await auth();
-  if (session?.user) redirect(withBasePath("/dashboard"));
+  if (session?.user) redirect(appRoute("/dashboard"));
   const params = await searchParams;
   const errorMessage = params?.error ? loginErrors[params.error] || "Sign-in failed. Please try again." : "";
 
@@ -81,7 +81,7 @@ export default async function LoginPage({
               <PasswordInput id="password" name="password" autoComplete="current-password" required />
             </div>
             <div className="flex items-center justify-between text-sm">
-              <Link href={withBasePath("/forgot-password")} className="font-medium text-cyan-700 hover:text-cyan-800">Forgot password?</Link>
+              <Link href={appRoute("/forgot-password")} className="font-medium text-cyan-700 hover:text-cyan-800">Forgot password?</Link>
             </div>
             <SubmitButton label="Sign in" pendingLabel="Signing in..." className="w-full sm:w-auto" />
           </form>

@@ -21,11 +21,16 @@ const ENV_BASE_PATH =
 
 export const APP_BASE_PATH = ENV_BASE_PATH;
 
+export function appRoute(path: string): string {
+  if (!path) return "/";
+  return path.startsWith("/") ? path : `/${path}`;
+}
+
 export function withBasePath(path: string): string {
   if (!path) return APP_BASE_PATH || "/";
   if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(path) || path.startsWith("//")) return path;
 
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const normalizedPath = appRoute(path);
   if (!APP_BASE_PATH || normalizedPath === APP_BASE_PATH || normalizedPath.startsWith(`${APP_BASE_PATH}/`)) {
     return normalizedPath;
   }

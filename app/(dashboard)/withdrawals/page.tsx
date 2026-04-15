@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { withBasePath } from "@/lib/app-path";
+import { appRoute } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 import { canManageFinance } from "@/lib/rbac";
 import { getWithdrawalContext } from "@/lib/queries";
@@ -7,7 +7,7 @@ import { WithdrawalsAdminClient } from "@/components/admin/withdrawals-admin-cli
 
 export default async function WithdrawalsPage() {
   const session = await auth();
-  if (!session?.user || !canManageFinance(session.user.role)) redirect(withBasePath("/dashboard"));
+  if (!session?.user || !canManageFinance(session.user.role)) redirect(appRoute("/dashboard"));
 
   const { members, rows } = await getWithdrawalContext();
 

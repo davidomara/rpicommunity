@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { withBasePath } from "@/lib/app-path";
+import { appRoute } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 import { canAccessContributions } from "@/lib/rbac";
 import { getContributionContextForRole } from "@/lib/queries";
@@ -7,8 +7,8 @@ import { ContributionsAdminClient } from "@/components/admin/contributions-admin
 
 export default async function ContributionsPage() {
   const session = await auth();
-  if (!session?.user) redirect(withBasePath("/login"));
-  if (!canAccessContributions(session.user.role)) redirect(withBasePath("/dashboard"));
+  if (!session?.user) redirect(appRoute("/login"));
+  if (!canAccessContributions(session.user.role)) redirect(appRoute("/dashboard"));
 
   const { members, rows, staffView } = await getContributionContextForRole(session.user.role, session.user.id);
 

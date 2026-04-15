@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { withBasePath } from "@/lib/app-path";
+import { appRoute } from "@/lib/app-path";
 import { redirect } from "next/navigation";
 import { getActiveConstitution } from "@/lib/queries";
 import { canManageProtectedDocuments } from "@/lib/rbac";
@@ -10,7 +10,7 @@ import { ProtectedUploadForm } from "@/components/forms/protected-upload-form";
 
 export default async function ConstitutionPage() {
   const session = await auth();
-  if (!session?.user) redirect(withBasePath("/login"));
+  if (!session?.user) redirect(appRoute("/login"));
 
   const doc = await getActiveConstitution();
   const canUpload = canManageProtectedDocuments(session.user.role);
