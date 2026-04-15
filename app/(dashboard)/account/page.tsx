@@ -16,7 +16,7 @@ export default async function AccountPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
   const admin = canManageMembers(session.user.role);
-  const members = admin ? await getMemberAccountDirectory() : [];
+  const members: Array<{ id: string; name: string; username: string }> = admin ? await getMemberAccountDirectory() : [];
   const statusSettings = admin ? await getCommunitySettings() : null;
   const selectClassName = "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 

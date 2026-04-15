@@ -119,7 +119,13 @@ export async function getMemberAccountDirectory() {
     }
   });
 
-  return sortCommunityRows(rows);
+  return sortCommunityRows(rows) as Array<{
+    id: string;
+    name: string;
+    username: string;
+    email: string;
+    status: string;
+  }>;
 }
 
 export async function getContributionContextForRole(role: Role, userId: string) {
