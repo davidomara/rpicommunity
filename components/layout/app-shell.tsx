@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Bell, LogOut } from "lucide-react";
+import { headers } from "next/headers";
 import { signOut } from "@/auth";
-import { withAppUrl } from "@/lib/app-path";
+import { withBasePath } from "@/lib/app-path";
 import { type Role } from "@/lib/domain-types";
 import { APP_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,18 @@ export function AppShell({
 }) {
   const logoutButtonClassName = "gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800";
   const notificationLinkClassName = "relative h-12 w-12 rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-sm hover:bg-slate-50 hover:text-slate-950";
+  const loginPath = withBasePath("/login");
+
+  async function getLogoutRedirectUrl() {
+    "use server";
+
+    const requestHeaders = headers();
+    const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+    const proto = requestHeaders.get("x-forwarded-proto") ?? (host?.startsWith("127.0.0.1") || host?.startsWith("localhost") ? "http" : "http");
+
+    if (!host) return loginPath;
+    return `${proto}://${host}${loginPath}`;
+  }
 
   return (
     <div className="page-shell h-screen overflow-hidden">
@@ -52,7 +65,10 @@ export function AppShell({
                 name={name}
                 notificationCount={notificationCount}
                 actions={
-                  <form action={async () => { "use server"; await signOut({ redirectTo: withAppUrl("/login") }); }}>
+                  <form action={async () => {
+                    "use server";
+                    await signOut({ redirectTo: await getLogoutRedirectUrl() });
+                  }}>
                     <Button variant="outline" className={`w-full justify-center ${logoutButtonClassName}`}>
                       <LogOut className="h-4 w-4" />
                       Logout
@@ -77,7 +93,10 @@ export function AppShell({
                   ) : null}
                 </Link>
               </Button>
-              <form action={async () => { "use server"; await signOut({ redirectTo: withAppUrl("/login") }); }} className="hidden sm:block">
+              <form action={async () => {
+                "use server";
+                await signOut({ redirectTo: await getLogoutRedirectUrl() });
+              }} className="hidden sm:block">
                 <Button variant="outline" className={logoutButtonClassName}><LogOut className="h-4 w-4" />Logout</Button>
               </form>
             </div>

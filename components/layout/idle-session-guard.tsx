@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { withAppUrl, withBasePath } from "@/lib/app-path";
+import { withBasePath } from "@/lib/app-path";
 import { BROWSER_SESSION_KEY, IDLE_TIMEOUT_MS, LAST_ACTIVITY_KEY } from "@/lib/settings";
 
 export function IdleSessionGuard() {
@@ -28,7 +28,7 @@ export function IdleSessionGuard() {
       try {
         sessionStorage.removeItem(LAST_ACTIVITY_KEY);
       } catch {}
-      signOut({ callbackUrl: withAppUrl("/login") });
+      signOut({ callbackUrl: `${window.location.origin}${loginPath}` });
     };
 
     const hasBrowserSession = () => {
