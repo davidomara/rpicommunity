@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createPortal } from "react-dom";
 import {
   FileText,
   Bell,
@@ -121,17 +120,10 @@ export function MobileDashboardNav({
   actions: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const asideRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
     const originalOverflow = document.body.style.overflow;
 
     if (open) {
@@ -141,7 +133,7 @@ export function MobileDashboardNav({
     return () => {
       document.body.style.overflow = originalOverflow;
     };
-  }, [mounted, open]);
+  }, [open]);
 
   useEffect(() => {
     if (open) return;
@@ -152,65 +144,6 @@ export function MobileDashboardNav({
       triggerRef.current?.focus();
     }
   }, [open]);
-
-  const mobileMenu = (
-    <>
-      <div
-        className={cn(
-          "fixed inset-0 z-40 bg-slate-950/45 transition-opacity duration-200 lg:hidden",
-          open ? "opacity-100" : "pointer-events-none opacity-0"
-        )}
-        onClick={() => setOpen(false)}
-        aria-hidden="true"
-      />
-
-      <aside
-        ref={asideRef}
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-80 max-w-[88vw] flex-col bg-slate-950 px-5 py-6 text-slate-100 shadow-2xl transition-transform duration-200 ease-out lg:hidden",
-          open ? "translate-x-0" : "-translate-x-full"
-        )}
-        aria-hidden={!open}
-      >
-        <div className="mb-2 flex items-start justify-between gap-1">
-          <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-            <div className="flex h-16 w-16 items-center justify-center">
-              <Image
-                src="/branding/rpic-logo.svg"
-                alt="RPIC logo"
-                width={64}
-                height={64}
-                className="h-16 w-16 object-contain"
-              />
-            </div>
-            <div>
-              <div className="text-sm font-medium text-cyan-100">{APP_NAME}</div>
-              <div className="text-xs leading-4 whitespace-nowrap text-slate-400">{APP_SUBTITLE}</div>
-            </div>
-          </div>
-          <Button type="button" variant="ghost" size="sm" className="text-slate-200 hover:bg-white/5" onClick={() => setOpen(false)}>
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close menu</span>
-          </Button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto">
-          <NavLinks role={role} notificationCount={notificationCount} onNavigate={() => setOpen(false)} />
-        </div>
-
-        <div
-          className="mt-6 border-t border-white/10 pt-4"
-          onClick={() => {
-            const activeElement = document.activeElement;
-            if (activeElement instanceof HTMLElement) activeElement.blur();
-            setOpen(false);
-          }}
-        >
-          {actions}
-        </div>
-      </aside>
-    </>
-  );
 
   return (
     <>
@@ -225,7 +158,64 @@ export function MobileDashboardNav({
         <Menu className="h-5 w-5 stroke-[2.6]" />
         <span className="sr-only">Open menu</span>
       </Button>
-      {mounted ? createPortal(mobileMenu, document.body) : null}
+      <div
+        className={cn(
+          "fixed inset-0 z-[60] transition-opacity duration-200 lg:hidden",
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        )}
+        aria-hidden={!open}
+      >
+        <div
+          className="absolute inset-0 bg-slate-950/45"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+
+        <aside
+          ref={asideRef}
+          className={cn(
+            "absolute inset-y-0 left-0 flex w-80 max-w-[88vw] flex-col bg-slate-950 px-5 py-6 text-slate-100 shadow-2xl transition-transform duration-200 ease-out",
+            open ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          <div className="mb-2 flex items-start justify-between gap-1">
+            <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+              <div className="flex h-16 w-16 items-center justify-center">
+                <Image
+                  src="/branding/rpic-logo.svg"
+                  alt="RPIC logo"
+                  width={64}
+                  height={64}
+                  className="h-16 w-16 object-contain"
+                />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-cyan-100">{APP_NAME}</div>
+                <div className="text-xs leading-4 whitespace-nowrap text-slate-400">{APP_SUBTITLE}</div>
+              </div>
+            </div>
+            <Button type="button" variant="ghost" size="sm" className="text-slate-200 hover:bg-white/5" onClick={() => setOpen(false)}>
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close menu</span>
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            <NavLinks role={role} notificationCount={notificationCount} onNavigate={() => setOpen(false)} />
+          </div>
+
+          <div
+            className="mt-6 border-t border-white/10 pt-4"
+            onClick={() => {
+              const activeElement = document.activeElement;
+              if (activeElement instanceof HTMLElement) activeElement.blur();
+              setOpen(false);
+            }}
+          >
+            {actions}
+          </div>
+        </aside>
+      </div>
     </>
   );
 }
