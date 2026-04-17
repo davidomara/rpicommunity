@@ -12,6 +12,9 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { BrowserSessionMarker } from "@/components/auth/browser-session-marker";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const loginErrors: Record<string, string> = {
   CredentialsSignin: "Invalid username/email or password.",
   CallbackRouteError: "Sign-in could not be completed. Check the database and Prisma setup, then try again."
