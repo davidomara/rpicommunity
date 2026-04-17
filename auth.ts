@@ -25,39 +25,57 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         identifier: { label: "Email or Username", type: "text" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials) {
-        const parsed = loginSchema.safeParse(credentials);
-        if (!parsed.success) return null;
-
-        try {
-          const identifier = parsed.data.identifier.trim().toLowerCase();
-          const user = await prisma.user.findFirst({
-            where: {
-              OR: [
-                { email: identifier },
-                { username: identifier }
-              ]
-            }
-          });
-
-          if (!user || !user.passwordHash) return null;
-
-          const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
-          if (!ok) return null;
-
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            status: user.status,
-            username: user.username
-          } as any;
-        } catch (error) {
-          console.error("Credentials authorize failed", error);
-          throw error;
-        }
+    async authorize(credentials) {
+      const parsed = loginSchema.safeParse(credentials);
+      if (!parsed.success) {
+        console.log("authorize: invalid credentials payload");
+        return null;
       }
+
+      try {
+        const identifier = parsed.data.identifier.trim().toLowerCase();
+        console.log("authorize: lookup start", { identifier });
+
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: identifier },
+              { username: identifier }
+            ]
+          }
+        });
+
+        console.log("authorize: lookup done", {
+          found: !!user,
+          userId: user?.id,
+          hasPasswordHash: !!user?.passwordHash,
+          email: user?.email,
+          username: user?.username
+        });
+
+        if (!user || !user.passwordHash) return null;
+
+        console.log("authorize: bcrypt compare start");
+        const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
+        console.log("authorize: bcrypt compare done", { ok });
+
+        if (!ok) return null;
+
+        console.log("authorize: success", { userId: user.id });
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          username: user.username
+        } as any;
+      } catch (error) {
+        console.error("Credentials authorize failed", error);
+        throw error;
+      }
+    }
     })
   ],
   callbacks: {
