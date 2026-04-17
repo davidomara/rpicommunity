@@ -1,10 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DataScroll } from "@/components/ui/data-scroll";
 import type { Role } from "@/lib/domain-types";
+import { Button } from "@/components/ui/button";
+import { showToast } from "@/components/ui/toaster";
 import { formatMoney } from "@/lib/utils";
 import { MemberStatusActions } from "@/components/members/member-status-actions";
 
@@ -33,6 +36,16 @@ export function MembersTable({
   role?: Role;
 }) {
   const [query, setQuery] = useState("");
+
+  async function copyEmail(email: string) {
+    try {
+      await navigator.clipboard.writeText(email);
+      showToast({ type: "success", message: `Copied ${email}` });
+    } catch {
+      showToast({ type: "error", message: "Could not copy email" });
+    }
+  }
+
   const showActions = role === "ADMIN" || role === "TREASURER";
   const filtered = useMemo(() => rows.filter((row) => {
     const q = query.trim().toLowerCase();
@@ -64,7 +77,20 @@ export function MembersTable({
                   <td className="whitespace-nowrap pr-3 text-slate-500">{index + 1}</td>
                   <td className="min-w-[240px] pr-4">
                     <div className="font-medium text-slate-900">{row.name}</div>
-                    <div className="mt-1 text-xs text-slate-500">{row.email}</div>
+                    <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                      <span className="select-all">{row.email}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-slate-500 hover:text-slate-900"
+                        onClick={() => void copyEmail(row.email)}
+                        aria-label={`Copy email for ${row.name}`}
+                        title="Copy email"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                     <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{row.role}</div>
                   </td>
                   <td className="whitespace-nowrap pr-4 text-slate-900">{formatMoney(row.contributions)}</td>
