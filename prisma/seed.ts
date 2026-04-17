@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { CONTRIBUTION_APPROVAL_STATUS, TRANSACTION_TYPE } from "@/lib/domain-types";
 
 const prisma = new PrismaClient();
 
@@ -169,6 +170,7 @@ async function main() {
   const adminHash = await bcrypt.hash("Admin@123", 12);
   const memberHash = await bcrypt.hash("Member@123", 12);
   const usedUsernames = new Set<string>();
+  const createdUsers: Array<{ id: string; role: Role }> = [];
 
   await prisma.transaction.deleteMany();
   await prisma.emergencyRequest.deleteMany();
@@ -188,7 +190,7 @@ async function main() {
 
     usedUsernames.add(generated.username);
 
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         name: person.name,
         username: generated.username,
@@ -198,9 +200,42 @@ async function main() {
         status: MEMBER_STATUS_ACTIVE
       }
     });
+
+    createdUsers.push({ id: user.id, role: person.role });
+  }
+
+  const adminUser = createdUsers.find((user) => user.role === ROLE.ADMIN) ?? createdUsers[0];
+
+  for (const [index, user] of createdUsers.entries()) {
+    const dayOfMonth = (index % 28) + 1;
+    const contributionDate = new Date(`2026-04-${String(dayOfMonth).padStart(2, "0")}T00:00:00.000Z`);
+
+    const contribution = await prisma.contribution.create({
+      data: {
+        memberId: user.id,
+        amount: 10000,
+        contributionDate,
+        approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED,
+        createdById: adminUser?.id,
+        approvedAt: contributionDate,
+        approvedById: adminUser?.id
+      }
+    });
+
+    await prisma.transaction.create({
+      data: {
+        memberId: user.id,
+        type: TRANSACTION_TYPE.CONTRIBUTION,
+        amount: contribution.amount,
+        eventDate: contribution.contributionDate,
+        actorId: adminUser?.id,
+        notes: "Seed April 2026 contribution"
+      }
+    });
   }
 
   console.log(`Seeded RPIC Community onboarding users: ${onboardingMembers.length}`);
+  console.log(`Seeded April 2026 contributions: ${createdUsers.length} x 10,000`);
   console.log("Admin login: admin / Admin@123");
   console.log("Treasurer login: treasurer / Admin@123");
   console.log("All other onboarded members use: Member@123");
