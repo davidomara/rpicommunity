@@ -36,17 +36,14 @@ export async function getDashboardData() {
       include: {
         contributions: {
           where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED }
-          where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED }
         },
         withdrawals: true,
         emergencyRequests: {
-          where: { status: EMERGENCY_STATUS.PENDING }
           where: { status: EMERGENCY_STATUS.PENDING }
         }
       }
     }),
     prisma.emergencyRequest.findMany({
-      where: { status: EMERGENCY_STATUS.PENDING },
       where: { status: EMERGENCY_STATUS.PENDING },
       include: { member: true },
       orderBy: { requestDate: "desc" },
@@ -184,10 +181,8 @@ export async function getNotificationCount(role: Role, userId: string) {
   const [pendingContributionCount, pendingEmergencyCount] = await Promise.all([
     prisma.contribution.count({
       where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING }
-      where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING }
     }),
     prisma.emergencyRequest.count({
-      where: { status: EMERGENCY_STATUS.PENDING }
       where: { status: EMERGENCY_STATUS.PENDING }
     })
   ]);

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Bell, LogOut } from "lucide-react";
 import { signOut } from "@/auth";
 import type { Role } from "@/lib/domain-types";
+import { withBasePath } from "@/lib/app-path";
 import { APP_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { Button } from "@/components/ui/button";
 import { DesktopDashboardNav, MobileDashboardNav } from "@/components/layout/dashboard-nav";
@@ -22,7 +23,6 @@ export function AppShell({
 }) {
   const logoutButtonClassName = "gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800";
   const notificationLinkClassName = "relative h-12 w-12 rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-sm hover:bg-slate-50 hover:text-slate-950";
-  const loginPath = withBasePath("/login");
   const logoSrc = withBasePath("/branding/rpic-logo.svg");
 
   return (

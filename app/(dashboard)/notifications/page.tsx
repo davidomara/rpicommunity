@@ -21,7 +21,6 @@ function getEmergencyApprovalLabel(
   }
 
   if (rowStatus === EMERGENCY_STATUS.REJECTED) {
-  if (rowStatus === EMERGENCY_STATUS.REJECTED) {
     return "Not approved";
   }
 
@@ -36,8 +35,6 @@ export default async function NotificationsPage() {
   const contributionCanAct = canReviewContributionNotifications(session.user.role);
   const emergencyCanAct = canApproveEmergencyDisbursements(session.user.role);
   const { rows: emergencyRows } = await getEmergencyContext(undefined, true);
-  const pendingContributionRows = rows.filter((row) => row.approvalStatus === CONTRIBUTION_APPROVAL_STATUS.PENDING);
-  const pendingEmergencyRows = emergencyRows.filter((row) => row.status === EMERGENCY_STATUS.PENDING);
   const pendingContributionRows = rows.filter((row) => row.approvalStatus === CONTRIBUTION_APPROVAL_STATUS.PENDING);
   const pendingEmergencyRows = emergencyRows.filter((row) => row.status === EMERGENCY_STATUS.PENDING);
 
@@ -85,7 +82,6 @@ export default async function NotificationsPage() {
                     </td>
                     {contributionCanAct ? (
                       <td className="whitespace-nowrap">
-                        {row.approvalStatus === CONTRIBUTION_APPROVAL_STATUS.PENDING ? (
                         {row.approvalStatus === CONTRIBUTION_APPROVAL_STATUS.PENDING ? (
                           <div className="flex flex-wrap gap-2">
                             <form action={approveContributionNotificationAction}>
@@ -154,7 +150,6 @@ export default async function NotificationsPage() {
                     <td className="whitespace-nowrap">{formatDate(row.requestDate)}</td>
                     {emergencyCanAct ? (
                       <td className="whitespace-nowrap">
-                        {row.status === EMERGENCY_STATUS.PENDING ? (
                         {row.status === EMERGENCY_STATUS.PENDING ? (
                           <EmergencyDecisionActions
                             requestId={row.id}

@@ -82,8 +82,6 @@ export async function createMemberAction(_: CreateMemberFormState, formData: For
       passwordHash: await bcrypt.hash(parsed.data.temporaryPin, 12),
       role: ROLE.MEMBER,
       status: MEMBER_STATUS.ACTIVE
-      role: ROLE.MEMBER,
-      status: MEMBER_STATUS.ACTIVE
     }
   });
 
@@ -128,7 +126,6 @@ export async function requestMemberStatusChangeAction(_: MemberStatusChangeFormS
   });
 
   if (!member || member.role !== ROLE.MEMBER) {
-  if (!member || member.role !== ROLE.MEMBER) {
     return {
       success: false,
       error: "Member not found"
@@ -145,7 +142,6 @@ export async function requestMemberStatusChangeAction(_: MemberStatusChangeFormS
   const existingPending = await prisma.memberStatusChangeRequest.findFirst({
     where: {
       memberId: member.id,
-      status: CHANGE_REQUEST_STATUS.PENDING
       status: CHANGE_REQUEST_STATUS.PENDING
     },
     select: { id: true }
@@ -239,12 +235,10 @@ export async function updateMemberRoleAndStatusAction(_: MemberStatusChangeFormS
     where: {
       memberId: member.id,
       status: CHANGE_REQUEST_STATUS.PENDING
-      status: CHANGE_REQUEST_STATUS.PENDING
     },
     select: { id: true }
   });
 
-  if (statusChanged && nextRole === ROLE.MEMBER && existingPending) {
   if (statusChanged && nextRole === ROLE.MEMBER && existingPending) {
     return {
       success: false,
@@ -266,7 +260,6 @@ export async function updateMemberRoleAndStatusAction(_: MemberStatusChangeFormS
 
     if (!statusChanged) return;
 
-    if (nextRole !== ROLE.MEMBER) {
     if (nextRole !== ROLE.MEMBER) {
       messages.push("Status was not changed because only members use manual status requests.");
       return;
@@ -330,7 +323,6 @@ export async function decideMemberStatusChangeAction(_: MemberStatusChangeFormSt
     });
 
     if (!request || request.status !== CHANGE_REQUEST_STATUS.PENDING) {
-    if (!request || request.status !== CHANGE_REQUEST_STATUS.PENDING) {
       return { ok: true };
     }
 
@@ -338,7 +330,6 @@ export async function decideMemberStatusChangeAction(_: MemberStatusChangeFormSt
       await tx.memberStatusChangeRequest.update({
         where: { id: request.id },
         data: {
-          status: CHANGE_REQUEST_STATUS.REJECTED,
           status: CHANGE_REQUEST_STATUS.REJECTED,
           rejectedAt: new Date(),
           rejectedById: session.user.id
@@ -379,7 +370,6 @@ export async function decideMemberStatusChangeAction(_: MemberStatusChangeFormSt
       await tx.memberStatusChangeRequest.update({
         where: { id: request.id },
         data: {
-          status: CHANGE_REQUEST_STATUS.APPROVED,
           status: CHANGE_REQUEST_STATUS.APPROVED,
           appliedAt: now,
           appliedById: session.user.id

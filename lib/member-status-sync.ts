@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/db";
-import { ROLE } from "@/lib/domain-types";
 import { getCommunitySettings } from "@/lib/community-settings";
 import { resolveMemberStatus } from "@/lib/member-status";
 import { COMMUNITY_ROLES, STATUS_MODE } from "@/lib/domain-types";

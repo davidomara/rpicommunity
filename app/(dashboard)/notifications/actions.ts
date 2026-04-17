@@ -3,7 +3,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { CONTRIBUTION_APPROVAL_STATUS } from "@/lib/domain-types";
-import { CONTRIBUTION_APPROVAL_STATUS } from "@/lib/domain-types";
 import { canReviewContributionNotifications } from "@/lib/rbac";
 import { revalidatePath } from "next/cache";
 
@@ -25,7 +24,6 @@ export async function approveContributionNotificationAction(formData: FormData) 
 
   await prisma.$transaction(async (tx) => {
     const contribution = await tx.contribution.findFirst({
-      where: { id: contributionId, approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING }
       where: { id: contributionId, approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING }
     });
 
@@ -68,9 +66,7 @@ export async function rejectContributionNotificationAction(formData: FormData) {
 
   await prisma.contribution.updateMany({
     where: { id: contributionId, approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING },
-    where: { id: contributionId, approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING },
     data: {
-      approvalStatus: CONTRIBUTION_APPROVAL_STATUS.REJECTED,
       approvalStatus: CONTRIBUTION_APPROVAL_STATUS.REJECTED,
       rejectedAt: new Date(),
       rejectedById: session.user.id
