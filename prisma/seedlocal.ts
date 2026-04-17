@@ -1,8 +1,34 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
-import { EMERGENCY_STATUS, MEMBER_STATUS, ROLE, TRANSACTION_TYPE } from "@/lib/domain-types";
 
 const prisma = new PrismaClient();
+type Role = "ADMIN" | "MEMBER" | "TREASURER";
+type MemberStatus = "ACTIVE" | "WARNING" | "CLOSED";
+type EmergencyStatus = "PENDING" | "APPROVED" | "REJECTED";
+type TransactionType = "CONTRIBUTION" | "WITHDRAWAL";
+
+const ROLE = {
+  ADMIN: "ADMIN" as Role,
+  MEMBER: "MEMBER" as Role,
+  TREASURER: "TREASURER" as Role
+};
+
+const MEMBER_STATUS = {
+  ACTIVE: "ACTIVE" as MemberStatus,
+  WARNING: "WARNING" as MemberStatus,
+  CLOSED: "CLOSED" as MemberStatus
+};
+
+const EMERGENCY_STATUS = {
+  PENDING: "PENDING" as EmergencyStatus,
+  APPROVED: "APPROVED" as EmergencyStatus,
+  REJECTED: "REJECTED" as EmergencyStatus
+};
+
+const TRANSACTION_TYPE = {
+  CONTRIBUTION: "CONTRIBUTION" as TransactionType,
+  WITHDRAWAL: "WITHDRAWAL" as TransactionType
+};
 
 async function main() {
   const passwordHash = await bcrypt.hash("Admin@123", 12);
@@ -27,6 +53,8 @@ async function main() {
       passwordHash,
       role: ROLE.ADMIN,
       status: MEMBER_STATUS.ACTIVE
+      role: ROLE.ADMIN,
+      status: MEMBER_STATUS.ACTIVE
     }
   });
 
@@ -36,6 +64,8 @@ async function main() {
       username: "treasurer",
       email: "treasurer@rpic.local",
       passwordHash,
+      role: ROLE.TREASURER,
+      status: MEMBER_STATUS.ACTIVE
       role: ROLE.TREASURER,
       status: MEMBER_STATUS.ACTIVE
     }
@@ -50,6 +80,8 @@ async function main() {
         passwordHash: memberHash,
         role: ROLE.MEMBER,
         status: MEMBER_STATUS.ACTIVE
+        role: ROLE.MEMBER,
+        status: MEMBER_STATUS.ACTIVE
       }
     }),
     prisma.user.create({
@@ -58,6 +90,8 @@ async function main() {
         username: "brian",
         email: "brian@rpic.local",
         passwordHash: memberHash,
+        role: ROLE.MEMBER,
+        status: MEMBER_STATUS.WARNING
         role: ROLE.MEMBER,
         status: MEMBER_STATUS.WARNING
       }
@@ -70,6 +104,8 @@ async function main() {
         passwordHash: memberHash,
         role: ROLE.MEMBER,
         status: MEMBER_STATUS.ACTIVE
+        role: ROLE.MEMBER,
+        status: MEMBER_STATUS.ACTIVE
       }
     })
   ]);
@@ -79,7 +115,7 @@ async function main() {
       data: {
         memberId: member.id,
         amount: 150000 + index * 25000,
-        contributionDate: new Date(`2026-0${index + 1}-15T00:00:00.000Z`),
+        contributionDate: new Date(`2026-0${index + 4}-15T00:00:00.000Z`),
         createdById: admin.id
       }
     });
@@ -87,6 +123,7 @@ async function main() {
     await prisma.transaction.create({
       data: {
         memberId: member.id,
+        type: TRANSACTION_TYPE.CONTRIBUTION,
         type: TRANSACTION_TYPE.CONTRIBUTION,
         amount: contribution.amount,
         eventDate: contribution.contributionDate,
@@ -110,6 +147,7 @@ async function main() {
     data: {
       memberId: members[1].id,
       type: TRANSACTION_TYPE.WITHDRAWAL,
+      type: TRANSACTION_TYPE.WITHDRAWAL,
       amount: withdrawal.amount,
       eventDate: withdrawal.withdrawalDate,
       actorId: admin.id,
@@ -123,6 +161,7 @@ async function main() {
       amount: 200000,
       reason: "Emergency medical bill support",
       status: EMERGENCY_STATUS.PENDING,
+      status: EMERGENCY_STATUS.PENDING,
       requestDate: new Date("2026-03-18T00:00:00.000Z")
     }
   });
@@ -133,6 +172,7 @@ async function main() {
       amount: 120000,
       approvedAmount: 120000,
       reason: "Funeral contribution support",
+      status: EMERGENCY_STATUS.APPROVED,
       status: EMERGENCY_STATUS.APPROVED,
       requestDate: new Date("2026-02-22T00:00:00.000Z"),
       adminApprovedAt: new Date("2026-02-23T00:00:00.000Z"),

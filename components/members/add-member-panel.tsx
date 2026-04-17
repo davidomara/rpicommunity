@@ -71,7 +71,7 @@ export function AddMemberPanel({ expectedPerMemberToDate }: { expectedPerMemberT
         <div className="min-w-0">
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
             View Member Standings. Expected per member to date
-            <span className="font-medium text-slate-600"> (since May 2026): </span>
+            <span className="font-medium text-slate-600"> (since April 2026): </span>
             <span className="font-semibold text-slate-950">{formatMoney(expectedPerMemberToDate)}</span>
           </p>
         </div>

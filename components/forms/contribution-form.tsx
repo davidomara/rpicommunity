@@ -99,7 +99,7 @@ export function ContributionForm({
               <p className="font-medium text-cyan-800">Contribution note</p>
               <p className="mt-1">
                 Record each member payment with the correct date and amount so the community balance, arrears,
-                and member standing remain accurate from the start of the May 2026 contribution cycle.
+                and member standing remain accurate from the start of the April 2026 contribution cycle.
               </p>
             </div>
           </div>

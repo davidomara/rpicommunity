@@ -57,7 +57,7 @@ export default async function MembersPage() {
             View member standings. The required emergency contribution is
             <span className="font-medium text-slate-600"> 10,000 per month, </span>
             and any extra approved contribution counts as savings. Expected per member to date
-            <span className="font-medium text-slate-600"> (since May 2026): </span>
+            <span className="font-medium text-slate-600"> (since April 2026): </span>
             <span className="font-semibold text-slate-950">{formatMoney(expectedPerMemberToDate)}</span>
           </p>
         </div>
