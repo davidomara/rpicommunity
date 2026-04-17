@@ -1,6 +1,5 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { withBasePath } from "@/lib/app-path";
 import { loginSchema } from "@/lib/validators/auth";
@@ -9,7 +8,6 @@ import type { MemberStatus, Role } from "@/lib/domain-types";
 import { IDLE_TIMEOUT_MS } from "@/lib/settings";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
     maxAge: Math.floor(IDLE_TIMEOUT_MS / 1000)
@@ -31,29 +29,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
 
-        const identifier = parsed.data.identifier.trim().toLowerCase();
-        const user = await prisma.user.findFirst({
-          where: {
-            OR: [
-              { email: identifier },
-              { username: identifier }
-            ]
-          }
-        });
+        try {
+          const identifier = parsed.data.identifier.trim().toLowerCase();
+          const user = await prisma.user.findFirst({
+            where: {
+              OR: [
+                { email: identifier },
+                { username: identifier }
+              ]
+            }
+          });
 
-        if (!user || !user.passwordHash) return null;
+          if (!user || !user.passwordHash) return null;
 
-        const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
-        if (!ok) return null;
+          const ok = await bcrypt.compare(parsed.data.password, user.passwordHash);
+          if (!ok) return null;
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          status: user.status,
-          username: user.username
-        } as any;
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            status: user.status,
+            username: user.username
+          } as any;
+        } catch (error) {
+          console.error("Credentials authorize failed", error);
+          throw error;
+        }
       }
     })
   ],
