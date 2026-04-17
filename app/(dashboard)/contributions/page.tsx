@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import type { ContributionApprovalStatus } from "@/lib/domain-types";
 import { canAccessContributions } from "@/lib/rbac";
 import { getContributionContextForRole } from "@/lib/queries";
 import { ContributionsAdminClient } from "@/components/admin/contributions-admin-client";
@@ -14,7 +15,11 @@ export default async function ContributionsPage() {
   return (
     <ContributionsAdminClient
       members={members}
-      rows={rows.map((row) => ({ ...row, amount: Number(row.amount) }))}
+      rows={rows.map((row) => ({
+        ...row,
+        amount: Number(row.amount),
+        approvalStatus: row.approvalStatus as ContributionApprovalStatus
+      }))}
       staffView={staffView}
     />
   );

@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AddMemberPanel } from "@/components/members/add-member-panel";
+import type { Role } from "@/lib/domain-types";
 import { getArrearsAmount, getExpectedContributionAmount, getSavingsAmount } from "@/lib/member-status";
 import { getMembersDirectory } from "@/lib/queries";
 import { canManageMembers } from "@/lib/rbac";
@@ -15,26 +16,33 @@ export default async function MembersPage() {
   const members = await getMembersDirectory();
   const expectedPerMemberToDate = getExpectedContributionAmount();
   const rows = members.map((member) => {
-    const contributionTotal = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
-    const withdrawalTotal = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
+    const totalContributions = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
+    const totalWithdrawals = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
+    const pendingChange = (member.memberStatusChanges as Array<{
+      id: string;
+      currentStatus: string;
+      requestedStatus: string;
+      adminApprovedAt: Date | null;
+      treasurerApprovedAt: Date | null;
+    }>)[0];
 
     return {
       id: member.id,
       name: member.name,
       email: member.email,
-      role: member.role,
+      role: member.role as Role,
       status: member.status,
-      contributions: contributionTotal,
-      withdrawals: withdrawalTotal,
-      savings: getSavingsAmount(contributionTotal),
-      arrears: getArrearsAmount(contributionTotal),
-      pendingStatusChange: member.targetedStatusChanges[0]
+      contributions: totalContributions,
+      withdrawals: totalWithdrawals,
+      savings: getSavingsAmount(totalContributions),
+      arrears: getArrearsAmount(totalContributions),
+      pendingStatusChange: pendingChange
         ? {
-            id: member.targetedStatusChanges[0].id,
-            currentStatus: member.targetedStatusChanges[0].currentStatus,
-            requestedStatus: member.targetedStatusChanges[0].requestedStatus,
-            adminApproved: Boolean(member.targetedStatusChanges[0].adminApprovedAt),
-            treasurerApproved: Boolean(member.targetedStatusChanges[0].treasurerApprovedAt)
+            id: pendingChange.id,
+            currentStatus: pendingChange.currentStatus,
+            requestedStatus: pendingChange.requestedStatus,
+            adminApproved: Boolean(pendingChange.adminApprovedAt),
+            treasurerApproved: Boolean(pendingChange.treasurerApprovedAt)
           }
         : null
     };
@@ -62,7 +70,7 @@ export default async function MembersPage() {
           </p>
         </div>
       )}
-      <MembersTable rows={rows} role={session.user.role} />
+      <MembersTable rows={rows} role={session.user.role as Role} />
     </div>
   );
 }
