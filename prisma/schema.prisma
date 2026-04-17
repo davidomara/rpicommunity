@@ -4,197 +4,114 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlserver"
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  TREASURER
-  MEMBER
-}
-
-enum MemberStatus {
-  ACTIVE
-  WARNING
-  CLOSED
-}
-
-enum StatusMode {
-  AUTO
-  MANUAL
-}
-
-enum ChangeRequestStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum EmergencyStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum ContributionApprovalStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum TransactionType {
-  CONTRIBUTION
-  WITHDRAWAL
-}
-
-enum StatementType {
-  PDF
-  IMAGE
-}
-
 model User {
-  id                String              @id @default(cuid())
-  name              String
-  username          String              @unique
-  email             String              @unique
-  passwordHash      String
-  role              Role                @default(MEMBER)
-  status            MemberStatus        @default(ACTIVE)
-  statusMode        StatusMode          @default(AUTO)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  contributions     Contribution[]      @relation("ContributionMember")
-  withdrawals       Withdrawal[]        @relation("WithdrawalMember")
-  emergencyRequests EmergencyRequest[]  @relation("EmergencyRequestMember")
-  createdContribs   Contribution[]      @relation("ContributionActor")
-  approvedContribs  Contribution[]      @relation("ContributionApprover")
-  rejectedContribs  Contribution[]      @relation("ContributionRejector")
-  createdWithdraws  Withdrawal[]        @relation("WithdrawalActor")
-  adminApprovedRequests EmergencyRequest[] @relation("EmergencyAdminApprover")
-  treasurerApprovedRequests EmergencyRequest[] @relation("EmergencyTreasurerApprover")
-  rejectedRequests  EmergencyRequest[]  @relation("EmergencyRejectionActor")
-  disbursedRequests EmergencyRequest[]  @relation("EmergencyDisbursementActor")
-  transactions      Transaction[]       @relation("TransactionMember")
-  actedTransactions Transaction[]       @relation("TransactionActor")
-  uploadedStatements BankStatement[]
-  uploadedDocuments GoverningDocument[]
-  sessions          Session[]
-  accounts          Account[]
-  resetTokens       PasswordResetToken[]
-  targetedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeTarget")
-  requestedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeRequester")
-  adminApprovedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeAdminApprover")
-  treasurerApprovedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeTreasurerApprover")
-  rejectedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeRejector")
-  appliedStatusChanges MemberStatusChangeRequest[] @relation("MemberStatusChangeApplier")
+  id                              String                      @id @default(cuid()) @db.VarChar(191)
+  name                            String
+  username                        String                      @unique @db.VarChar(255)
+  email                           String                      @unique @db.VarChar(255)
+  passwordHash                    String
+  role                            String                      @default("MEMBER") @db.VarChar(32)
+  status                          String                      @default("ACTIVE") @db.VarChar(32)
+  createdAt                       DateTime                    @default(now())
+  updatedAt                       DateTime                    @updatedAt
+  statusMode                      String                      @default("AUTO") @db.VarChar(32)
+  accounts                        Account[]
+  sessions                        Session[]
+  passwordResetTokens             PasswordResetToken[]
+  contributions                   Contribution[]              @relation("ContributionMember")
+  contributionApprovals           Contribution[]              @relation("ContributionApprovedBy")
+  contributionRejections          Contribution[]              @relation("ContributionRejectedBy")
+  contributionsCreated            Contribution[]              @relation("ContributionCreatedBy")
+  withdrawals                     Withdrawal[]                @relation("WithdrawalMember")
+  withdrawalsCreated              Withdrawal[]                @relation("WithdrawalCreatedBy")
+  emergencyRequests               EmergencyRequest[]          @relation("EmergencyRequestMember")
+  emergencyAdminApprovals         EmergencyRequest[]          @relation("EmergencyRequestAdminApprovedBy")
+  emergencyTreasurerApprovals     EmergencyRequest[]          @relation("EmergencyRequestTreasurerApprovedBy")
+  emergencyRejections             EmergencyRequest[]          @relation("EmergencyRequestRejectedBy")
+  emergencyDisbursements          EmergencyRequest[]          @relation("EmergencyRequestDisbursedBy")
+  transactions                    Transaction[]               @relation("TransactionMember")
+  transactionActions              Transaction[]               @relation("TransactionActor")
+  uploadedBankStatements          BankStatement[]
+  uploadedDocuments               GoverningDocument[]
+  requestedMemberStatusChanges    MemberStatusChangeRequest[] @relation("MemberStatusChangeRequestRequestedBy")
+  memberStatusChanges             MemberStatusChangeRequest[] @relation("MemberStatusChangeRequestMember")
+  memberStatusAdminApprovals      MemberStatusChangeRequest[] @relation("MemberStatusChangeRequestAdminApprovedBy")
+  memberStatusTreasurerApprovals  MemberStatusChangeRequest[] @relation("MemberStatusChangeRequestTreasurerApprovedBy")
+  memberStatusRejections          MemberStatusChangeRequest[] @relation("MemberStatusChangeRequestRejectedBy")
+  memberStatusApplications        MemberStatusChangeRequest[] @relation("MemberStatusChangeRequestAppliedBy")
 
   @@index([role, name])
   @@index([role, status])
 }
 
-model CommunitySettings {
-  id                 String   @id @default("community")
-  warningAfterMonths Int      @default(3)
-  closeAfterMonths   Int      @default(6)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-}
-
-model MemberStatusChangeRequest {
-  id                    String              @id @default(cuid())
-  memberId              String
-  member                User                @relation("MemberStatusChangeTarget", fields: [memberId], references: [id])
-  currentStatus         MemberStatus
-  requestedStatus       MemberStatus
-  status                ChangeRequestStatus @default(PENDING)
-  requestedById         String
-  requestedBy           User                @relation("MemberStatusChangeRequester", fields: [requestedById], references: [id])
-  adminApprovedAt       DateTime?
-  adminApprovedById     String?
-  adminApprovedBy       User?               @relation("MemberStatusChangeAdminApprover", fields: [adminApprovedById], references: [id])
-  treasurerApprovedAt   DateTime?
-  treasurerApprovedById String?
-  treasurerApprovedBy   User?               @relation("MemberStatusChangeTreasurerApprover", fields: [treasurerApprovedById], references: [id])
-  rejectedAt            DateTime?
-  rejectedById          String?
-  rejectedBy            User?               @relation("MemberStatusChangeRejector", fields: [rejectedById], references: [id])
-  appliedAt             DateTime?
-  appliedById           String?
-  appliedBy             User?               @relation("MemberStatusChangeApplier", fields: [appliedById], references: [id])
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-
-  @@index([memberId, status, createdAt])
-  @@index([requestedById])
-  @@index([adminApprovedById])
-  @@index([treasurerApprovedById])
-}
-
 model Contribution {
-  id               String                     @id @default(cuid())
-  memberId         String
-  member           User                       @relation("ContributionMember", fields: [memberId], references: [id])
+  id               String                     @id @default(cuid()) @db.VarChar(191)
+  memberId         String                     @db.VarChar(191)
   amount           Decimal                    @db.Decimal(12, 2)
   contributionDate DateTime
-  approvalStatus   ContributionApprovalStatus @default(APPROVED)
-  createdById      String?
-  createdBy        User?                      @relation("ContributionActor", fields: [createdById], references: [id])
-  approvedAt       DateTime?
-  approvedById     String?
-  approvedBy       User?                      @relation("ContributionApprover", fields: [approvedById], references: [id])
-  rejectedAt       DateTime?
-  rejectedById     String?
-  rejectedBy       User?                      @relation("ContributionRejector", fields: [rejectedById], references: [id])
+  createdById      String?                    @db.VarChar(191)
   createdAt        DateTime                   @default(now())
   updatedAt        DateTime                   @updatedAt
+  approvalStatus   String                     @default("APPROVED") @db.VarChar(32)
+  approvedAt       DateTime?
+  approvedById     String?                    @db.VarChar(191)
+  rejectedAt       DateTime?
+  rejectedById     String?                    @db.VarChar(191)
+  member           User                       @relation("ContributionMember", fields: [memberId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdBy        User?                      @relation("ContributionCreatedBy", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approvedBy       User?                      @relation("ContributionApprovedBy", fields: [approvedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rejectedBy       User?                      @relation("ContributionRejectedBy", fields: [rejectedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([memberId, contributionDate])
+  @@index([createdAt])
   @@index([approvalStatus, contributionDate])
   @@index([approvedById])
   @@index([rejectedById])
-  @@index([createdAt])
 }
 
 model Withdrawal {
-  id             String   @id @default(cuid())
-  memberId       String
-  member         User     @relation("WithdrawalMember", fields: [memberId], references: [id])
+  id             String   @id @default(cuid()) @db.VarChar(191)
+  memberId       String   @db.VarChar(191)
   amount         Decimal  @db.Decimal(12, 2)
   reason         String
   withdrawalDate DateTime
-  createdById    String?
-  createdBy      User?    @relation("WithdrawalActor", fields: [createdById], references: [id])
+  createdById    String?  @db.VarChar(191)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  member         User     @relation("WithdrawalMember", fields: [memberId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdBy      User?    @relation("WithdrawalCreatedBy", fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([memberId, withdrawalDate])
   @@index([createdAt])
 }
 
 model EmergencyRequest {
-  id                    String          @id @default(cuid())
-  memberId              String
-  member                User            @relation("EmergencyRequestMember", fields: [memberId], references: [id])
+  id                    String          @id @default(cuid()) @db.VarChar(191)
+  memberId              String          @db.VarChar(191)
   amount                Decimal         @db.Decimal(12, 2)
-  approvedAmount        Decimal?        @db.Decimal(12, 2)
   reason                String
-  status                EmergencyStatus @default(PENDING)
+  status                String          @default("PENDING") @db.VarChar(32)
   requestDate           DateTime        @default(now())
   decisionDate          DateTime?
-  adminApprovedAt       DateTime?
-  adminApprovedById     String?
-  adminApprovedBy       User?           @relation("EmergencyAdminApprover", fields: [adminApprovedById], references: [id])
-  treasurerApprovedAt   DateTime?
-  treasurerApprovedById String?
-  treasurerApprovedBy   User?           @relation("EmergencyTreasurerApprover", fields: [treasurerApprovedById], references: [id])
-  rejectedById          String?
-  rejectedBy            User?           @relation("EmergencyRejectionActor", fields: [rejectedById], references: [id])
-  disbursedAt           DateTime?
-  disbursedById         String?
-  disbursedBy           User?           @relation("EmergencyDisbursementActor", fields: [disbursedById], references: [id])
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
+  approvedAmount        Decimal?        @db.Decimal(12, 2)
+  adminApprovedAt       DateTime?
+  adminApprovedById     String?         @db.VarChar(191)
+  treasurerApprovedAt   DateTime?
+  treasurerApprovedById String?         @db.VarChar(191)
+  rejectedById          String?         @db.VarChar(191)
+  disbursedAt           DateTime?
+  disbursedById         String?         @db.VarChar(191)
+  member                User            @relation("EmergencyRequestMember", fields: [memberId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  adminApprovedBy       User?           @relation("EmergencyRequestAdminApprovedBy", fields: [adminApprovedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  treasurerApprovedBy   User?           @relation("EmergencyRequestTreasurerApprovedBy", fields: [treasurerApprovedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rejectedBy            User?           @relation("EmergencyRequestRejectedBy", fields: [rejectedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  disbursedBy           User?           @relation("EmergencyRequestDisbursedBy", fields: [disbursedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([memberId, requestDate])
   @@index([status, requestDate])
@@ -205,100 +122,138 @@ model EmergencyRequest {
 }
 
 model Transaction {
-  id         String          @id @default(cuid())
-  memberId   String
-  member     User            @relation("TransactionMember", fields: [memberId], references: [id])
-  type       TransactionType
-  amount     Decimal         @db.Decimal(12, 2)
-  eventDate  DateTime
-  notes      String?
-  actorId    String?
-  actor      User?           @relation("TransactionActor", fields: [actorId], references: [id])
-  createdAt  DateTime        @default(now())
+  id        String          @id @default(cuid()) @db.VarChar(191)
+  memberId  String          @db.VarChar(191)
+  type      String          @db.VarChar(32)
+  amount    Decimal         @db.Decimal(12, 2)
+  eventDate DateTime
+  notes     String?
+  actorId   String?         @db.VarChar(191)
+  createdAt DateTime        @default(now())
+  member    User            @relation("TransactionMember", fields: [memberId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  actor     User?           @relation("TransactionActor", fields: [actorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([memberId, type, eventDate])
   @@index([createdAt])
 }
 
 model BankStatement {
-  id            String        @id @default(cuid())
-  filename      String
-  originalName  String
-  mimeType      String
-  sizeBytes     Int
-  storagePath   String
-  data          Bytes?
-  statementType StatementType
-  statementDate DateTime?
+  id              String        @id @default(cuid()) @db.VarChar(191)
+  filename        String
+  originalName    String
+  mimeType        String
+  sizeBytes       Int
+  storagePath     String
+  statementType   String        @db.VarChar(32)
+  statementDate   DateTime?
   statementPeriod String?
-  uploadedById  String?
-  uploadedBy    User?         @relation(fields: [uploadedById], references: [id])
-  createdAt     DateTime      @default(now())
+  uploadedById    String?       @db.VarChar(191)
+  createdAt       DateTime      @default(now())
+  data            Bytes?
+  uploadedBy      User?         @relation(fields: [uploadedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([createdAt])
 }
 
 model GoverningDocument {
-  id           String   @id @default(cuid())
+  id           String   @id @default(cuid()) @db.VarChar(191)
   title        String
   filename     String
   originalName String
   mimeType     String
-  sizeBytes    Int
   storagePath  String
-  data         Bytes?
   isActive     Boolean  @default(true)
-  uploadedById String?
-  uploadedBy   User?    @relation(fields: [uploadedById], references: [id])
+  uploadedById String?  @db.VarChar(191)
   createdAt    DateTime @default(now())
+  sizeBytes    Int
+  data         Bytes?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([isActive, createdAt])
 }
 
+model CommunitySettings {
+  id                 String   @id @default("community") @db.VarChar(191)
+  warningAfterMonths Int      @default(3)
+  closeAfterMonths   Int      @default(6)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
 model PasswordResetToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid()) @db.VarChar(191)
+  token     String   @unique @db.VarChar(255)
+  userId    String   @db.VarChar(191)
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([userId, expiresAt])
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
+  id                String  @id @default(cuid()) @db.VarChar(191)
+  userId            String  @db.VarChar(191)
   type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  provider          String  @db.VarChar(255)
+  providerAccountId String  @db.VarChar(255)
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([provider, providerAccountId])
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
+  id           String   @id @default(cuid()) @db.VarChar(191)
+  sessionToken String   @unique @db.VarChar(255)
+  userId       String   @db.VarChar(191)
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([userId, expires])
 }
 
 model VerificationToken {
-  identifier String
-  token      String   @unique
+  identifier String   @db.VarChar(255)
+  token      String   @unique @db.VarChar(255)
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model MemberStatusChangeRequest {
+  id                    String              @id @default(cuid()) @db.VarChar(191)
+  memberId              String              @db.VarChar(191)
+  currentStatus         String              @db.VarChar(32)
+  requestedStatus       String              @db.VarChar(32)
+  status                String              @default("PENDING") @db.VarChar(32)
+  requestedById         String              @db.VarChar(191)
+  adminApprovedAt       DateTime?
+  adminApprovedById     String?             @db.VarChar(191)
+  treasurerApprovedAt   DateTime?
+  treasurerApprovedById String?             @db.VarChar(191)
+  rejectedAt            DateTime?
+  rejectedById          String?             @db.VarChar(191)
+  appliedAt             DateTime?
+  appliedById           String?             @db.VarChar(191)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  member                User                @relation("MemberStatusChangeRequestMember", fields: [memberId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requestedBy           User                @relation("MemberStatusChangeRequestRequestedBy", fields: [requestedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  adminApprovedBy       User?               @relation("MemberStatusChangeRequestAdminApprovedBy", fields: [adminApprovedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  treasurerApprovedBy   User?               @relation("MemberStatusChangeRequestTreasurerApprovedBy", fields: [treasurerApprovedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rejectedBy            User?               @relation("MemberStatusChangeRequestRejectedBy", fields: [rejectedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appliedBy             User?               @relation("MemberStatusChangeRequestAppliedBy", fields: [appliedById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([memberId, status, createdAt])
+  @@index([requestedById])
+  @@index([adminApprovedById])
+  @@index([treasurerApprovedById])
 }
