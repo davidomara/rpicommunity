@@ -18,7 +18,8 @@ export function getExpectedContributionMonths(now = new Date()) {
   const currentYear = now.getUTCFullYear();
   const currentMonth = now.getUTCMonth();
 
-  return Math.max(0, (currentYear - startYear) * 12 + (currentMonth - startMonth));
+  const monthDiff = (currentYear - startYear) * 12 + (currentMonth - startMonth);
+  return monthDiff < 0 ? 0 : monthDiff + 1;
 }
 
 export function getExpectedContributionAmount(now = new Date()) {

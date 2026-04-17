@@ -19,16 +19,16 @@ export function MemberStatusCard({
       </CardHeader>
       <CardContent className="px-4 pb-4 pt-1 sm:px-6 sm:pb-5">
         <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">Active</p>
+          <div className="min-w-0 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-2">
+            <p className="truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-emerald-700 sm:text-[10px]">Active</p>
             <p className="mt-1 text-xl font-semibold text-emerald-950">{active}</p>
           </div>
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700">Warning</p>
+          <div className="min-w-0 rounded-xl border border-amber-200 bg-amber-50 px-2 py-2">
+            <p className="truncate text-[9px] font-semibold uppercase tracking-[0.03em] text-amber-700 sm:text-[10px] sm:tracking-[0.05em]">Warning</p>
             <p className="mt-1 text-xl font-semibold text-amber-950">{warning}</p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-700">Closed</p>
+          <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2">
+            <p className="truncate text-[9px] font-semibold uppercase tracking-[0.08em] text-slate-700 sm:text-[10px]">Closed</p>
             <p className="mt-1 text-xl font-semibold text-slate-950">{closed}</p>
           </div>
         </div>
