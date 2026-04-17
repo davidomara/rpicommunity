@@ -1,5 +1,6 @@
-import { MEMBER_STATUS, type MemberStatus } from "@/lib/domain-types";
 import { COMMUNITY_CONTRIBUTION_START, EXPECTED_MONTHLY_CONTRIBUTION } from "@/lib/settings";
+
+export type MemberStatus = "ACTIVE" | "WARNING" | "CLOSED";
 
 export type MemberStatusThresholds = {
   warningAfterMonths: number;
@@ -45,11 +46,11 @@ export function resolveMemberStatus(
   const arrearsAmount = getArrearsAmount(totalContributions, now);
   const arrearsMonths = getArrearsMonthsFromAmount(arrearsAmount);
 
-  let status: MemberStatus = MEMBER_STATUS.ACTIVE;
+  let status: MemberStatus = "ACTIVE";
   if (arrearsMonths >= thresholds.closeAfterMonths) {
-    status = MEMBER_STATUS.CLOSED;
+    status = "CLOSED";
   } else if (arrearsMonths >= thresholds.warningAfterMonths) {
-    status = MEMBER_STATUS.WARNING;
+    status = "WARNING";
   }
 
   return {
