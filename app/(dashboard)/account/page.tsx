@@ -12,6 +12,9 @@ import {
   UpdateMemberEmailForm
 } from "@/components/account/account-forms";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AccountPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");

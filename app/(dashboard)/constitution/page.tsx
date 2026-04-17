@@ -7,6 +7,9 @@ import { DocumentViewer } from "@/components/documents/document-viewer";
 import { uploadConstitutionAction } from "./actions";
 import { ProtectedUploadForm } from "@/components/forms/protected-upload-form";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ConstitutionPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");

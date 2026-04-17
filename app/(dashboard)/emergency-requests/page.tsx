@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { DataScroll } from "@/components/ui/data-scroll";
 import { formatMoney, formatDate } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function EmergencyRequestsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");

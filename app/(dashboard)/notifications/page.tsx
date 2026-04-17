@@ -11,6 +11,9 @@ import { approveContributionNotificationAction, rejectContributionNotificationAc
 import { Badge } from "@/components/ui/badge";
 import { EmergencyDecisionActions } from "@/components/forms/emergency-decision-actions";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 function getEmergencyApprovalLabel(
   approvedAt: Date | string | null,
   rowStatus: string,

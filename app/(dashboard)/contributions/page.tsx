@@ -5,6 +5,9 @@ import { canAccessContributions } from "@/lib/rbac";
 import { getContributionContextForRole } from "@/lib/queries";
 import { ContributionsAdminClient } from "@/components/admin/contributions-admin-client";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ContributionsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");

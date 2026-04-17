@@ -4,6 +4,9 @@ import { canManageFinance } from "@/lib/rbac";
 import { getWithdrawalContext } from "@/lib/queries";
 import { WithdrawalsAdminClient } from "@/components/admin/withdrawals-admin-client";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function WithdrawalsPage() {
   const session = await auth();
   if (!session?.user || !canManageFinance(session.user.role)) redirect("/dashboard");

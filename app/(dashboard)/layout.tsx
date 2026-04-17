@@ -4,6 +4,9 @@ import { AppShell } from "@/components/layout/app-shell";
 import type { Role } from "@/lib/domain-types";
 import { getNotificationCount } from "@/lib/queries";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/login");

@@ -8,6 +8,9 @@ import { canManageMembers } from "@/lib/rbac";
 import { MembersTable } from "@/components/tables/members-table";
 import { formatMoney } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function MembersPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
