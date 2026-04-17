@@ -1,28 +1,52 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { CONTRIBUTION_APPROVAL_STATUS, EMERGENCY_STATUS, ROLE, type Role } from "@/lib/domain-types";
+import { CONTRIBUTION_APPROVAL_STATUS, EMERGENCY_STATUS, COMMUNITY_ROLES, type Role } from "@/lib/domain-types";
 import { getArrearsAmount, getSavingsAmount } from "@/lib/member-status";
 import { syncAutoMemberStatuses } from "@/lib/member-status-sync";
 import { sortCommunityRows } from "@/lib/community-order";
 import { canManageFinance, canReviewContributionNotifications } from "@/lib/rbac";
 
-const communityRoles: Role[] = [ROLE.ADMIN, ROLE.TREASURER, ROLE.MEMBER];
+const memberDirectoryArgs = {
+  where: { role: { in: COMMUNITY_ROLES } },
+  include: {
+    contributions: {
+      where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED }
+    },
+    withdrawals: true,
+    emergencyRequests: {
+      where: { status: EMERGENCY_STATUS.PENDING }
+    },
+    memberStatusChanges: {
+      where: { status: "PENDING" },
+      orderBy: { createdAt: "desc" },
+      take: 1
+    }
+  }
+} satisfies Prisma.UserFindManyArgs;
+
+export type MemberDirectoryRow = Prisma.UserGetPayload<{ 
+  include: typeof memberDirectoryArgs.include 
+}>;
 
 export async function getDashboardData() {
   await syncAutoMemberStatuses();
   const [members, pendingRequests] = await Promise.all([
     prisma.user.findMany({
-      where: { role: { in: communityRoles } },
+      where: { role: { in: COMMUNITY_ROLES } },
       include: {
         contributions: {
+          where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED }
           where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED }
         },
         withdrawals: true,
         emergencyRequests: {
           where: { status: EMERGENCY_STATUS.PENDING }
+          where: { status: EMERGENCY_STATUS.PENDING }
         }
       }
     }),
     prisma.emergencyRequest.findMany({
+      where: { status: EMERGENCY_STATUS.PENDING },
       where: { status: EMERGENCY_STATUS.PENDING },
       include: { member: true },
       orderBy: { requestDate: "desc" },
@@ -81,32 +105,16 @@ export async function getDashboardData() {
   };
 }
 
-export async function getMembersDirectory() {
+export async function getMembersDirectory(): Promise<MemberDirectoryRow[]> {
   await syncAutoMemberStatuses();
-  const rows = await prisma.user.findMany({
-    where: { role: { in: communityRoles } },
-    include: {
-      contributions: {
-        where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED }
-      },
-      withdrawals: true,
-      emergencyRequests: {
-        where: { status: EMERGENCY_STATUS.PENDING }
-      },
-      targetedStatusChanges: {
-        where: { status: "PENDING" },
-        orderBy: { createdAt: "desc" },
-        take: 1
-      }
-    }
-  });
+  const rows = await prisma.user.findMany(memberDirectoryArgs);
 
   return sortCommunityRows(rows);
 }
 
 export async function getMemberAccountDirectory() {
   const rows = await prisma.user.findMany({
-    where: { role: ROLE.MEMBER },
+    where: { role: "MEMBER" },
     select: {
       id: true,
       name: true,
@@ -122,7 +130,7 @@ export async function getMemberAccountDirectory() {
 export async function getContributionContextForRole(role: Role, userId: string) {
   const staffView = canManageFinance(role);
   const memberWhere = staffView
-    ? { role: { in: communityRoles } }
+    ? { role: { in: COMMUNITY_ROLES } }
     : { id: userId };
 
   const members = await prisma.user.findMany({
@@ -176,8 +184,10 @@ export async function getNotificationCount(role: Role, userId: string) {
   const [pendingContributionCount, pendingEmergencyCount] = await Promise.all([
     prisma.contribution.count({
       where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING }
+      where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING }
     }),
     prisma.emergencyRequest.count({
+      where: { status: EMERGENCY_STATUS.PENDING }
       where: { status: EMERGENCY_STATUS.PENDING }
     })
   ]);
@@ -187,7 +197,7 @@ export async function getNotificationCount(role: Role, userId: string) {
 
 export async function getWithdrawalContext() {
   const members = await prisma.user.findMany({
-    where: { role: { in: communityRoles } },
+    where: { role: { in: COMMUNITY_ROLES } },
     select: { id: true, name: true, username: true }
   });
 
@@ -208,7 +218,7 @@ export async function getWithdrawalContext() {
 
 export async function getEmergencyContext(memberId?: string, isAdmin = false) {
   const members = await prisma.user.findMany({
-    where: { role: { in: communityRoles } },
+    where: { role: { in: COMMUNITY_ROLES } },
     select: { id: true, name: true, username: true }
   });
 

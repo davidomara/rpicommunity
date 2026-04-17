@@ -1,6 +1,7 @@
 "use client";
 
 import { useDeferredValue, useState } from "react";
+import type { ContributionApprovalStatus } from "@/lib/domain-types";
 import { ContributionForm } from "@/components/forms/contribution-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataScroll } from "@/components/ui/data-scroll";
@@ -17,7 +18,7 @@ type ContributionRow = {
   memberId: string;
   amount: number;
   contributionDate: string | Date;
-  approvalStatus: "PENDING" | "APPROVED" | "REJECTED";
+  approvalStatus: ContributionApprovalStatus;
   createdAt: string | Date;
 };
 

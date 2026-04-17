@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Pencil } from "lucide-react";
 import { decideMemberStatusChangeAction, updateMemberRoleAndStatusAction, type MemberStatusChangeFormState } from "@/app/(dashboard)/members/actions";
+import { COMMUNITY_ROLES, type Role } from "@/lib/domain-types";
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/forms/form-message";
 import { ROLE, type Role } from "@/lib/domain-types";
 
 const MEMBER_STATUSES = ["ACTIVE", "WARNING", "CLOSED"] as const;
-const COMMUNITY_ROLES: Role[] = [ROLE.ADMIN, ROLE.TREASURER, ROLE.MEMBER];
 const initialState: MemberStatusChangeFormState = {
   success: false,
   error: "",

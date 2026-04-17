@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { ROLE } from "@/lib/domain-types";
 import { getCommunitySettings } from "@/lib/community-settings";
 import { resolveMemberStatus } from "@/lib/member-status";
+import { COMMUNITY_ROLES, STATUS_MODE } from "@/lib/domain-types";
 
 const STATUS_SYNC_INTERVAL_MS = 60_000;
 
@@ -23,8 +24,8 @@ export async function syncAutoMemberStatuses() {
     getCommunitySettings(),
     prisma.user.findMany({
       where: {
-        role: { in: [ROLE.ADMIN, ROLE.TREASURER, ROLE.MEMBER] },
-        statusMode: "AUTO"
+        role: { in: COMMUNITY_ROLES },
+        statusMode: STATUS_MODE.AUTO
       },
       include: {
         contributions: {

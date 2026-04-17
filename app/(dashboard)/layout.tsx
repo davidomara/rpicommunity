@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
+import type { Role } from "@/lib/domain-types";
 import { getNotificationCount } from "@/lib/queries";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -10,7 +11,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <>
-      <AppShell role={session.user.role} name={session.user.name || session.user.username || "Member"} notificationCount={notificationCount}>
+      <AppShell role={session.user.role as Role} name={session.user.name || session.user.username || "Member"} notificationCount={notificationCount}>
         {children}
       </AppShell>
     </>
