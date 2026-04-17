@@ -1,0 +1,5 @@
+@echo off
+cd /d C:\apps\rpic-community-app || exit /b 1
+set PATH=C:\Program Files\nodejs;%PATH%
+call "C:\Program Files\nodejs\npm.cmd" run start >> C:\apps\rpic-community-app\next-start.log 2>&1
+exit /b %errorlevel%
