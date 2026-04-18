@@ -35,7 +35,7 @@ export function WithdrawalsAdminClient({
     : [];
 
   return (
-    <div className="min-w-0 space-y-6">
+    <div className="min-w-0 space-y-4">
       <div>
         <p className="text-sm font-medium text-cyan-700">Financial Administration</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Withdrawals</h1>

@@ -73,8 +73,8 @@ export function WithdrawalForm({
               id="reason"
               name="reason"
               required
-              rows={3}
-              className="min-h-[80px] resize-y overflow-auto"
+              rows={2}
+              className="min-h-[64px] resize-y overflow-auto"
             />
           </div>
           <div className="mt-auto md:col-span-2">
