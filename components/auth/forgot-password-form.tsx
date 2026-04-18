@@ -1,12 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useFormState } from "react-dom";
 import { requestResetAction, type RequestResetFormState } from "@/app/(auth)/forgot-password/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { FormMessage } from "@/components/forms/form-message";
+import { withBasePath } from "@/lib/app-path";
 
 const initialState: RequestResetFormState = {
   success: false,
@@ -31,7 +34,12 @@ export function ForgotPasswordForm() {
         <Label htmlFor="identifier">Username or Email</Label>
         <Input id="identifier" name="identifier" required />
       </div>
-      <SubmitButton label="Send reset link" pendingLabel="Sending..." className="w-full sm:w-auto" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <SubmitButton label="Send reset link" pendingLabel="Sending..." className="w-full sm:w-auto" />
+        <Button asChild variant="outline" className="w-full sm:ml-auto sm:w-auto">
+          <Link href={withBasePath("/login")}>Back to login</Link>
+        </Button>
+      </div>
     </form>
   );
 }
