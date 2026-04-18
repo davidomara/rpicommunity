@@ -42,7 +42,42 @@ export type MemberOptionRow = {
   username: string;
 };
 
-export async function getDashboardData() {
+export type DashboardMemberRow = {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+  role: string;
+  totalContributions: number;
+  totalWithdrawals: number;
+  missing: number;
+  savings: number;
+  pendingEmergencyRequests: number;
+};
+
+export type DashboardPendingRequestRow = Prisma.EmergencyRequestGetPayload<{
+  include: { member: true };
+}>;
+
+export type DashboardSummary = {
+  totalContributions: number;
+  totalWithdrawals: number;
+  totalArrears: number;
+  totalSavings: number;
+  pendingEmergencyRequests: number;
+  members: number;
+  active: number;
+  warning: number;
+  closed: number;
+  balance: number;
+  availableBalance: number;
+};
+
+export async function getDashboardData(): Promise<{
+  members: DashboardMemberRow[];
+  pendingRequests: DashboardPendingRequestRow[];
+  summary: DashboardSummary;
+}> {
   await syncAutoMemberStatuses();
   const [members, pendingRequests] = await Promise.all([
     prisma.user.findMany({
@@ -65,7 +100,7 @@ export async function getDashboardData() {
     })
   ]);
 
-  const memberRows = sortCommunityRows(members.map((member) => {
+  const memberRows = sortCommunityRows<DashboardMemberRow>(members.map((member) => {
     const contributionTotal = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
     const withdrawalTotal = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
     return {
