@@ -21,6 +21,16 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
+function extractEmailAddress(value: string) {
+  const match = value.match(/<([^>]+)>/);
+  return (match?.[1] || value).trim().toLowerCase();
+}
+
+function getEmailDomain(value: string) {
+  const address = extractEmailAddress(value);
+  return address.split("@")[1] || "";
+}
+
 export function hashPasswordResetToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
@@ -36,6 +46,26 @@ export function isPasswordResetEmailConfigured() {
 export function getPasswordResetEmailConfigError() {
   if (isPasswordResetEmailConfigured()) return "";
   return "Password reset email is not configured. Set RESEND_API_KEY, RESET_EMAIL_FROM, and APP_URL.";
+}
+
+export function getPasswordResetDeliveryErrorMessage(error: unknown) {
+  const fallback = "Unable to send the password reset email right now. Please try again later.";
+
+  if (!(error instanceof Error)) return fallback;
+
+  const details = error.message.toLowerCase();
+  if (details.includes("domain is not verified")) {
+    const senderDomain = getEmailDomain(RESET_EMAIL_FROM);
+    return senderDomain
+      ? `Password reset email is blocked because the sender domain ${senderDomain} is not verified in Resend. Verify that domain in Resend, or change RESET_EMAIL_FROM to a verified sender.`
+      : "Password reset email is blocked because the sender domain is not verified in Resend. Verify the domain in Resend, or change RESET_EMAIL_FROM to a verified sender.";
+  }
+
+  if (details.includes("403") && details.includes("resend.dev")) {
+    return "Resend rejected the sender address. The resend.dev test sender only works in limited testing. Use a verified domain in RESET_EMAIL_FROM for normal password reset emails.";
+  }
+
+  return fallback;
 }
 
 export async function issuePasswordResetToken(userId: string) {

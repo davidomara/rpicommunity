@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { requestPasswordResetSchema } from "@/lib/validators/auth";
 import {
+  getPasswordResetDeliveryErrorMessage,
   getPasswordResetEmailConfigError,
   isPasswordResetEmailConfigured,
   issuePasswordResetToken,
@@ -69,7 +70,7 @@ export async function requestResetAction(
 
     return {
       success: false,
-      error: "Unable to send the password reset email right now. Please try again later.",
+      error: getPasswordResetDeliveryErrorMessage(error),
       message: ""
     };
   }
