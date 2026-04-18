@@ -118,7 +118,7 @@ Protected files are stored under `storage/private` by default. This starter keep
 
 ## Notes
 
-- Password reset token generation is implemented; delivery email is not wired in this starter.
+- Password reset sends email links when `RESEND_API_KEY` and `RESET_EMAIL_FROM` are configured.
 - The architecture is intentionally monolithic for faster, cheaper, and simpler deployment on Railway.
 
 For your **RPIC Community App** (Next.js + TypeScript + Prisma + Auth.js + PostgreSQL on Railway), you should combine several testing tools to cover **unit, integration, and end‑to‑end behavior**.[^1][^2][^3]

@@ -110,7 +110,7 @@ The RPIC Community App is a modern migration of a community welfare, emergency s
 
 ## Notes and Limitations
 
-- Password reset token generation is present, but email delivery is not wired in this starter implementation
+- Password reset email delivery is supported when `RESEND_API_KEY` and `RESET_EMAIL_FROM` are configured
 - Real-time websocket updates are deferred in favor of simpler cache-revalidate behavior
 
 ## Recommended Files and Areas

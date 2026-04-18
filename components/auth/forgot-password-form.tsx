@@ -31,7 +31,7 @@ export function ForgotPasswordForm() {
         <Label htmlFor="identifier">Username or Email</Label>
         <Input id="identifier" name="identifier" required />
       </div>
-      <SubmitButton label="Generate reset token" pendingLabel="Generating..." className="w-full sm:w-auto" />
+      <SubmitButton label="Send reset link" pendingLabel="Sending..." className="w-full sm:w-auto" />
     </form>
   );
 }

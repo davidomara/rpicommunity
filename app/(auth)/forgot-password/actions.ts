@@ -1,9 +1,15 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
-import { addHours } from "date-fns";
 import { prisma } from "@/lib/db";
 import { requestPasswordResetSchema } from "@/lib/validators/auth";
+import {
+  getPasswordResetEmailConfigError,
+  isPasswordResetEmailConfigured,
+  issuePasswordResetToken,
+  revokeOtherPasswordResetTokens,
+  revokePasswordResetToken,
+  sendPasswordResetEmail
+} from "@/lib/password-reset";
 
 export type RequestResetFormState = {
   success: boolean;
@@ -15,6 +21,14 @@ export async function requestResetAction(
   _: RequestResetFormState,
   formData: FormData
 ): Promise<RequestResetFormState> {
+  if (!isPasswordResetEmailConfigured()) {
+    return {
+      success: false,
+      error: getPasswordResetEmailConfigError(),
+      message: ""
+    };
+  }
+
   const parsed = requestPasswordResetSchema.safeParse({
     identifier: String(formData.get("identifier") || "")
   });
@@ -35,21 +49,34 @@ export async function requestResetAction(
     return {
       success: true,
       error: "",
-      message: "If the account exists, a reset token has been generated for internal handling."
+      message: "If the account exists, a password reset link has been sent."
     };
   }
 
-  await prisma.passwordResetToken.create({
-    data: {
-      userId: user.id,
-      token: randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, ""),
-      expiresAt: addHours(new Date(), 1)
-    }
-  });
+  const resetToken = await issuePasswordResetToken(user.id);
+
+  try {
+    await sendPasswordResetEmail({
+      to: user.email,
+      name: user.name,
+      resetUrl: resetToken.resetUrl,
+      expiresAt: resetToken.expiresAt
+    });
+    await revokeOtherPasswordResetTokens(user.id, resetToken.tokenHash);
+  } catch (error) {
+    await revokePasswordResetToken(resetToken.tokenHash);
+    console.error("Password reset email delivery failed", error);
+
+    return {
+      success: false,
+      error: "Unable to send the password reset email right now. Please try again later.",
+      message: ""
+    };
+  }
 
   return {
     success: true,
     error: "",
-    message: "Reset token generated successfully for internal handling."
+    message: "If the account exists, a password reset link has been sent."
   };
 }

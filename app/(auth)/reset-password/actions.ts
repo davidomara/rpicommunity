@@ -2,6 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
+import { getValidPasswordResetToken } from "@/lib/password-reset";
 import { resetPasswordSchema } from "@/lib/validators/auth";
 
 export type ResetPasswordFormState = {
@@ -27,12 +28,9 @@ export async function resetPasswordAction(
     };
   }
 
-  const token = await prisma.passwordResetToken.findUnique({
-    where: { token: parsed.data.token },
-    include: { user: true }
-  });
+  const token = await getValidPasswordResetToken(parsed.data.token);
 
-  if (!token || token.usedAt || token.expiresAt < new Date()) {
+  if (!token) {
     return {
       success: false,
       error: "Reset token is invalid or expired",
@@ -45,8 +43,11 @@ export async function resetPasswordAction(
     data: { passwordHash: await bcrypt.hash(parsed.data.password, 12) }
   });
 
-  await prisma.passwordResetToken.update({
-    where: { id: token.id },
+  await prisma.passwordResetToken.updateMany({
+    where: {
+      userId: token.userId,
+      usedAt: null
+    },
     data: { usedAt: new Date() }
   });
 

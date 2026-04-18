@@ -209,5 +209,5 @@ This keeps file access behind authenticated routes while making uploads survive 
 
 ## Notes
 
-- Password reset token generation is implemented; delivery email is not wired in this starter.
+- Password reset sends email links when `RESEND_API_KEY` and `RESET_EMAIL_FROM` are configured.
 - The architecture is intentionally monolithic for faster, cheaper, and simpler deployment on Railway.
