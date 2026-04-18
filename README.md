@@ -13,7 +13,7 @@ This repo is a migration and modernization of the original Lango Community appli
 - Tailwind CSS
 - shadcn-style UI primitives
 - Prisma ORM
-- Railway PostgreSQL
+- SQL Server
 - Auth.js with database sessions
 - Zod validation
 - Recharts
@@ -35,15 +35,17 @@ This repo is a migration and modernization of the original Lango Community appli
 ## Getting started
 
 1. Copy `.env.example` to `.env`
-2. Set `DATABASE_URL` and `AUTH_SECRET`
+2. Set `DATABASE_URL` to your SQL Server connection string, and set `AUTH_SECRET`
 3. Run `npm install`
 4. Run `npx prisma migrate dev`
 5. Run `npm run prisma:seed`
 6. Run `npm run dev`
 
-## Environment notes
+Example `DATABASE_URL` for SQL Server:
 
-- WSL setup and troubleshooting: [docs/wsl-setup.md](/mnt/d/.Nord%20APP/RPICCommunityApp/docs/wsl-setup.md)
+```env
+DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;"
+```
 
 ## Default users
 
@@ -63,105 +65,42 @@ This repo is a migration and modernization of the original Lango Community appli
   `CP`, `SSP`, `SP`, `ASP`, `AIP`, `CPL`, `PC`
 - Within the same rank, names are sorted alphabetically.
 
-## WSL New 
-
-Then redeploy Railway.
-
-If you want to verify locally first from the WSL repo:
-
-cd /home/nord/projects/RPICCommunityApp
-npm run build
-
-Windows to WSL is already synced for the contribution-notification changes.
-
-Run this in WSL:
-
-```bash
-cd /home/nord/projects/RPICCommunityApp
-npx prisma generate
-npm run build
-```
-
-If you also want the local DB aligned first:
-
-```bash
-cd /home/nord/projects/RPICCommunityApp
-npx prisma migrate dev
-npx prisma generate
-npm run build
-```
-
-Manual Windows -> WSL sync commands :
-
-```bash
-
--- Manual command to do the same offline:
-
-rsync -a --delete --exclude '.git/' --exclude 'node_modules/' --exclude '.next/' --exclude 'storage/' '/mnt/d/.Nord APP/RPICCommunityApp/' '/home/nord/projects/RPICCommunityApp/'
-
--- Manual verification command:
-
-rsync -ani --delete --exclude '.git/' --exclude 'node_modules/' --exclude '.next/' --exclude 'storage/' '/mnt/d/.Nord APP/RPICCommunityApp/' '/home/nord/projects/RPICCommunityApp/'
-
-
-If `npm run build` fails again after `npx prisma generate`, paste the next error block.
-
-## Railway deployment
-
-- Create one Railway PostgreSQL service
-- Create one Railway web service for this app
-- Root directory: repo root. Leave it blank if this repository is deployed directly to Railway because `package.json` is already at the project root.
-- Set `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, `NEXT_PUBLIC_APP_URL`, `AUTH_URL`, `NEXTAUTH_URL`, and `UPLOAD_ROOT`
-- Recommended Railway variables:
-  `DATABASE_URL`
-  `AUTH_SECRET`
-  `APP_URL`
-  `NEXT_PUBLIC_APP_URL`
-  `AUTH_URL`
-  `NEXTAUTH_URL`
-  `UPLOAD_ROOT=/data/private`
-  `AUTH_TRUST_HOST=true`
-- Recommended build command:
-  `npm run build`
-- Recommended start command:
-  `npm run start`
-- Recommended migration flow:
-  Run `npx prisma migrate deploy` manually from a Railway shell or CI job when you intentionally want to apply pending production migrations.
-- cd /home/nord/projects/RPICCommunityApp wsl
-- Example production migration commands from your own terminal:
-  `DATABASE_URL='postgresql://...production...?sslmode=require' npx prisma migrate deploy`
-  `DATABASE_URL='postgresql://...production...?sslmode=require' npx prisma migrate status`
-- Why:
-  Running `prisma migrate deploy` inside the Railway start command can put the service into a restart loop if a migration fails. Keeping migrations as a manual deployment step is safer for production.
-- First deploy flow:
-  1. Push this repo to GitHub
-  2. In Railway, create a PostgreSQL service
-  3. In Railway, create a web service from the GitHub repo
-  4. Confirm the root directory is blank or `/`
-  5. Add the environment variables listed above
-  6. Set the build command to `npm run build`
-  7. Set the start command to `npm run start`
-  8. Deploy the service
-  9. If you have pending schema changes, open a Railway shell and run `npx prisma migrate deploy`
-  10. After the first successful deploy, open a Railway shell and run `npm run prisma:seed` once if you want the onboarding user accounts
-  11. If Prisma reports a failed production migration record but the schema changes are already present, resolve it before future deploys with:
-     `npx prisma migrate resolve --applied <migration_name>`
-  12. If you only need to add a Treasurer user in production, do not reseed the whole database. Run a one-off create command instead:
-     `DATABASE_URL='postgresql://...production...?sslmode=require' node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.create({ data:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer created: treasurer / Admin@123'); })().finally(()=>prisma.$disconnect());"`
-  13. If a Treasurer account may already exist, use an upsert instead:
-     `DATABASE_URL='postgresql://...production...?sslmode=require' node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.upsert({ where:{ username:'treasurer' }, update:{ email:'treasurer@rpic.local', role:Role.TREASURER, status:MemberStatus.ACTIVE }, create:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer upserted'); })().finally(()=>prisma.$disconnect());"`
-- Railway CLI example:
-  `railway up`
-
 ## Windows Server deployment
 
-For a Windows Server deployment, use standalone output in Next.js. This repo uses `next.config.mjs`, so set:
+This branch targets Windows Server with SQL Server.
 
-```js
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: "standalone"
-}
+Use standalone output in Next.js. This repo already uses `next.config.mjs` with standalone output enabled.
+
+Recommended production steps:
+
+1. Set the required environment variables:
+   `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, `NEXT_PUBLIC_APP_URL`, `AUTH_URL`, `NEXTAUTH_URL`, `UPLOAD_ROOT`, `AUTH_TRUST_HOST`
+2. Apply pending schema changes:
+   `npx prisma migrate deploy`
+3. Seed onboarding users once if needed:
+   `npm run prisma:seed`
+4. Build the app:
+   `npm run build`
+5. Start the app:
+   `npm run start`
+
+Example production migration commands:
+
+```bash
+DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;" npx prisma migrate deploy
+DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;" npx prisma migrate status
+```
+
+If you only need to add a Treasurer user in production, do not reseed the whole database. Use a one-off command instead:
+
+```bash
+DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;" node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.create({ data:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer created: treasurer / Admin@123'); })().finally(()=>prisma.$disconnect());"
+```
+
+If a Treasurer account may already exist, use an upsert instead:
+
+```bash
+DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;" node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.upsert({ where:{ username:'treasurer' }, update:{ email:'treasurer@rpic.local', role:Role.TREASURER, status:MemberStatus.ACTIVE }, create:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer upserted'); })().finally(()=>prisma.$disconnect());"
 ```
 
 Production environment example:
@@ -199,15 +138,14 @@ After you create the reverse-proxy rule, IIS may write the rule for you. If you 
 
 Protected files are stored under `storage/private` by default for local development.
 
-For Railway production, do not use app-local disk for protected uploads. Mount a persistent volume and point:
+For Windows Server production, point `UPLOAD_ROOT` to a persistent folder on disk, for example:
 
-`UPLOAD_ROOT=/data/private`
+`UPLOAD_ROOT=C:\sites\rpic-community-app\data\private`
 
-This app now stores logical relative file keys in the database for new uploads, and resolves them against `UPLOAD_ROOT` at runtime. Existing older rows that stored absolute disk paths still work if those files still exist, but files previously written to ephemeral Railway local disk must be re-uploaded after you switch to a mounted volume.
+This app stores logical relative file keys in the database for new uploads and resolves them against `UPLOAD_ROOT` at runtime. Existing older rows that stored absolute disk paths still work if those files still exist.
 
-This keeps file access behind authenticated routes while making uploads survive redeploys and restarts. Move to object storage later if file volume or retention requirements grow.
+This keeps file access behind authenticated routes while making uploads survive restarts and redeploys.
 
 ## Notes
 
 - Password reset sends email links when `RESEND_API_KEY` and `RESET_EMAIL_FROM` are configured.
-- The architecture is intentionally monolithic for faster, cheaper, and simpler deployment on Railway.
