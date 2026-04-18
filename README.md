@@ -71,24 +71,30 @@ This branch targets Windows Server with SQL Server.
 
 Use standalone output in Next.js. This repo already uses `next.config.mjs` with standalone output enabled.
 
-Recommended production steps:
+Server working directory:
 
-1. Set the required environment variables:
-   `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, `NEXT_PUBLIC_APP_URL`, `AUTH_URL`, `NEXTAUTH_URL`, `UPLOAD_ROOT`, `AUTH_TRUST_HOST`
-2. Apply pending schema changes:
-   `npx prisma migrate deploy`
-3. Seed onboarding users once if needed:
-   `npm run prisma:seed`
-4. Build the app:
-   `npm run build`
-5. Start the app:
-   `npm run start`
+```powershell
+cd C:\apps\rpic-community-app
+```
 
-Example production migration commands:
+Stop any currently running Node process before rebuilding:
 
-```bash
-DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;" npx prisma migrate deploy
-DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;" npx prisma migrate status
+```powershell
+taskkill /f /im node.exe
+```
+
+Run this on the server after pulling:
+
+```powershell
+npx prisma migrate deploy
+npx prisma generate
+cd C:\apps\rpic-community-app
+& "C:\Program Files\nodejs\npm.cmd" run build
+robocopy .next\static .next\standalone\.next\static /E
+robocopy public .next\standalone\public /E
+Copy-Item .env.production .next\standalone\.env.production -Force
+taskkill /f /im node.exe
+schtasks /run /tn "RPIC WWW"
 ```
 
 If you only need to add a Treasurer user in production, do not reseed the whole database. Use a one-off command instead:
