@@ -36,6 +36,12 @@ export type MemberAccountDirectoryRow = {
   status: string;
 };
 
+export type MemberOptionRow = {
+  id: string;
+  name: string;
+  username: string;
+};
+
 export async function getDashboardData() {
   await syncAutoMemberStatuses();
   const [members, pendingRequests] = await Promise.all([
@@ -132,7 +138,21 @@ export async function getMemberAccountDirectory(): Promise<MemberAccountDirector
   return sortCommunityRows<MemberAccountDirectoryRow>(rows);
 }
 
-export async function getContributionContextForRole(role: Role, userId: string) {
+export async function getContributionContextForRole(
+  role: Role,
+  userId: string
+): Promise<{
+  members: MemberOptionRow[];
+  rows: Array<{
+    id: string;
+    memberId: string;
+    amount: Prisma.Decimal;
+    contributionDate: Date;
+    approvalStatus: string;
+    createdAt: Date;
+  }>;
+  staffView: boolean;
+}> {
   const staffView = canManageFinance(role);
   const memberWhere = staffView
     ? { role: { in: COMMUNITY_ROLES } }
@@ -159,7 +179,7 @@ export async function getContributionContextForRole(role: Role, userId: string) 
     }
   });
 
-  return { members: sortCommunityRows(members), rows, staffView };
+  return { members: sortCommunityRows<MemberOptionRow>(members), rows, staffView };
 }
 
 export async function getContributionNotifications(role: Role) {
