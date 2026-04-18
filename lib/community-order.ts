@@ -25,6 +25,6 @@ export function compareCommunityNames(a: string, b: string) {
   });
 }
 
-export function sortCommunityRows<T extends { name: string }>(rows: T[]) {
+export function sortCommunityRows<T extends { name: string }>(rows: T[]): T[] {
   return [...rows].sort((a, b) => compareCommunityNames(a.name, b.name));
 }

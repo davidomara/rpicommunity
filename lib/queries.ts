@@ -28,6 +28,14 @@ export type MemberDirectoryRow = Prisma.UserGetPayload<{
   include: typeof memberDirectoryArgs.include 
 }>;
 
+export type MemberAccountDirectoryRow = {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  status: string;
+};
+
 export async function getDashboardData() {
   await syncAutoMemberStatuses();
   const [members, pendingRequests] = await Promise.all([
@@ -109,7 +117,7 @@ export async function getMembersDirectory(): Promise<MemberDirectoryRow[]> {
   return sortCommunityRows(rows);
 }
 
-export async function getMemberAccountDirectory() {
+export async function getMemberAccountDirectory(): Promise<MemberAccountDirectoryRow[]> {
   const rows = await prisma.user.findMany({
     where: { role: "MEMBER" },
     select: {
@@ -121,7 +129,7 @@ export async function getMemberAccountDirectory() {
     }
   });
 
-  return sortCommunityRows(rows);
+  return sortCommunityRows<MemberAccountDirectoryRow>(rows);
 }
 
 export async function getContributionContextForRole(role: Role, userId: string) {
