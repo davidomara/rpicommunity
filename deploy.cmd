@@ -116,6 +116,11 @@ if errorlevel 1 (
   exit /b 1
 )
 
+if not exist ".next\standalone\server.js" (
+  echo FAILED: standalone build output missing at .next\standalone\server.js >> "%LOG%"
+  exit /b 1
+)
+
 echo --- copy standalone static --- >> "%LOG%"
 robocopy .next\static .next\standalone\.next\static /E >> "%LOG%" 2>&1
 
@@ -130,7 +135,7 @@ if errorlevel 1 (
 )
 
 echo --- prepare IIS runtime folders --- >> "%LOG%"
-powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '%IIS_ROOT%' | Out-Null; New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next' | Out-Null" >> "%LOG%" 2>&1
+powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '%IIS_ROOT%' | Out-Null; New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next' | Out-Null; New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next\static' | Out-Null" >> "%LOG%" 2>&1
 if errorlevel 1 (
   echo FAILED: create IIS runtime folders >> "%LOG%"
   exit /b 1
@@ -144,7 +149,7 @@ if errorlevel 1 (
 )
 
 echo --- copy static to IIS runtime --- >> "%LOG%"
-powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\.next\static' '%IIS_ROOT%\.next\static' -Recurse -Force" >> "%LOG%" 2>&1
+powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\.next\static\*' '%IIS_ROOT%\.next\static' -Recurse -Force" >> "%LOG%" 2>&1
 if errorlevel 1 (
   echo FAILED: copy static to IIS runtime >> "%LOG%"
   exit /b 1
