@@ -148,6 +148,13 @@ if errorlevel 1 (
   exit /b 1
 )
 
+echo --- copy server to IIS runtime --- >> "%LOG%"
+powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next\server' | Out-Null; Copy-Item 'C:\apps\rpic-community-app\.next\server\*' '%IIS_ROOT%\.next\server' -Recurse -Force" >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: copy server to IIS runtime >> "%LOG%"
+  exit /b 1
+)
+
 echo --- copy static to IIS runtime --- >> "%LOG%"
 powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\.next\static\*' '%IIS_ROOT%\.next\static' -Recurse -Force" >> "%LOG%" 2>&1
 if errorlevel 1 (
