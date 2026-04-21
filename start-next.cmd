@@ -1,7 +1,7 @@
 @echo off
-cd /d C:\apps\rpic-community-app || exit /b 1
-robocopy .next\static .next\standalone\.next\static /E >nul
-robocopy public .next\standalone\public /E >nul
+setlocal
+cd /d C:\inetpub\wwwroot\rpicommunity || exit /b 1
 set PATH=C:\Program Files\nodejs;%PATH%
 set PORT=3000
-"C:\Program Files\nodejs\node.exe" .next\standalone\server.js >> C:\apps\rpic-community-app\next-start.log 2>&1
+echo Starting app at %date% %time%>> C:\apps\rpic-community-app\next-start.log
+"C:\Program Files\nodejs\node.exe" server.js >> C:\apps\rpic-community-app\next-start.log 2>&1
