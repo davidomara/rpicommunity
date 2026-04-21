@@ -7,6 +7,7 @@ set LOG=C:\apps\rpic-community-app\deploy.log
 set BRANCH=feature/sql_db
 set PORT=3000
 set START_TASK=RPIC WWW
+set IIS_ROOT=C:\inetpub\wwwroot\rpicommunity
 
 echo ==================================================>> "%LOG%"
 echo Deploy check started %date% %time%>> "%LOG%"
@@ -108,16 +109,51 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo --- copy .next static --- >> "%LOG%"
+echo --- copy standalone static --- >> "%LOG%"
 robocopy .next\static .next\standalone\.next\static /E >> "%LOG%" 2>&1
 
-echo --- copy public --- >> "%LOG%"
+echo --- copy standalone public --- >> "%LOG%"
 robocopy public .next\standalone\public /E >> "%LOG%" 2>&1
 
-echo --- copy env --- >> "%LOG%"
+echo --- copy standalone env --- >> "%LOG%"
 powershell -NoProfile -Command "Copy-Item '.env.production' '.next\standalone\.env.production' -Force" >> "%LOG%" 2>&1
 if errorlevel 1 (
-  echo FAILED: copy env >> "%LOG%"
+  echo FAILED: copy standalone env >> "%LOG%"
+  exit /b 1
+)
+
+echo --- prepare IIS runtime folders --- >> "%LOG%"
+powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '%IIS_ROOT%' | Out-Null; New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next' | Out-Null" >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: create IIS runtime folders >> "%LOG%"
+  exit /b 1
+)
+
+echo --- copy standalone server to IIS runtime --- >> "%LOG%"
+powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\.next\standalone\*' '%IIS_ROOT%' -Recurse -Force" >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: copy standalone server to IIS runtime >> "%LOG%"
+  exit /b 1
+)
+
+echo --- copy static to IIS runtime --- >> "%LOG%"
+powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\.next\static' '%IIS_ROOT%\.next\static' -Recurse -Force" >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: copy static to IIS runtime >> "%LOG%"
+  exit /b 1
+)
+
+echo --- copy public to IIS runtime --- >> "%LOG%"
+powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\public' '%IIS_ROOT%\public' -Recurse -Force" >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: copy public to IIS runtime >> "%LOG%"
+  exit /b 1
+)
+
+echo --- copy env to IIS runtime --- >> "%LOG%"
+powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\.env.production' '%IIS_ROOT%\.env.production' -Force" >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: copy env to IIS runtime >> "%LOG%"
   exit /b 1
 )
 
