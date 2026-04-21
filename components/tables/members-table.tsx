@@ -36,6 +36,8 @@ export function MembersTable({
   role?: Role;
 }) {
   const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [alphabetOrder, setAlphabetOrder] = useState<"A_Z" | "Z_A">("A_Z");
 
   async function copyText(value: string) {
     if (window.isSecureContext && navigator.clipboard?.writeText) {
@@ -71,15 +73,56 @@ export function MembersTable({
   }
 
   const showActions = role === "ADMIN" || role === "TREASURER";
-  const filtered = useMemo(() => rows.filter((row) => {
+  const statusOptions = useMemo(
+    () => Array.from(new Set(rows.map((row) => row.status))).sort((left, right) => left.localeCompare(right)),
+    [rows]
+  );
+  const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return true;
-    return row.name.toLowerCase().includes(q) || row.email.toLowerCase().includes(q);
-  }), [rows, query]);
+    const filteredRows = rows.filter((row) => {
+      const matchesQuery = !q || row.name.toLowerCase().includes(q) || row.email.toLowerCase().includes(q);
+      const matchesStatus = statusFilter === "ALL" || row.status === statusFilter;
+      return matchesQuery && matchesStatus;
+    });
+
+    return [...filteredRows].sort((left, right) => {
+      const comparison = left.name.localeCompare(right.name);
+      return alphabetOrder === "A_Z" ? comparison : comparison * -1;
+    });
+  }, [alphabetOrder, query, rows, statusFilter]);
 
   return (
     <div className="min-w-0 space-y-4">
-      <Input placeholder="Search members by name or email" value={query} onChange={(event) => setQuery(event.target.value)} />
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <Input
+          placeholder="Search members by name or email"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          className="w-full lg:flex-1"
+        />
+        <div className="flex flex-col gap-3 sm:flex-row lg:w-auto">
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900"
+          >
+            <option value="ALL">All statuses</option>
+            {statusOptions.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+          <select
+            value={alphabetOrder}
+            onChange={(event) => setAlphabetOrder(event.target.value as "A_Z" | "Z_A")}
+            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900"
+          >
+            <option value="A_Z">Alphabet A-Z</option>
+            <option value="Z_A">Alphabet Z-A</option>
+          </select>
+        </div>
+      </div>
       <div className="min-w-0 rounded-lg border bg-white shadow-soft">
         <DataScroll className="px-0 max-h-[520px] overflow-auto touch-auto">
           <table className="data-table w-full table-auto">
@@ -96,7 +139,7 @@ export function MembersTable({
               </tr>
             </thead>
             <tbody>
-              {filtered.map((row, index) => (
+              {filtered.length ? filtered.map((row, index) => (
                 <tr key={row.id}>
                   <td className="whitespace-nowrap pr-3 text-slate-500">{index + 1}</td>
                   <td className="min-w-[240px] pr-4">
@@ -134,7 +177,13 @@ export function MembersTable({
                     </td>
                   ) : null}
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={showActions ? 8 : 7} className="py-6 text-center text-sm text-slate-500">
+                    No members matched the current search and filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </DataScroll>
