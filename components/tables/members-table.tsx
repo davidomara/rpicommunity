@@ -20,6 +20,7 @@ export function MembersTable({
   rows: Array<{
     id: string;
     name: string;
+    username: string;
     email: string;
     role: Role;
     status: string;
@@ -84,7 +85,11 @@ export function MembersTable({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const filteredRows = rows.filter((row) => {
-      const matchesQuery = !q || row.name.toLowerCase().includes(q) || row.email.toLowerCase().includes(q);
+      const matchesQuery =
+        !q ||
+        row.username.toLowerCase().includes(q) ||
+        row.name.toLowerCase().includes(q) ||
+        row.email.toLowerCase().includes(q);
       const matchesStatus = statusFilter === "ALL" || row.status === statusFilter;
       return matchesQuery && matchesStatus;
     });
@@ -97,14 +102,8 @@ export function MembersTable({
 
   return (
     <div className="min-w-0 space-y-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-        <Input
-          placeholder="Search members by name or email"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          className="w-full lg:flex-1"
-        />
-        <div className="flex flex-col gap-3 sm:flex-row lg:w-auto">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:flex-none">
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
@@ -125,6 +124,14 @@ export function MembersTable({
             <option value="A_Z">Alphabet A-Z</option>
             <option value="Z_A">Alphabet Z-A</option>
           </select>
+        </div>
+        <div className="min-w-0 flex-1">
+          <Input
+            placeholder="Search members by number, name or email"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            className="w-full"
+          />
         </div>
       </div>
       <div className="min-w-0 rounded-lg border bg-white shadow-soft">

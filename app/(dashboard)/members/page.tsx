@@ -36,6 +36,7 @@ export default async function MembersPage() {
     return {
       id: member.id,
       name: member.name,
+      username: member.username,
       email: member.email,
       role: member.role as Role,
       status: member.status,
