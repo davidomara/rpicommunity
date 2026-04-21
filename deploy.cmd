@@ -124,6 +124,13 @@ if not exist ".next\standalone\server.js" (
 echo --- copy standalone static --- >> "%LOG%"
 robocopy .next\static .next\standalone\.next\static /E >> "%LOG%" 2>&1
 
+echo --- copy standalone server --- >> "%LOG%"
+powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '.next\standalone\.next\server' | Out-Null; Copy-Item '.next\server\*' '.next\standalone\.next\server' -Recurse -Force" >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: copy standalone server >> "%LOG%"
+  exit /b 1
+)
+
 echo --- copy standalone public --- >> "%LOG%"
 robocopy public .next\standalone\public /E >> "%LOG%" 2>&1
 
