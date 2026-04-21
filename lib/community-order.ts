@@ -12,6 +12,10 @@ function getRankParts(name: string) {
   };
 }
 
+export function getCommunityNameWithoutRank(name: string) {
+  return getRankParts(name).remainder;
+}
+
 export function compareCommunityNames(a: string, b: string) {
   const left = getRankParts(a);
   const right = getRankParts(b);

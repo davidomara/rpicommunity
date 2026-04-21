@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { showToast } from "@/components/ui/toaster";
 import { formatMoney } from "@/lib/utils";
 import { MemberStatusActions } from "@/components/members/member-status-actions";
-import { compareCommunityNames } from "@/lib/community-order";
+import { compareCommunityNames, getCommunityNameWithoutRank } from "@/lib/community-order";
 
 export function MembersTable({
   rows,
@@ -101,7 +101,9 @@ export function MembersTable({
         return compareCommunityNames(left.name, right.name);
       }
 
-      const comparison = left.name.localeCompare(right.name);
+      const comparison = getCommunityNameWithoutRank(left.name).localeCompare(getCommunityNameWithoutRank(right.name), undefined, {
+        sensitivity: "base"
+      });
       return alphabetOrder === "A_Z" ? comparison : comparison * -1;
     });
   }, [alphabetOrder, query, rows, statusFilter]);
