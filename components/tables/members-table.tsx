@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Copy } from "lucide-react";
+import { Copy, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DataScroll } from "@/components/ui/data-scroll";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { showToast } from "@/components/ui/toaster";
 import { formatMoney } from "@/lib/utils";
 import { MemberStatusActions } from "@/components/members/member-status-actions";
+import { compareCommunityNames } from "@/lib/community-order";
 
 export function MembersTable({
   rows,
@@ -42,7 +43,7 @@ export function MembersTable({
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [alphabetOrder, setAlphabetOrder] = useState<"A_Z" | "Z_A">("A_Z");
+  const [alphabetOrder, setAlphabetOrder] = useState<"RANK" | "A_Z" | "Z_A">("RANK");
 
   async function copyText(value: string) {
     if (window.isSecureContext && navigator.clipboard?.writeText) {
@@ -78,6 +79,7 @@ export function MembersTable({
   }
 
   const showActions = canEdit || canReview;
+  const hasActiveFilters = query.trim() !== "" || statusFilter !== "ALL" || alphabetOrder !== "RANK";
   const statusOptions = useMemo(
     () => Array.from(new Set(rows.map((row) => row.status))).sort((left, right) => left.localeCompare(right)),
     [rows]
@@ -95,6 +97,10 @@ export function MembersTable({
     });
 
     return [...filteredRows].sort((left, right) => {
+      if (alphabetOrder === "RANK") {
+        return compareCommunityNames(left.name, right.name);
+      }
+
       const comparison = left.name.localeCompare(right.name);
       return alphabetOrder === "A_Z" ? comparison : comparison * -1;
     });
@@ -103,11 +109,11 @@ export function MembersTable({
   return (
     <div className="min-w-0 space-y-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:flex-none">
+        <div className="flex flex-wrap items-center gap-2 lg:flex-none">
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900"
+            className="h-10 min-w-[140px] flex-1 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 sm:flex-none"
           >
             <option value="ALL">All statuses</option>
             {statusOptions.map((status) => (
@@ -118,12 +124,30 @@ export function MembersTable({
           </select>
           <select
             value={alphabetOrder}
-            onChange={(event) => setAlphabetOrder(event.target.value as "A_Z" | "Z_A")}
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900"
+            onChange={(event) => setAlphabetOrder(event.target.value as "RANK" | "A_Z" | "Z_A")}
+            className="h-10 min-w-[140px] flex-1 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 sm:flex-none"
           >
+            <option value="RANK">Rank order</option>
             <option value="A_Z">Alphabet A-Z</option>
             <option value="Z_A">Alphabet Z-A</option>
           </select>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setQuery("");
+              setStatusFilter("ALL");
+              setAlphabetOrder("RANK");
+            }}
+            disabled={!hasActiveFilters}
+            className="h-10 px-3 text-slate-600"
+            aria-label="Clear member filters"
+            title="Clear filters and return to rank order"
+          >
+            <X className="mr-1 h-3.5 w-3.5" />
+            Clear
+          </Button>
         </div>
         <div className="min-w-0 flex-1">
           <Input
