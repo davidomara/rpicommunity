@@ -13,7 +13,9 @@ import { MemberStatusActions } from "@/components/members/member-status-actions"
 
 export function MembersTable({
   rows,
-  role
+  actorAccessRoleKey,
+  canEdit,
+  canReview
 }: {
   rows: Array<{
     id: string;
@@ -33,7 +35,9 @@ export function MembersTable({
       treasurerApproved: boolean;
     } | null;
   }>;
-  role?: Role;
+  actorAccessRoleKey: string;
+  canEdit: boolean;
+  canReview: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -72,7 +76,7 @@ export function MembersTable({
     }
   }
 
-  const showActions = role === "ADMIN" || role === "TREASURER";
+  const showActions = canEdit || canReview;
   const statusOptions = useMemo(
     () => Array.from(new Set(rows.map((row) => row.status))).sort((left, right) => left.localeCompare(right)),
     [rows]
@@ -171,7 +175,9 @@ export function MembersTable({
                         memberId={row.id}
                         currentRole={row.role}
                         currentStatus={row.status}
-                        actorRole={role!}
+                        actorAccessRoleKey={actorAccessRoleKey}
+                        canEdit={canEdit}
+                        canReview={canReview}
                         pendingChange={row.pendingStatusChange}
                       />
                     </td>

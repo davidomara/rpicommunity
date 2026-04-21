@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 import { CONTRIBUTION_APPROVAL_STATUS, TRANSACTION_TYPE } from "@/lib/domain-types";
+import { deriveLegacyAccessRoleKey, getPermissionDefinitions, getSeedAccessRoles } from "@/lib/rbac-core";
 
 const prisma = new PrismaClient();
 
@@ -134,6 +135,56 @@ async function main() {
   await prisma.session.deleteMany();
   await prisma.account.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.accessRolePermission.deleteMany();
+  await prisma.permission.deleteMany();
+  await prisma.accessRole.deleteMany();
+
+  const permissionRows = getPermissionDefinitions();
+  await prisma.permission.createMany({
+    data: permissionRows.map((permission) => ({
+      key: permission.key,
+      module: permission.module,
+      name: permission.name,
+      description: permission.description
+    }))
+  });
+
+  const createdPermissions = await prisma.permission.findMany({
+    select: { id: true, key: true }
+  });
+  const permissionIdByKey = new Map(createdPermissions.map((permission) => [permission.key, permission.id]));
+
+  const seedRoles = getSeedAccessRoles();
+  await prisma.accessRole.createMany({
+    data: seedRoles.map((role) => ({
+      key: role.key,
+      name: role.name,
+      description: role.description,
+      isSystem: true
+    }))
+  });
+
+  const createdAccessRoles = await prisma.accessRole.findMany({
+    select: { id: true, key: true }
+  });
+  const accessRoleIdByKey = new Map(createdAccessRoles.map((role) => [role.key, role.id]));
+
+  await prisma.accessRolePermission.createMany({
+    data: seedRoles.flatMap((role) =>
+      role.permissions
+        .map((permissionKey) => {
+          const roleId = accessRoleIdByKey.get(role.key);
+          const permissionId = permissionIdByKey.get(permissionKey);
+          if (!roleId || !permissionId) return null;
+
+          return {
+            roleId,
+            permissionId
+          };
+        })
+        .filter((value): value is { roleId: string; permissionId: string } => Boolean(value))
+    )
+  });
 
   for (const person of onboardingMembers) {
     const generated = person.username && person.email
@@ -149,6 +200,7 @@ async function main() {
         email: generated.email,
         passwordHash: person.role === ROLE.MEMBER ? memberHash : adminHash,
         role: person.role,
+        accessRoleId: accessRoleIdByKey.get(deriveLegacyAccessRoleKey(person.role)) ?? null,
         status: MEMBER_STATUS_ACTIVE
       }
     });

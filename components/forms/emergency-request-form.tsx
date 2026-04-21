@@ -83,7 +83,7 @@ export function EmergencyRequestForm({
               </div>
               <div>
                 <p className="font-medium text-slate-800">Record quality</p>
-                <p className="mt-1 text-slate-600">Accurate reasons help the Admin and Treasurer make faster, defensible decisions.</p>
+                <p className="mt-1 text-slate-600">Accurate reasons help the Admin and Manager make faster, defensible decisions.</p>
               </div>
             </div>
           </aside>

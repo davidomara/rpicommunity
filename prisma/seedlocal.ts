@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { deriveLegacyAccessRoleKey, getPermissionDefinitions, getSeedAccessRoles } from "@/lib/rbac-core";
 
 const prisma = new PrismaClient();
 type Role = "ADMIN" | "MEMBER" | "TREASURER";
@@ -44,6 +45,56 @@ async function main() {
   await prisma.session.deleteMany();
   await prisma.account.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.accessRolePermission.deleteMany();
+  await prisma.permission.deleteMany();
+  await prisma.accessRole.deleteMany();
+
+  const permissionRows = getPermissionDefinitions();
+  await prisma.permission.createMany({
+    data: permissionRows.map((permission) => ({
+      key: permission.key,
+      module: permission.module,
+      name: permission.name,
+      description: permission.description
+    }))
+  });
+
+  const createdPermissions = await prisma.permission.findMany({
+    select: { id: true, key: true }
+  });
+  const permissionIdByKey = new Map(createdPermissions.map((permission) => [permission.key, permission.id]));
+
+  const seedRoles = getSeedAccessRoles();
+  await prisma.accessRole.createMany({
+    data: seedRoles.map((role) => ({
+      key: role.key,
+      name: role.name,
+      description: role.description,
+      isSystem: true
+    }))
+  });
+
+  const createdAccessRoles = await prisma.accessRole.findMany({
+    select: { id: true, key: true }
+  });
+  const accessRoleIdByKey = new Map(createdAccessRoles.map((role) => [role.key, role.id]));
+
+  await prisma.accessRolePermission.createMany({
+    data: seedRoles.flatMap((role) =>
+      role.permissions
+        .map((permissionKey) => {
+          const roleId = accessRoleIdByKey.get(role.key);
+          const permissionId = permissionIdByKey.get(permissionKey);
+          if (!roleId || !permissionId) return null;
+
+          return {
+            roleId,
+            permissionId
+          };
+        })
+        .filter((value): value is { roleId: string; permissionId: string } => Boolean(value))
+    )
+  });
 
   const admin = await prisma.user.create({
     data: {
@@ -52,6 +103,7 @@ async function main() {
       email: "admin@rpic.local",
       passwordHash,
       role: ROLE.ADMIN,
+      accessRoleId: accessRoleIdByKey.get(deriveLegacyAccessRoleKey(ROLE.ADMIN)) ?? null,
       status: MEMBER_STATUS.ACTIVE
     }
   });
@@ -63,6 +115,7 @@ async function main() {
       email: "treasurer@rpic.local",
       passwordHash,
       role: ROLE.TREASURER,
+      accessRoleId: accessRoleIdByKey.get(deriveLegacyAccessRoleKey(ROLE.TREASURER)) ?? null,
       status: MEMBER_STATUS.ACTIVE
     }
   });
@@ -75,6 +128,7 @@ async function main() {
         email: "alice@rpic.local",
         passwordHash: memberHash,
         role: ROLE.MEMBER,
+        accessRoleId: accessRoleIdByKey.get(deriveLegacyAccessRoleKey(ROLE.MEMBER)) ?? null,
         status: MEMBER_STATUS.ACTIVE
       }
     }),
@@ -85,6 +139,7 @@ async function main() {
         email: "brian@rpic.local",
         passwordHash: memberHash,
         role: ROLE.MEMBER,
+        accessRoleId: accessRoleIdByKey.get(deriveLegacyAccessRoleKey(ROLE.MEMBER)) ?? null,
         status: MEMBER_STATUS.WARNING
       }
     }),
@@ -95,6 +150,7 @@ async function main() {
         email: "catherine@rpic.local",
         passwordHash: memberHash,
         role: ROLE.MEMBER,
+        accessRoleId: accessRoleIdByKey.get(deriveLegacyAccessRoleKey(ROLE.MEMBER)) ?? null,
         status: MEMBER_STATUS.ACTIVE
       }
     })

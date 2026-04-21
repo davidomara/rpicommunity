@@ -12,6 +12,13 @@ echo ==================================================>> "%LOG%"
 echo Deploy check started %date% %time%>> "%LOG%"
 echo Running as: %username%>> "%LOG%"
 
+echo --- checkout branch %BRANCH% --- >> "%LOG%"
+git checkout %BRANCH% >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: git checkout %BRANCH% >> "%LOG%"
+  exit /b 1
+)
+
 echo --- current branch --- >> "%LOG%"
 git rev-parse --abbrev-ref HEAD >> "%LOG%" 2>&1
 if errorlevel 1 (

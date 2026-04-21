@@ -8,7 +8,7 @@ import {
   type EmergencyDecisionFormState
 } from "@/app/(dashboard)/emergency-requests/actions";
 import { Button } from "@/components/ui/button";
-import { type Role } from "@/lib/domain-types";
+import { getDualApprovalActor } from "@/lib/rbac-core";
 import { showToast } from "@/components/ui/toaster";
 import { formatMoney } from "@/lib/utils";
 
@@ -42,7 +42,7 @@ export function EmergencyDecisionActions({
   requestId,
   memberName,
   amount,
-  actorRole,
+  actorAccessRoleKey,
   adminApproved,
   treasurerApproved,
   approvedAmount
@@ -50,7 +50,7 @@ export function EmergencyDecisionActions({
   requestId: string;
   memberName: string;
   amount: number;
-  actorRole: Role;
+  actorAccessRoleKey: string;
   adminApproved: boolean;
   treasurerApproved: boolean;
   approvedAmount?: number | null;
@@ -58,8 +58,10 @@ export function EmergencyDecisionActions({
   const amountRef = useRef<HTMLInputElement>(null);
   const [approveState, approveAction] = useFormState(approveEmergencyRequestAction, initialState);
   const [rejectState, rejectAction] = useFormState(rejectEmergencyRequestAction, initialState);
-  const alreadyApproved = actorRole === "ADMIN" ? adminApproved : actorRole === "TREASURER" ? treasurerApproved : false;
-  const secondApproval = actorRole === "ADMIN" ? treasurerApproved : adminApproved;
+  const actorApprovalRole = getDualApprovalActor(actorAccessRoleKey);
+  const actorLabel = actorApprovalRole === "ADMIN" ? "Admin" : actorApprovalRole === "MANAGER" ? "Manager" : "Reviewer";
+  const alreadyApproved = actorApprovalRole === "ADMIN" ? adminApproved : actorApprovalRole === "MANAGER" ? treasurerApproved : false;
+  const secondApproval = actorApprovalRole === "ADMIN" ? treasurerApproved : adminApproved;
   const defaultAmount = approvedAmount ?? amount;
 
   useEffect(() => {
@@ -79,9 +81,9 @@ export function EmergencyDecisionActions({
           <input type="hidden" name="status" value="APPROVED" />
           <input ref={amountRef} type="hidden" name="disbursementAmount" value={defaultAmount} />
           <DecisionButton
-            disabled={alreadyApproved}
+            disabled={alreadyApproved || !actorApprovalRole}
             onClick={(event) => {
-              if (alreadyApproved) {
+              if (alreadyApproved || !actorApprovalRole) {
                 event.preventDefault();
                 return;
               }
@@ -111,8 +113,8 @@ export function EmergencyDecisionActions({
 
               const ok = window.confirm(
                 secondApproval
-                  ? `${actorRole === "ADMIN" ? "Admin" : "Treasurer"} approval will disburse ${formatMoney(numericAmount)} to ${memberName} and record it as a withdrawal. Continue?`
-                  : `${actorRole === "ADMIN" ? "Admin" : "Treasurer"} approval will record ${formatMoney(numericAmount)} for ${memberName}. The request will be disbursed after the other approver confirms. Continue?`
+                  ? `${actorLabel} approval will disburse ${formatMoney(numericAmount)} to ${memberName} and record it as a withdrawal. Continue?`
+                  : `${actorLabel} approval will record ${formatMoney(numericAmount)} for ${memberName}. The request will be disbursed after the other approver confirms. Continue?`
               );
 
               if (!ok) {
@@ -126,7 +128,7 @@ export function EmergencyDecisionActions({
         <form action={rejectAction}>
           <input type="hidden" name="requestId" value={requestId} />
           <input type="hidden" name="status" value="REJECTED" />
-          <DecisionButton variant="destructive" disabled={alreadyApproved}>Reject</DecisionButton>
+          <DecisionButton variant="destructive" disabled={alreadyApproved || !actorApprovalRole}>Reject</DecisionButton>
         </form>
     </div>
   );

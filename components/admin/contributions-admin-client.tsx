@@ -25,11 +25,13 @@ type ContributionRow = {
 export function ContributionsAdminClient({
   members,
   rows,
-  staffView
+  staffView,
+  canCreate
 }: {
   members: MemberOption[];
   rows: ContributionRow[];
   staffView: boolean;
+  canCreate: boolean;
 }) {
   const defaultMemberId = staffView
     ? rows[0]?.memberId || members[0]?.id || ""
@@ -53,16 +55,29 @@ export function ContributionsAdminClient({
         ) : null}
       </div>
       <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-stretch">
-        <ContributionForm
-          members={members.map((member) => ({
-            id: member.id,
-            name: member.name || member.username,
-            username: member.username
-          }))}
-          selectedMemberId={selectedMemberId}
-          onSelectedMemberChange={setSelectedMemberId}
-          memberLocked={!staffView}
-        />
+        {canCreate ? (
+          <ContributionForm
+            members={members.map((member) => ({
+              id: member.id,
+              name: member.name || member.username,
+              username: member.username
+            }))}
+            selectedMemberId={selectedMemberId}
+            onSelectedMemberChange={setSelectedMemberId}
+            memberLocked={!staffView}
+          />
+        ) : (
+          <Card className="min-w-0 h-full">
+            <CardHeader>
+              <CardTitle>Contribution Access</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm leading-6 text-slate-500">
+                You can review contribution records, but you do not have permission to create new contribution entries.
+              </p>
+            </CardContent>
+          </Card>
+        )}
         <Card className="min-w-0 h-full min-h-[34rem]">
           <CardHeader>
             <CardTitle>{staffView ? "Recent Contributions" : "Your Contribution Requests"}</CardTitle>

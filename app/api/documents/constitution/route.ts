@@ -1,11 +1,16 @@
 import { Buffer } from "buffer";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { getPrivateFileStat, streamPrivateFile } from "@/lib/storage";
 
 export async function GET(request: Request) {
   const session = await auth();
   if (!session?.user) return new Response("Unauthorized", { status: 401 });
+  const authorization = await getUserAuthorization(session.user.id);
+  if (!authorization || !hasPermission(authorization, "constitution.view")) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
   const { searchParams } = new URL(request.url);
   const docId = searchParams.get("docId");

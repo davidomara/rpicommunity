@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { CHANGE_REQUEST_STATUS, MEMBER_STATUS, ROLE, STATUS_MODE, type MemberStatus, type Role } from "@/lib/domain-types";
-import { canManageMembers, isAdmin, isTreasurer } from "@/lib/rbac";
+import { getCurrentUserAuthorization, getDualApprovalActor, hasPermission } from "@/lib/rbac";
 import { createMemberSchema, decideMemberStatusChangeSchema, requestMemberStatusChangeSchema, updateMemberRoleAndStatusSchema } from "@/lib/validators/account";
 import { revalidatePath } from "next/cache";
 
@@ -22,7 +22,8 @@ export type MemberStatusChangeFormState = {
 
 export async function createMemberAction(_: CreateMemberFormState, formData: FormData): Promise<CreateMemberFormState> {
   const session = await auth();
-  if (!session?.user || !canManageMembers(session.user.role)) {
+  const authorization = await getCurrentUserAuthorization();
+  if (!session?.user || !authorization || !hasPermission(authorization, "members.create")) {
     return {
       success: false,
       message: "",
@@ -91,6 +92,7 @@ export async function createMemberAction(_: CreateMemberFormState, formData: For
   revalidatePath("/contributions");
   revalidatePath("/withdrawals");
   revalidatePath("/emergency-requests");
+  revalidatePath("/settings/roles");
 
   return {
     success: true,
@@ -101,7 +103,8 @@ export async function createMemberAction(_: CreateMemberFormState, formData: For
 
 export async function requestMemberStatusChangeAction(_: MemberStatusChangeFormState, formData: FormData): Promise<MemberStatusChangeFormState> {
   const session = await auth();
-  if (!session?.user || !isAdmin(session.user.role)) {
+  const authorization = await getCurrentUserAuthorization();
+  if (!session?.user || !authorization || !hasPermission(authorization, "members.edit") || getDualApprovalActor(authorization.accessRoleKey) !== "ADMIN") {
     return {
       success: false,
       error: "Unauthorized"
@@ -175,7 +178,8 @@ export async function requestMemberStatusChangeAction(_: MemberStatusChangeFormS
 
 export async function updateMemberRoleAndStatusAction(_: MemberStatusChangeFormState, formData: FormData): Promise<MemberStatusChangeFormState> {
   const session = await auth();
-  if (!session?.user || !isAdmin(session.user.role)) {
+  const authorization = await getCurrentUserAuthorization();
+  if (!session?.user || !authorization || !hasPermission(authorization, "members.edit") || getDualApprovalActor(authorization.accessRoleKey) !== "ADMIN") {
     return {
       success: false,
       error: "Unauthorized",
@@ -280,6 +284,7 @@ export async function updateMemberRoleAndStatusAction(_: MemberStatusChangeFormS
 
   revalidatePath("/members");
   revalidatePath("/dashboard");
+  revalidatePath("/settings/roles");
 
   return {
     success: true,
@@ -290,7 +295,9 @@ export async function updateMemberRoleAndStatusAction(_: MemberStatusChangeFormS
 
 export async function decideMemberStatusChangeAction(_: MemberStatusChangeFormState, formData: FormData): Promise<MemberStatusChangeFormState> {
   const session = await auth();
-  if (!session?.user || !canManageMembers(session.user.role)) {
+  const authorization = await getCurrentUserAuthorization();
+  const actorApprovalRole = authorization ? getDualApprovalActor(authorization.accessRoleKey) : null;
+  if (!session?.user || !authorization || !hasPermission(authorization, "members.review") || !actorApprovalRole) {
     return {
       success: false,
       error: "Unauthorized"
@@ -340,11 +347,11 @@ export async function decideMemberStatusChangeAction(_: MemberStatusChangeFormSt
 
     const now = new Date();
     const updateData: Record<string, Date | string> = {};
-    if (isAdmin(session.user.role) && !request.adminApprovedAt) {
+    if (actorApprovalRole === "ADMIN" && !request.adminApprovedAt) {
       updateData.adminApprovedAt = now;
       updateData.adminApprovedById = session.user.id;
     }
-    if (isTreasurer(session.user.role) && !request.treasurerApprovedAt) {
+    if (actorApprovalRole === "MANAGER" && !request.treasurerApprovedAt) {
       updateData.treasurerApprovedAt = now;
       updateData.treasurerApprovedById = session.user.id;
     }
@@ -389,6 +396,7 @@ export async function decideMemberStatusChangeAction(_: MemberStatusChangeFormSt
 
   revalidatePath("/members");
   revalidatePath("/dashboard");
+  revalidatePath("/settings/roles");
 
   return {
     success: true,

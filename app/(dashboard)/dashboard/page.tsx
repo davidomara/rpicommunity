@@ -6,11 +6,23 @@ import { SummaryChart } from "@/components/dashboard/summary-chart";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataScroll } from "@/components/ui/data-scroll";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { canAccessSettings, getUserAuthorization, hasPermission } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function DashboardPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+
+  const authorization = await getUserAuthorization(session.user.id);
+  if (!authorization) redirect("/login");
+  if (!hasPermission(authorization, "dashboard.view")) {
+    redirect(canAccessSettings(authorization) ? "/settings" : "/account");
+  }
+
   const data = await getDashboardData();
   const chartData = data.members.map((member) => ({
     name: member.name,

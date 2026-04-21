@@ -4,7 +4,7 @@ import { AddMemberPanel } from "@/components/members/add-member-panel";
 import type { Role } from "@/lib/domain-types";
 import { getArrearsAmount, getExpectedContributionAmount, getSavingsAmount } from "@/lib/member-status";
 import { getMembersDirectory } from "@/lib/queries";
-import { canManageMembers } from "@/lib/rbac";
+import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { MembersTable } from "@/components/tables/members-table";
 import { formatMoney } from "@/lib/utils";
 
@@ -15,7 +15,11 @@ export default async function MembersPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const admin = canManageMembers(session.user.role);
+  const authorization = await getUserAuthorization(session.user.id);
+  if (!authorization || !hasPermission(authorization, "members.view")) redirect("/dashboard");
+  const canCreate = hasPermission(authorization, "members.create");
+  const canEdit = hasPermission(authorization, "members.edit");
+  const canReview = hasPermission(authorization, "members.review");
   const members = await getMembersDirectory();
   const expectedPerMemberToDate = getExpectedContributionAmount();
   const rows = members.map((member) => {
@@ -53,7 +57,7 @@ export default async function MembersPage() {
 
   return (
     <div className="space-y-6">
-      {admin ? (
+      {canCreate ? (
         <AddMemberPanel expectedPerMemberToDate={expectedPerMemberToDate} />
       ) : (
         <div>
@@ -73,7 +77,7 @@ export default async function MembersPage() {
           </p>
         </div>
       )}
-      <MembersTable rows={rows} role={session.user.role as Role} />
+      <MembersTable rows={rows} actorAccessRoleKey={authorization.accessRoleKey} canEdit={canEdit} canReview={canReview} />
     </div>
   );
 }

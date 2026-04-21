@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { CONTRIBUTION_APPROVAL_STATUS, EMERGENCY_STATUS } from "@/lib/domain-types";
 import { getContributionNotifications, getEmergencyContext } from "@/lib/queries";
-import { canApproveEmergencyDisbursements, canReviewContributionNotifications } from "@/lib/rbac";
+import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataScroll } from "@/components/ui/data-scroll";
 import { Button } from "@/components/ui/button";
@@ -33,11 +33,13 @@ function getEmergencyApprovalLabel(
 export default async function NotificationsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  const authorization = await getUserAuthorization(session.user.id);
+  if (!authorization || !hasPermission(authorization, "notifications.view")) redirect("/dashboard");
 
-  const { rows, adminReview } = await getContributionNotifications(session.user.role);
-  const contributionCanAct = canReviewContributionNotifications(session.user.role);
-  const emergencyCanAct = canApproveEmergencyDisbursements(session.user.role);
-  const { rows: emergencyRows } = await getEmergencyContext(undefined, true);
+  const { rows } = await getContributionNotifications();
+  const contributionCanAct = hasPermission(authorization, "contributions.review");
+  const emergencyCanAct = hasPermission(authorization, "emergency_requests.review");
+  const { rows: emergencyRows } = await getEmergencyContext({ canViewAll: true });
   const pendingContributionRows = rows.filter((row) => row.approvalStatus === CONTRIBUTION_APPROVAL_STATUS.PENDING);
   const pendingEmergencyRows = emergencyRows.filter((row) => row.status === EMERGENCY_STATUS.PENDING);
 
@@ -47,7 +49,7 @@ export default async function NotificationsPage() {
         <p className="text-sm font-medium text-cyan-700">Workflow Inbox</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Notifications</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-          {adminReview
+          {contributionCanAct || emergencyCanAct
             ? "Review shared contribution and emergency workflow activity across the community and act on items that are still pending."
             : "View the shared contribution and emergency workflow activity across the community."}
         </p>
@@ -129,7 +131,7 @@ export default async function NotificationsPage() {
                   <th>Reason</th>
                   <th>Status</th>
                   <th>Admin Approval</th>
-                  <th>Treasurer Approval</th>
+                  <th>Manager Approval</th>
                   <th>Request Date</th>
                   {emergencyCanAct ? <th>Actions</th> : null}
                 </tr>
@@ -149,7 +151,7 @@ export default async function NotificationsPage() {
                     <td className="min-w-[240px]">{row.reason}</td>
                     <td className="whitespace-nowrap"><Badge value={row.status} /></td>
                     <td className="whitespace-nowrap">{getEmergencyApprovalLabel(row.adminApprovedAt, row.status, "Awaiting Admin")}</td>
-                    <td className="whitespace-nowrap">{getEmergencyApprovalLabel(row.treasurerApprovedAt, row.status, "Awaiting Treasurer")}</td>
+                    <td className="whitespace-nowrap">{getEmergencyApprovalLabel(row.treasurerApprovedAt, row.status, "Awaiting Manager")}</td>
                     <td className="whitespace-nowrap">{formatDate(row.requestDate)}</td>
                     {emergencyCanAct ? (
                       <td className="whitespace-nowrap">
@@ -159,7 +161,7 @@ export default async function NotificationsPage() {
                             memberName={row.member.name || row.member.username}
                             amount={Number(row.amount)}
                             approvedAmount={row.approvedAmount ? Number(row.approvedAmount) : null}
-                            actorRole={session.user.role}
+                            actorAccessRoleKey={authorization.accessRoleKey}
                             adminApproved={Boolean(row.adminApprovedAt)}
                             treasurerApproved={Boolean(row.treasurerApprovedAt)}
                           />

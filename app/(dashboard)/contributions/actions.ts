@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { CONTRIBUTION_APPROVAL_STATUS } from "@/lib/domain-types";
-import { canAccessContributions, canManageFinance } from "@/lib/rbac";
+import { getCurrentUserAuthorization, hasPermission } from "@/lib/rbac";
 import { contributionSchema } from "@/lib/validators/finance";
 import { revalidatePath } from "next/cache";
 
@@ -15,7 +15,8 @@ export type ContributionFormState = {
 
 export async function createContributionAction(_: ContributionFormState, formData: FormData): Promise<ContributionFormState> {
   const session = await auth();
-  if (!session?.user || !canAccessContributions(session.user.role)) {
+  const authorization = await getCurrentUserAuthorization();
+  if (!session?.user || !authorization || !hasPermission(authorization, "contributions.create")) {
     return {
       success: false,
       error: "Unauthorized",
@@ -24,7 +25,9 @@ export async function createContributionAction(_: ContributionFormState, formDat
   }
 
   const requestedMemberId = String(formData.get("memberId") || "");
-  const memberId = canManageFinance(session.user.role) ? requestedMemberId : session.user.id;
+  const canCreateForAnyMember = hasPermission(authorization, "contributions.view_all");
+  const canApproveDirectly = hasPermission(authorization, "contributions.review");
+  const memberId = canCreateForAnyMember ? requestedMemberId : session.user.id;
 
   const parsed = contributionSchema.safeParse({
     memberId,
@@ -54,7 +57,7 @@ export async function createContributionAction(_: ContributionFormState, formDat
 
   const contributionDate = new Date(`${parsed.data.contributionDate}T00:00:00.000Z`);
 
-  if (canManageFinance(session.user.role)) {
+  if (canApproveDirectly) {
     const contribution = await prisma.contribution.create({
       data: {
         memberId: parsed.data.memberId,
@@ -92,7 +95,7 @@ export async function createContributionAction(_: ContributionFormState, formDat
 
   await prisma.contribution.create({
     data: {
-      memberId: session.user.id,
+      memberId: parsed.data.memberId,
       amount: parsed.data.amount,
       contributionDate,
       approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING,

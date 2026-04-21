@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { CONTRIBUTION_APPROVAL_STATUS } from "@/lib/domain-types";
-import { canReviewContributionNotifications } from "@/lib/rbac";
+import { getCurrentUserAuthorization, hasPermission } from "@/lib/rbac";
 import { revalidatePath } from "next/cache";
 
 async function revalidateContributionSurfaces() {
@@ -15,7 +15,8 @@ async function revalidateContributionSurfaces() {
 
 export async function approveContributionNotificationAction(formData: FormData) {
   const session = await auth();
-  if (!session?.user || !canReviewContributionNotifications(session.user.role)) {
+  const authorization = await getCurrentUserAuthorization();
+  if (!session?.user || !authorization || !hasPermission(authorization, "contributions.review")) {
     throw new Error("Unauthorized");
   }
 
@@ -57,7 +58,8 @@ export async function approveContributionNotificationAction(formData: FormData) 
 
 export async function rejectContributionNotificationAction(formData: FormData) {
   const session = await auth();
-  if (!session?.user || !canReviewContributionNotifications(session.user.role)) {
+  const authorization = await getCurrentUserAuthorization();
+  if (!session?.user || !authorization || !hasPermission(authorization, "contributions.review")) {
     throw new Error("Unauthorized");
   }
 

@@ -22,10 +22,12 @@ type WithdrawalRow = {
 
 export function WithdrawalsAdminClient({
   members,
-  rows
+  rows,
+  canCreate
 }: {
   members: MemberOption[];
   rows: WithdrawalRow[];
+  canCreate: boolean;
 }) {
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const deferredSelectedMemberId = useDeferredValue(selectedMemberId);
@@ -41,15 +43,28 @@ export function WithdrawalsAdminClient({
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Withdrawals</h1>
       </div>
       <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-stretch">
-        <WithdrawalForm
-          members={members.map((member) => ({
-            id: member.id,
-            name: member.name || member.username,
-            username: member.username
-          }))}
-          selectedMemberId={selectedMemberId}
-          onSelectedMemberChange={setSelectedMemberId}
-        />
+        {canCreate ? (
+          <WithdrawalForm
+            members={members.map((member) => ({
+              id: member.id,
+              name: member.name || member.username,
+              username: member.username
+            }))}
+            selectedMemberId={selectedMemberId}
+            onSelectedMemberChange={setSelectedMemberId}
+          />
+        ) : (
+          <Card className="min-w-0 h-full">
+            <CardHeader>
+              <CardTitle>Withdrawal Access</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm leading-6 text-slate-500">
+                You can review withdrawal records, but you do not have permission to create new withdrawals.
+              </p>
+            </CardContent>
+          </Card>
+        )}
         <Card className="min-w-0 h-full min-h-[34rem]">
           <CardHeader>
             <CardTitle>Recent Withdrawals</CardTitle>

@@ -1,10 +1,10 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { CONTRIBUTION_APPROVAL_STATUS, EMERGENCY_STATUS, COMMUNITY_ROLES, type Role } from "@/lib/domain-types";
+import { CONTRIBUTION_APPROVAL_STATUS, EMERGENCY_STATUS, COMMUNITY_ROLES } from "@/lib/domain-types";
 import { getArrearsAmount, getSavingsAmount } from "@/lib/member-status";
 import { syncAutoMemberStatuses } from "@/lib/member-status-sync";
 import { sortCommunityRows } from "@/lib/community-order";
-import { canManageFinance, canReviewContributionNotifications } from "@/lib/rbac";
+import { deriveLegacyAccessRoleKey, getAccessRoleLabel, hasPermission, type AuthorizationContext } from "@/lib/rbac";
 
 const memberDirectoryArgs = {
   where: { role: { in: COMMUNITY_ROLES } },
@@ -34,6 +34,32 @@ export type MemberAccountDirectoryRow = {
   username: string;
   email: string;
   status: string;
+};
+
+export type UserAccessAssignmentRow = {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  status: string;
+  legacyRole: string;
+  assignedAccessRoleId: string | null;
+  assignedAccessRoleKey: string | null;
+  assignedAccessRoleName: string | null;
+  effectiveAccessRoleKey: string;
+  effectiveAccessRoleName: string;
+  accessSource: "assigned" | "legacy";
+};
+
+export type AccessRoleOverviewRow = {
+  id: string;
+  key: string;
+  name: string;
+  description: string | null;
+  isSystem: boolean;
+  permissionKeys: string[];
+  permissionCount: number;
+  userCount: number;
 };
 
 export type MemberOptionRow = {
@@ -173,9 +199,8 @@ export async function getMemberAccountDirectory(): Promise<MemberAccountDirector
   return sortCommunityRows<MemberAccountDirectoryRow>(rows);
 }
 
-export async function getContributionContextForRole(
-  role: Role,
-  userId: string
+export async function getContributionContextForAuthorization(
+  authorization: AuthorizationContext
 ): Promise<{
   members: MemberOptionRow[];
   rows: Array<{
@@ -188,10 +213,10 @@ export async function getContributionContextForRole(
   }>;
   staffView: boolean;
 }> {
-  const staffView = canManageFinance(role);
+  const staffView = hasPermission(authorization, "contributions.view_all");
   const memberWhere = staffView
     ? { role: { in: COMMUNITY_ROLES } }
-    : { id: userId };
+    : { id: authorization.userId };
 
   const members = await prisma.user.findMany({
     where: memberWhere,
@@ -201,7 +226,7 @@ export async function getContributionContextForRole(
   const rows = await prisma.contribution.findMany({
     where: staffView
       ? undefined
-      : { memberId: userId },
+      : { memberId: authorization.userId },
     orderBy: [{ contributionDate: "desc" }, { createdAt: "desc" }],
     take: 200,
     select: {
@@ -217,7 +242,7 @@ export async function getContributionContextForRole(
   return { members: sortCommunityRows<MemberOptionRow>(members), rows, staffView };
 }
 
-export async function getContributionNotifications(role: Role) {
+export async function getContributionNotifications() {
   const rows = await prisma.contribution.findMany({
     include: {
       member: {
@@ -237,20 +262,28 @@ export async function getContributionNotifications(role: Role) {
     take: 200
   });
 
-  return { rows, adminReview: canReviewContributionNotifications(role) };
+  return { rows };
 }
 
-export async function getNotificationCount(role: Role, userId: string) {
-  const [pendingContributionCount, pendingEmergencyCount] = await Promise.all([
-    prisma.contribution.count({
-      where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING }
-    }),
-    prisma.emergencyRequest.count({
-      where: { status: EMERGENCY_STATUS.PENDING }
-    })
+export async function getNotificationCount(authorization: AuthorizationContext | null) {
+  if (!authorization || !hasPermission(authorization, "notifications.view")) {
+    return 0;
+  }
+
+  const counts = await Promise.all([
+    hasPermission(authorization, "contributions.review")
+      ? prisma.contribution.count({
+          where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.PENDING }
+        })
+      : Promise.resolve(0),
+    hasPermission(authorization, "emergency_requests.review")
+      ? prisma.emergencyRequest.count({
+          where: { status: EMERGENCY_STATUS.PENDING }
+        })
+      : Promise.resolve(0)
   ]);
 
-  return pendingContributionCount + pendingEmergencyCount;
+  return counts[0] + counts[1];
 }
 
 export async function getWithdrawalContext() {
@@ -274,15 +307,26 @@ export async function getWithdrawalContext() {
   return { members: sortCommunityRows(members), rows };
 }
 
-export async function getEmergencyContext(memberId?: string, isAdmin = false) {
+export async function getEmergencyContext({
+  memberId,
+  canViewAll = false
+}: {
+  memberId?: string;
+  canViewAll?: boolean;
+} = {}) {
   const members = await prisma.user.findMany({
     where: { role: { in: COMMUNITY_ROLES } },
     select: { id: true, name: true, username: true }
   });
 
-  const filterId = isAdmin ? memberId : memberId;
+  const where = canViewAll
+    ? (memberId ? { memberId } : undefined)
+    : memberId
+      ? { memberId }
+      : { memberId: "__none__" };
+
   const rows = await prisma.emergencyRequest.findMany({
-    where: filterId ? { memberId: filterId } : undefined,
+    where,
     include: { member: true, adminApprovedBy: true, treasurerApprovedBy: true, rejectedBy: true, disbursedBy: true },
     orderBy: { requestDate: "desc" },
     take: 30
@@ -301,5 +345,105 @@ export async function getActiveConstitution() {
   return prisma.governingDocument.findFirst({
     where: { isActive: true },
     orderBy: { createdAt: "desc" }
+  });
+}
+
+export async function getSettingsAccessOverview(): Promise<{
+  roles: AccessRoleOverviewRow[];
+  users: UserAccessAssignmentRow[];
+}> {
+  const [roles, users] = await Promise.all([getAccessRolesOverview(), getUserAccessAssignments()]);
+
+  return {
+    roles,
+    users
+  };
+}
+
+export async function getAccessRolesOverview(): Promise<AccessRoleOverviewRow[]> {
+  const [roles, users] = await Promise.all([
+    prisma.accessRole.findMany({
+      include: {
+        rolePermissions: {
+          include: {
+            permission: {
+              select: {
+                key: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: [
+        { isSystem: "desc" },
+        { name: "asc" }
+      ]
+    }),
+    prisma.user.findMany({
+      select: {
+        role: true,
+        accessRole: {
+          select: {
+            key: true
+          }
+        }
+      }
+    })
+  ]);
+
+  const userCountsByRoleKey = users.reduce<Record<string, number>>((counts, user) => {
+    const roleKey = user.accessRole?.key || deriveLegacyAccessRoleKey(user.role);
+    counts[roleKey] = (counts[roleKey] || 0) + 1;
+    return counts;
+  }, {});
+
+  return roles.map((role) => ({
+    id: role.id,
+    key: role.key,
+    name: role.name,
+    description: role.description,
+    isSystem: role.isSystem,
+    permissionKeys: role.rolePermissions.map((entry) => entry.permission.key).sort((left, right) => left.localeCompare(right)),
+    permissionCount: role.rolePermissions.length,
+    userCount: userCountsByRoleKey[role.key] || 0
+  }));
+}
+
+export async function getUserAccessAssignments(): Promise<UserAccessAssignmentRow[]> {
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      status: true,
+      role: true,
+      accessRoleId: true,
+      accessRole: {
+        select: {
+          key: true,
+          name: true
+        }
+      }
+    },
+    orderBy: [{ name: "asc" }]
+  });
+
+  return users.map((user) => {
+    const effectiveAccessRoleKey = user.accessRole?.key || deriveLegacyAccessRoleKey(user.role);
+    return {
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      status: user.status,
+      legacyRole: user.role,
+      assignedAccessRoleId: user.accessRoleId,
+      assignedAccessRoleKey: user.accessRole?.key || null,
+      assignedAccessRoleName: user.accessRole?.name || null,
+      effectiveAccessRoleKey,
+      effectiveAccessRoleName: user.accessRole?.name || getAccessRoleLabel(effectiveAccessRoleKey),
+      accessSource: user.accessRole ? "assigned" : "legacy"
+    };
   });
 }

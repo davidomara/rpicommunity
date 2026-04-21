@@ -3,8 +3,7 @@
 import { auth } from "@/auth";
 import { getAvailableCommunityBalance } from "@/lib/community-balance";
 import { prisma } from "@/lib/db";
-import { canApproveEmergencyDisbursements, canManageMembers, isAdmin, isTreasurer } from "@/lib/rbac";
-import { type Role } from "@/lib/domain-types";
+import { getCurrentUserAuthorization, getDualApprovalActor, hasPermission } from "@/lib/rbac";
 import { formatMoney } from "@/lib/utils";
 import { emergencyRequestSchema, emergencyDecisionSchema } from "@/lib/validators/finance";
 import { revalidatePath } from "next/cache";
@@ -25,7 +24,8 @@ export async function createEmergencyRequestAction(
   formData: FormData
 ): Promise<EmergencyRequestFormState> {
   const session = await auth();
-  if (!session?.user) {
+  const authorization = await getCurrentUserAuthorization();
+  if (!session?.user || !authorization || !hasPermission(authorization, "emergency_requests.create")) {
     return {
       success: false,
       error: "Unauthorized"
@@ -45,7 +45,8 @@ export async function createEmergencyRequestAction(
     };
   }
 
-  const memberId = canManageMembers(session.user.role) ? parsed.data.memberId : session.user.id;
+  const canCreateForOthers = hasPermission(authorization, "emergency_requests.review") || hasPermission(authorization, "members.edit");
+  const memberId = canCreateForOthers ? parsed.data.memberId : session.user.id;
   const member = await prisma.user.findUnique({
     where: { id: memberId },
     select: { id: true }
@@ -81,7 +82,9 @@ export async function decideEmergencyRequestAction(formData: FormData) {
 
 async function decideEmergencyRequestSubmission(formData: FormData): Promise<EmergencyDecisionFormState> {
   const session = await auth();
-  if (!session?.user || !canApproveEmergencyDisbursements(session.user.role)) {
+  const authorization = await getCurrentUserAuthorization();
+  const actorApprovalRole = authorization ? getDualApprovalActor(authorization.accessRoleKey) : null;
+  if (!session?.user || !authorization || !hasPermission(authorization, "emergency_requests.review") || !actorApprovalRole) {
     return {
       success: false,
       error: "Unauthorized",
@@ -165,15 +168,15 @@ async function decideEmergencyRequestSubmission(formData: FormData): Promise<Eme
 
     const requestedAmount = Number(request.amount);
     const proposedAmount = parsed.data.disbursementAmount ?? Number(request.approvedAmount ?? request.amount);
-    const role = session.user.role as Role;
+    const actorLabel = actorApprovalRole === "ADMIN" ? "Admin" : "Manager";
     const completingApproval =
-      (isAdmin(role) && Boolean(request.treasurerApprovedAt)) ||
-      (isTreasurer(role) && Boolean(request.adminApprovedAt));
+      (actorApprovalRole === "ADMIN" && Boolean(request.treasurerApprovedAt)) ||
+      (actorApprovalRole === "MANAGER" && Boolean(request.adminApprovedAt));
 
     const approvalWhere =
-      isAdmin(role)
+      actorApprovalRole === "ADMIN"
         ? { id: parsed.data.requestId, status: "PENDING" as const, adminApprovedAt: null }
-        : isTreasurer(role)
+        : actorApprovalRole === "MANAGER"
           ? { id: parsed.data.requestId, status: "PENDING" as const, treasurerApprovedAt: null }
           : null;
 
@@ -198,7 +201,7 @@ async function decideEmergencyRequestSubmission(formData: FormData): Promise<Eme
     }
 
     const approvalData =
-      isAdmin(role)
+      actorApprovalRole === "ADMIN"
         ? {
             approvedAmount: proposedAmount,
             adminApprovedAt: new Date(),
@@ -218,7 +221,7 @@ async function decideEmergencyRequestSubmission(formData: FormData): Promise<Eme
     if (!updated.count) {
       return {
         success: false,
-        error: `Your ${isAdmin(role) ? "Admin" : "Treasurer"} approval has already been recorded for this request.`,
+        error: `Your ${actorLabel} approval has already been recorded for this request.`,
         message: ""
       };
     }
@@ -241,7 +244,7 @@ async function decideEmergencyRequestSubmission(formData: FormData): Promise<Eme
       return {
         success: true,
         error: "",
-        message: `${isAdmin(role) ? "Admin" : "Treasurer"} approval recorded. Waiting for the other approver before disbursement.`
+        message: `${actorLabel} approval recorded. Waiting for the other approver before disbursement.`
       };
     }
 
@@ -250,8 +253,8 @@ async function decideEmergencyRequestSubmission(formData: FormData): Promise<Eme
 
     const amountNote =
       disbursedAmount === requestedAmount
-        ? "Emergency request approved by Admin and Treasurer, then disbursed"
-        : `Emergency request approved by Admin and Treasurer. Requested ${requestedAmount}, disbursed ${disbursedAmount}`;
+        ? "Emergency request approved by Admin and Manager, then disbursed"
+        : `Emergency request approved by Admin and Manager. Requested ${requestedAmount}, disbursed ${disbursedAmount}`;
 
     const finalized = await tx.emergencyRequest.updateMany({
       where: {

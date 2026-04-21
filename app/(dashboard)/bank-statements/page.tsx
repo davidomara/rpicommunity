@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getLatestBankStatement } from "@/lib/queries";
-import { canManageProtectedDocuments } from "@/lib/rbac";
+import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DocumentViewer } from "@/components/documents/document-viewer";
 import { uploadBankStatementAction } from "./actions";
@@ -13,9 +13,11 @@ export const revalidate = 0;
 export default async function BankStatementsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  const authorization = await getUserAuthorization(session.user.id);
+  if (!authorization || !hasPermission(authorization, "bank_statements.view")) redirect("/dashboard");
 
   const latest = await getLatestBankStatement();
-  const canUpload = canManageProtectedDocuments(session.user.role);
+  const canUpload = hasPermission(authorization, "bank_statements.manage");
 
   return (
     <div className="space-y-6">

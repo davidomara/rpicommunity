@@ -10,3 +10,5 @@ coverage
 prisma/dev.db
 storage/private/*
 !storage/private/.gitkeep
+deploy.log
+next-start.log

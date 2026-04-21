@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Pencil } from "lucide-react";
 import { decideMemberStatusChangeAction, updateMemberRoleAndStatusAction, type MemberStatusChangeFormState } from "@/app/(dashboard)/members/actions";
-import { COMMUNITY_ROLES, ROLE, type Role } from "@/lib/domain-types";
+import { COMMUNITY_ROLES, type Role } from "@/lib/domain-types";
+import { getDualApprovalActor } from "@/lib/rbac-core";
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/forms/form-message";
 
@@ -39,13 +40,17 @@ export function MemberStatusActions({
   memberId,
   currentRole,
   currentStatus,
-  actorRole,
+  actorAccessRoleKey,
+  canEdit,
+  canReview,
   pendingChange
 }: {
   memberId: string;
   currentRole: Role;
   currentStatus: string;
-  actorRole: Role;
+  actorAccessRoleKey: string;
+  canEdit: boolean;
+  canReview: boolean;
   pendingChange?: {
     id: string;
     currentStatus: string;
@@ -60,6 +65,7 @@ export function MemberStatusActions({
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
   const [selectedRole, setSelectedRole] = useState<Role>(currentRole);
   const requestedStatusRef = useRef<HTMLInputElement>(null);
+  const actorApprovalRole = getDualApprovalActor(actorAccessRoleKey);
 
   useEffect(() => {
     if (editState.success) {
@@ -73,7 +79,7 @@ export function MemberStatusActions({
   const canRequestStatusChange = selectedRole === "MEMBER";
 
   if (!pendingChange) {
-    if (actorRole !== "ADMIN") return <span className="text-xs text-slate-400">No action</span>;
+    if (!canEdit) return <span className="text-xs text-slate-400">No action</span>;
 
     return (
       <div className="space-y-2">
@@ -148,7 +154,7 @@ export function MemberStatusActions({
                 {!canRequestStatusChange ? (
                   <p className="text-xs text-slate-500">Manual status changes apply only when the selected role is MEMBER.</p>
                 ) : (
-                  <p className="text-xs text-slate-500">Status changes follow the existing Admin and Treasurer approval flow.</p>
+                  <p className="text-xs text-slate-500">Status changes follow the existing Admin and Manager approval flow.</p>
                 )}
                 <FormMessage type="error" message={editState.error} className="text-xs" />
                 <div className="flex flex-wrap justify-end gap-2">
@@ -170,7 +176,18 @@ export function MemberStatusActions({
     );
   }
 
-  const alreadyApproved = actorRole === "ADMIN" ? pendingChange.adminApproved : actorRole === "TREASURER" ? pendingChange.treasurerApproved : true;
+  if (!canReview || !actorApprovalRole) {
+    return (
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-slate-500">
+          Pending: {pendingChange.currentStatus} to {pendingChange.requestedStatus}
+        </p>
+        <span className="text-xs text-slate-400">No action</span>
+      </div>
+    );
+  }
+
+  const alreadyApproved = actorApprovalRole === "ADMIN" ? pendingChange.adminApproved : pendingChange.treasurerApproved;
 
   return (
     <div className="space-y-2">

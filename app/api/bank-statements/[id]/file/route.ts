@@ -1,11 +1,16 @@
 import { Buffer } from "buffer";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { getPrivateFileStat, streamPrivateFile } from "@/lib/storage";
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const session = await auth();
   if (!session?.user) return new Response("Unauthorized", { status: 401 });
+  const authorization = await getUserAuthorization(session.user.id);
+  if (!authorization || !hasPermission(authorization, "bank_statements.view")) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
   const row = await prisma.bankStatement.findUnique({ where: { id: params.id } });
   if (!row) return new Response("Not found", { status: 404 });

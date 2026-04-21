@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { canManageProtectedDocuments } from "@/lib/rbac";
+import { getCurrentUserAuthorization, hasPermission } from "@/lib/rbac";
 import { storePrivateFile } from "@/lib/storage";
 import { protectedDocumentUploadSchema } from "@/lib/validators/uploads";
 import { revalidatePath } from "next/cache";
@@ -13,7 +13,8 @@ export async function uploadConstitutionAction(
   formData: FormData
 ): Promise<ProtectedUploadFormState> {
   const session = await auth();
-  if (!session?.user || !canManageProtectedDocuments(session.user.role)) {
+  const authorization = await getCurrentUserAuthorization();
+  if (!session?.user || !authorization || !hasPermission(authorization, "constitution.manage")) {
     return { success: false, error: "Unauthorized", message: "" };
   }
 

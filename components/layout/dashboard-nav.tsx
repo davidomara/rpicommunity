@@ -11,10 +11,12 @@ import {
   HandCoins,
   Home,
   Landmark,
+  type LucideIcon,
   Menu,
   ScrollText,
   Settings,
   ShieldAlert,
+  User,
   Users,
   X
 } from "lucide-react";
@@ -22,28 +24,36 @@ import { withBasePath } from "@/lib/app-path";
 import { APP_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import type { Role } from "@/lib/domain-types";
-import { canManageFinance } from "@/lib/rbac";
+import { canAccessSettings, hasPermission, type PermissionKey } from "@/lib/rbac-core";
 
-type NavRole = Role;
+type NavItem = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  permission?: PermissionKey;
+};
 
-const baseItems = [
-  { href: "/dashboard", label: "Dashboard", icon: Home },
-  { href: "/members", label: "Members", icon: Users },
-  { href: "/contributions", label: "Contributions", icon: HandCoins },
-  { href: "/notifications", label: "Notifications", icon: Bell },
-  { href: "/emergency-requests", label: "Emergency Requests", icon: ShieldAlert },
-  { href: "/bank-statements", label: "Bank Statements", icon: FileText },
-  { href: "/constitution", label: "Constitution", icon: ScrollText },
-  { href: "/account", label: "Account", icon: Settings }
+const baseItems: NavItem[] = [
+  { href: "/dashboard", label: "Dashboard", icon: Home, permission: "dashboard.view" },
+  { href: "/members", label: "Members", icon: Users, permission: "members.view" },
+  { href: "/withdrawals", label: "Withdrawals", icon: Landmark, permission: "withdrawals.view" },
+  { href: "/contributions", label: "Contributions", icon: HandCoins, permission: "contributions.view" },
+  { href: "/notifications", label: "Notifications", icon: Bell, permission: "notifications.view" },
+  { href: "/emergency-requests", label: "Emergency Requests", icon: ShieldAlert, permission: "emergency_requests.view" },
+  { href: "/bank-statements", label: "Bank Statements", icon: FileText, permission: "bank_statements.view" },
+  { href: "/constitution", label: "Constitution", icon: ScrollText, permission: "constitution.view" },
+  { href: "/account", label: "Account", icon: User, permission: "account.view" },
+  { href: "/settings", label: "Settings", icon: Settings, permission: "settings.view" }
 ];
 
-const financeItems = [
-  { href: "/withdrawals", label: "Withdrawals", icon: Landmark }
-];
+function getItems(permissionKeys: string[]) {
+  return baseItems.filter((item) => {
+    if (item.href === "/settings") {
+      return canAccessSettings(permissionKeys);
+    }
 
-function getItems(role: NavRole) {
-  return canManageFinance(role) ? [...baseItems.slice(0, 2), ...financeItems, ...baseItems.slice(2)] : baseItems;
+    return item.permission ? hasPermission(permissionKeys, item.permission) : true;
+  });
 }
 
 function isActive(pathname: string, href: string) {
@@ -51,16 +61,16 @@ function isActive(pathname: string, href: string) {
 }
 
 function NavLinks({
-  role,
+  permissionKeys,
   notificationCount,
   onNavigate
 }: {
-  role: NavRole;
+  permissionKeys: string[];
   notificationCount: number;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const items = getItems(role);
+  const items = getItems(permissionKeys);
 
   return (
     <nav className="space-y-1">
@@ -106,18 +116,22 @@ function NavLinks({
   );
 }
 
-export function DesktopDashboardNav({ role, notificationCount }: { role: NavRole; notificationCount: number }) {
-  return <NavLinks role={role} notificationCount={notificationCount} />;
+export function DesktopDashboardNav({
+  permissionKeys,
+  notificationCount
+}: {
+  permissionKeys: string[];
+  notificationCount: number;
+}) {
+  return <NavLinks permissionKeys={permissionKeys} notificationCount={notificationCount} />;
 }
 
 export function MobileDashboardNav({
-  role,
-  name,
+  permissionKeys,
   notificationCount,
   actions
 }: {
-  role: NavRole;
-  name: string;
+  permissionKeys: string[];
   notificationCount: number;
   actions: React.ReactNode;
 }) {
@@ -197,7 +211,7 @@ export function MobileDashboardNav({
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          <NavLinks role={role} notificationCount={notificationCount} onNavigate={() => setOpen(false)} />
+          <NavLinks permissionKeys={permissionKeys} notificationCount={notificationCount} onNavigate={() => setOpen(false)} />
         </div>
 
         <div

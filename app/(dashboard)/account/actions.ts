@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { ROLE } from "@/lib/domain-types";
-import { canManageMembers } from "@/lib/rbac";
+import { getCurrentUserAuthorization, hasPermission } from "@/lib/rbac";
 import { resetMemberPinSchema, updateEmailSchema, updateMemberEmailSchema, updateMemberStatusThresholdsSchema, updatePasswordSchema } from "@/lib/validators/account";
 import { revalidatePath } from "next/cache";
 
@@ -65,8 +65,8 @@ export async function updatePasswordAction(_: AccountFormState, formData: FormDa
 }
 
 export async function updateMemberEmailAction(_: AccountFormState, formData: FormData): Promise<AccountFormState> {
-  const session = await auth();
-  if (!session?.user || !canManageMembers(session.user.role)) return { success: false, error: "Unauthorized", message: "" };
+  const authorization = await getCurrentUserAuthorization();
+  if (!authorization || !hasPermission(authorization, "users.manage")) return { success: false, error: "Unauthorized", message: "" };
 
   const parsed = updateMemberEmailSchema.safeParse({
     memberId: String(formData.get("memberId") || ""),
@@ -89,8 +89,8 @@ export async function updateMemberEmailAction(_: AccountFormState, formData: For
 }
 
 export async function resetMemberPinAction(_: AccountFormState, formData: FormData): Promise<AccountFormState> {
-  const session = await auth();
-  if (!session?.user || !canManageMembers(session.user.role)) return { success: false, error: "Unauthorized", message: "" };
+  const authorization = await getCurrentUserAuthorization();
+  if (!authorization || !hasPermission(authorization, "users.manage")) return { success: false, error: "Unauthorized", message: "" };
 
   const parsed = resetMemberPinSchema.safeParse({
     memberId: String(formData.get("memberId") || ""),
@@ -113,8 +113,8 @@ export async function resetMemberPinAction(_: AccountFormState, formData: FormDa
 }
 
 export async function updateMemberStatusThresholdsAction(_: AccountFormState, formData: FormData): Promise<AccountFormState> {
-  const session = await auth();
-  if (!session?.user || !canManageMembers(session.user.role)) return { success: false, error: "Unauthorized", message: "" };
+  const authorization = await getCurrentUserAuthorization();
+  if (!authorization || !hasPermission(authorization, "settings.manage")) return { success: false, error: "Unauthorized", message: "" };
 
   const parsed = updateMemberStatusThresholdsSchema.safeParse({
     warningAfterMonths: formData.get("warningAfterMonths"),

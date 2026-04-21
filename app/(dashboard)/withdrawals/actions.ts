@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { getAvailableCommunityBalance } from "@/lib/community-balance";
 import { prisma } from "@/lib/db";
-import { canManageFinance } from "@/lib/rbac";
+import { getCurrentUserAuthorization, hasPermission } from "@/lib/rbac";
 import { formatMoney } from "@/lib/utils";
 import { withdrawalSchema } from "@/lib/validators/finance";
 import { revalidatePath } from "next/cache";
@@ -16,7 +16,8 @@ export type WithdrawalFormState = {
 
 export async function createWithdrawalAction(_: WithdrawalFormState, formData: FormData): Promise<WithdrawalFormState> {
   const session = await auth();
-  if (!session?.user || !canManageFinance(session.user.role)) {
+  const authorization = await getCurrentUserAuthorization();
+  if (!session?.user || !authorization || !hasPermission(authorization, "withdrawals.create")) {
     return {
       success: false,
       error: "Unauthorized",

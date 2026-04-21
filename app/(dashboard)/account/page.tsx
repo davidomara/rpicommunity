@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getCommunitySettings } from "@/lib/community-settings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMemberAccountDirectory } from "@/lib/queries";
-import { canManageMembers } from "@/lib/rbac";
+import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import {
   ChangePasswordForm,
   MemberStatusAutomationForm,
@@ -18,11 +18,14 @@ export const revalidate = 0;
 export default async function AccountPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
-  const admin = canManageMembers(session.user.role);
-  const members: Array<{ id: string; name: string; username: string }> = admin
+  const authorization = await getUserAuthorization(session.user.id);
+  if (!authorization || !hasPermission(authorization, "account.view")) redirect("/dashboard");
+  const canManageUsers = hasPermission(authorization, "users.manage");
+  const canManageSettings = hasPermission(authorization, "settings.manage");
+  const members: Array<{ id: string; name: string; username: string }> = canManageUsers
     ? await getMemberAccountDirectory()
     : [];
-  const statusSettings = admin ? await getCommunitySettings() : null;
+  const statusSettings = canManageSettings ? await getCommunitySettings() : null;
   const selectClassName = "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
@@ -45,34 +48,38 @@ export default async function AccountPage() {
           </CardContent>
         </Card>
       </div>
-      {admin ? (
+      {canManageUsers || canManageSettings ? (
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
-          <Card>
-            <CardHeader>
-              <CardTitle>Member Access Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {members.length ? (
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <UpdateMemberEmailForm members={members} selectClassName={selectClassName} />
-                  <ResetMemberPinForm members={members} selectClassName={selectClassName} />
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500">No member accounts exist yet. Add a member from the Members page first.</p>
-              )}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Member Status Automation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MemberStatusAutomationForm
-                warningAfterMonths={statusSettings?.warningAfterMonths ?? 3}
-                closeAfterMonths={statusSettings?.closeAfterMonths ?? 6}
-              />
-            </CardContent>
-          </Card>
+          {canManageUsers ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Member Access Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {members.length ? (
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <UpdateMemberEmailForm members={members} selectClassName={selectClassName} />
+                    <ResetMemberPinForm members={members} selectClassName={selectClassName} />
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500">No member accounts exist yet. Add a member from the Members page first.</p>
+                )}
+              </CardContent>
+            </Card>
+          ) : null}
+          {canManageSettings ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Member Status Automation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MemberStatusAutomationForm
+                  warningAfterMonths={statusSettings?.warningAfterMonths ?? 3}
+                  closeAfterMonths={statusSettings?.closeAfterMonths ?? 6}
+                />
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
       ) : null}
     </div>

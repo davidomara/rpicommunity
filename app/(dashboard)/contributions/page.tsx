@@ -1,8 +1,8 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import type { ContributionApprovalStatus } from "@/lib/domain-types";
-import { canAccessContributions } from "@/lib/rbac";
-import { getContributionContextForRole } from "@/lib/queries";
+import { getContributionContextForAuthorization } from "@/lib/queries";
+import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { ContributionsAdminClient } from "@/components/admin/contributions-admin-client";
 
 export const dynamic = "force-dynamic";
@@ -11,9 +11,11 @@ export const revalidate = 0;
 export default async function ContributionsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
-  if (!canAccessContributions(session.user.role)) redirect("/dashboard");
+  const authorization = await getUserAuthorization(session.user.id);
+  if (!authorization || !hasPermission(authorization, "contributions.view")) redirect("/dashboard");
+  const canCreate = hasPermission(authorization, "contributions.create");
 
-  const { members, rows, staffView } = await getContributionContextForRole(session.user.role, session.user.id);
+  const { members, rows, staffView } = await getContributionContextForAuthorization(authorization);
 
   return (
     <ContributionsAdminClient
@@ -24,6 +26,7 @@ export default async function ContributionsPage() {
         approvalStatus: row.approvalStatus as ContributionApprovalStatus
       }))}
       staffView={staffView}
+      canCreate={canCreate}
     />
   );
 }

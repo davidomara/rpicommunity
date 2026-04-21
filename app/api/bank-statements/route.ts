@@ -1,7 +1,7 @@
 import { Buffer } from "buffer";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { canManageProtectedDocuments } from "@/lib/rbac";
+import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { storePrivateFile } from "@/lib/storage";
 import { NextResponse } from "next/server";
 
@@ -10,6 +10,10 @@ const MAX_BYTES = 8 * 1024 * 1024;
 export async function GET() {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authorization = await getUserAuthorization(session.user.id);
+  if (!authorization || !hasPermission(authorization, "bank_statements.view")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const latest = await prisma.bankStatement.findFirst({ orderBy: { createdAt: "desc" } });
   if (!latest) return NextResponse.json({}, { status: 204 });
@@ -18,7 +22,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session?.user || !canManageProtectedDocuments(session.user.role)) {
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const authorization = await getUserAuthorization(session.user.id);
+  if (!authorization || !hasPermission(authorization, "bank_statements.manage")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
