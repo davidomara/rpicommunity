@@ -127,9 +127,9 @@ export function MembersTable({
             onChange={(event) => setAlphabetOrder(event.target.value as "RANK" | "A_Z" | "Z_A")}
             className="h-10 min-w-[140px] flex-1 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 sm:flex-none"
           >
-            <option value="RANK">Rank order</option>
-            <option value="A_Z">Alphabet A-Z</option>
-            <option value="Z_A">Alphabet Z-A</option>
+            <option value="RANK">Name</option>
+            <option value="A_Z">Name A-Z</option>
+            <option value="Z_A">Name Z-A</option>
           </select>
           <Button
             type="button"
