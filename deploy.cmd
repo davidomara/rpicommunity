@@ -66,6 +66,12 @@ echo --- commit before pull --- >> "%LOG%"
 git log -1 --pretty=format:"Commit: %%H ^| Message: %%s" >> "%LOG%" 2>&1
 echo.>> "%LOG%"
 
+echo --- stop current app on port %PORT% before deploy --- >> "%LOG%"
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
+  echo Killing PID %%p on port %PORT%>> "%LOG%"
+  taskkill /f /pid %%p >> "%LOG%" 2>&1
+)
+
 echo --- git pull origin %BRANCH% --- >> "%LOG%"
 git pull origin %BRANCH% >> "%LOG%" 2>&1
 if errorlevel 1 (
@@ -113,12 +119,6 @@ powershell -NoProfile -Command "Copy-Item '.env.production' '.next\standalone\.e
 if errorlevel 1 (
   echo FAILED: copy env >> "%LOG%"
   exit /b 1
-)
-
-echo --- stop current app on port %PORT% --- >> "%LOG%"
-for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
-  echo Killing PID %%p on port %PORT%>> "%LOG%"
-  taskkill /f /pid %%p >> "%LOG%" 2>&1
 )
 
 echo --- start app task %START_TASK% --- >> "%LOG%"
