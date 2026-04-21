@@ -11,9 +11,22 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: "/meta.json",
+        destination: "/rpicommunity/meta.json",
+        permanent: false,
+        basePath: false
+      },
+      {
+        source: "/favicon.svg",
+        destination: "/rpicommunity/favicon.svg",
+        permanent: false,
+        basePath: false
+      },
+      {
         source: "/favicon.ico",
-        destination: "/favicon.svg",
-        permanent: false
+        destination: "/rpicommunity/favicon.svg",
+        permanent: false,
+        basePath: false
       }
     ];
   }
