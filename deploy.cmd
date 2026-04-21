@@ -96,7 +96,7 @@ if errorlevel 1 (
 )
 
 echo --- prisma generate --- >> "%LOG%"
-call "C:\Program Files\nodejs\npm.cmd" run prisma:generate >> "%LOG%" 2>&1
+call "C:\Program Files\nodejs\npx.cmd" prisma generate >> "%LOG%" 2>&1
 if errorlevel 1 (
   echo FAILED: prisma generate >> "%LOG%"
   exit /b 1

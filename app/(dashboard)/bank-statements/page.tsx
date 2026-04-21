@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getLatestBankStatement } from "@/lib/queries";
+import { withBasePath } from "@/lib/app-path";
 import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DocumentViewer } from "@/components/documents/document-viewer";
@@ -42,7 +43,11 @@ export default async function BankStatementsPage() {
         <CardHeader><CardTitle>Current Statement Preview</CardTitle></CardHeader>
         <CardContent>
           {latest ? (
-            <DocumentViewer src={`/api/bank-statements/${latest.id}/file`} mimeType={latest.mimeType} title={latest.originalName} />
+            <DocumentViewer
+              src={withBasePath(`/api/bank-statements/${latest.id}/file`)}
+              mimeType={latest.mimeType}
+              title={latest.originalName}
+            />
           ) : (
             <p className="text-sm text-slate-500">No bank statement has been uploaded yet.</p>
           )}

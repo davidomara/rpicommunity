@@ -348,6 +348,12 @@ export async function getActiveConstitution() {
   });
 }
 
+export async function getGoverningDocuments() {
+  return prisma.governingDocument.findMany({
+    orderBy: [{ isActive: "desc" }, { createdAt: "desc" }]
+  });
+}
+
 export async function getSettingsAccessOverview(): Promise<{
   roles: AccessRoleOverviewRow[];
   users: UserAccessAssignmentRow[];

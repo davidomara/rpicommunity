@@ -1,9 +1,10 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { getActiveConstitution } from "@/lib/queries";
+import { withBasePath } from "@/lib/app-path";
+import { getGoverningDocuments } from "@/lib/queries";
 import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DocumentViewer } from "@/components/documents/document-viewer";
+import { TabbedDocumentViewer } from "@/components/documents/tabbed-document-viewer";
 import { uploadConstitutionAction } from "./actions";
 import { ProtectedUploadForm } from "@/components/forms/protected-upload-form";
 
@@ -16,14 +17,14 @@ export default async function ConstitutionPage() {
   const authorization = await getUserAuthorization(session.user.id);
   if (!authorization || !hasPermission(authorization, "constitution.view")) redirect("/dashboard");
 
-  const doc = await getActiveConstitution();
+  const documents = await getGoverningDocuments();
   const canUpload = hasPermission(authorization, "constitution.manage");
 
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-medium text-cyan-700">Protected Governance Document</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Community Constitution</h1>
+        <p className="text-sm font-medium text-cyan-700">Protected Governance Documents</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Governing Documents</h1>
       </div>
       {canUpload ? (
         <Card>
@@ -39,13 +40,21 @@ export default async function ConstitutionPage() {
         </Card>
       ) : null}
       <Card>
-        <CardHeader><CardTitle>Current Governing Document</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Governing Documents Library</CardTitle></CardHeader>
         <CardContent>
-          {doc ? (
-            <DocumentViewer src={`/api/documents/constitution?docId=${doc.id}`} mimeType={doc.mimeType} title={doc.title} />
-          ) : (
-            <p className="text-sm text-slate-500">No constitution or guidelines document has been uploaded yet.</p>
-          )}
+          <TabbedDocumentViewer
+            ariaLabel="Governing documents"
+            emptyMessage="No constitution or guidelines document has been uploaded yet."
+            documents={documents.map((document) => ({
+              id: document.id,
+              title: document.title,
+              originalName: document.originalName,
+              mimeType: document.mimeType,
+              src: withBasePath(`/api/documents/constitution?docId=${document.id}`),
+              createdAt: document.createdAt.toISOString(),
+              isActive: document.isActive
+            }))}
+          />
         </CardContent>
       </Card>
     </div>
