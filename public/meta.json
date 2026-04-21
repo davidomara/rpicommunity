@@ -4,5 +4,21 @@
   "description": "Research Planning and Innovation Center Community platform.",
   "theme_color": "#0f172a",
   "background_color": "#f8fafc",
-  "display": "standalone"
+  "display": "standalone",
+  "start_url": "/rpicommunity/",
+  "scope": "/rpicommunity/",
+  "icons": [
+    {
+      "src": "/rpicommunity/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/rpicommunity/branding/rpic-logo.png",
+      "sizes": "760x760",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }

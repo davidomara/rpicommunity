@@ -29,13 +29,15 @@ const ENV_BASE_PATH =
   normalizeBasePath(process.env.NEXTAUTH_URL) ||
   normalizeBasePath(process.env.AUTH_URL);
 
+const CONFIGURED_BASE_PATH = "/rpicommunity";
+
 const APP_ORIGIN =
   normalizeOrigin(process.env.NEXT_PUBLIC_APP_URL) ||
   normalizeOrigin(process.env.APP_URL) ||
   normalizeOrigin(process.env.NEXTAUTH_URL) ||
   normalizeOrigin(process.env.AUTH_URL);
 
-export const APP_BASE_PATH = ENV_BASE_PATH;
+export const APP_BASE_PATH = ENV_BASE_PATH || CONFIGURED_BASE_PATH;
 
 export function appRoute(path: string): string {
   if (!path) return "/";
