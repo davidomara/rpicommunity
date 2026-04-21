@@ -1,0 +1,143 @@
+@echo off
+setlocal EnableExtensions EnableDelayedExpansion
+
+cd /d C:\apps\rpic-community-app || exit /b 1
+
+set LOG=C:\apps\rpic-community-app\deploy.log
+set BRANCH=feature/sql_db
+set PORT=3000
+set START_TASK=RPIC WWW
+
+echo ==================================================>> "%LOG%"
+echo Deploy check started %date% %time%>> "%LOG%"
+echo Running as: %username%>> "%LOG%"
+
+echo --- current branch --- >> "%LOG%"
+git rev-parse --abbrev-ref HEAD >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: git rev-parse >> "%LOG%"
+  exit /b 1
+)
+
+for /f %%i in ('git rev-parse HEAD') do set LOCALHEAD=%%i
+if not defined LOCALHEAD (
+  echo FAILED: could not read local HEAD >> "%LOG%"
+  exit /b 1
+)
+
+echo Local HEAD before fetch: !LOCALHEAD!>> "%LOG%"
+
+echo --- current commit before fetch --- >> "%LOG%"
+git log -1 --pretty=format:"Commit: %%H ^| Message: %%s" >> "%LOG%" 2>&1
+echo.>> "%LOG%"
+if errorlevel 1 (
+  echo FAILED: git log before fetch >> "%LOG%"
+  exit /b 1
+)
+
+echo --- git fetch origin %BRANCH% --- >> "%LOG%"
+git fetch origin %BRANCH% >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: git fetch origin %BRANCH% >> "%LOG%"
+  exit /b 1
+)
+
+for /f %%i in ('git rev-parse origin/%BRANCH%') do set REMOTEHEAD=%%i
+if not defined REMOTEHEAD (
+  echo FAILED: could not read remote HEAD >> "%LOG%"
+  exit /b 1
+)
+
+echo Remote HEAD after fetch: !REMOTEHEAD!>> "%LOG%"
+
+if /I "!LOCALHEAD!"=="!REMOTEHEAD!" (
+  echo No new commit detected. Nothing to deploy.>> "%LOG%"
+  exit /b 0
+)
+
+echo --- commit before pull --- >> "%LOG%"
+git log -1 --pretty=format:"Commit: %%H ^| Message: %%s" >> "%LOG%" 2>&1
+echo.>> "%LOG%"
+
+echo --- git pull origin %BRANCH% --- >> "%LOG%"
+git pull origin %BRANCH% >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: git pull origin %BRANCH% >> "%LOG%"
+  exit /b 1
+)
+
+echo --- commit after pull --- >> "%LOG%"
+git log -1 --pretty=format:"Commit: %%H ^| Message: %%s" >> "%LOG%" 2>&1
+echo.>> "%LOG%"
+if errorlevel 1 (
+  echo FAILED: git log after pull >> "%LOG%"
+  exit /b 1
+)
+
+echo --- npm install --- >> "%LOG%"
+call "C:\Program Files\nodejs\npm.cmd" install >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: npm install >> "%LOG%"
+  exit /b 1
+)
+
+echo --- prisma generate --- >> "%LOG%"
+call "C:\Program Files\nodejs\npm.cmd" run prisma:generate >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: prisma generate >> "%LOG%"
+  exit /b 1
+)
+
+echo --- build --- >> "%LOG%"
+call "C:\Program Files\nodejs\npm.cmd" run build >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: build >> "%LOG%"
+  exit /b 1
+)
+
+echo --- copy .next static --- >> "%LOG%"
+robocopy .next\static .next\standalone\.next\static /E >> "%LOG%" 2>&1
+
+echo --- copy public --- >> "%LOG%"
+robocopy public .next\standalone\public /E >> "%LOG%" 2>&1
+
+echo --- copy env --- >> "%LOG%"
+powershell -NoProfile -Command "Copy-Item '.env.production' '.next\standalone\.env.production' -Force" >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: copy env >> "%LOG%"
+  exit /b 1
+)
+
+echo --- stop current app on port %PORT% --- >> "%LOG%"
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
+  echo Killing PID %%p on port %PORT%>> "%LOG%"
+  taskkill /f /pid %%p >> "%LOG%" 2>&1
+)
+
+echo --- start app task %START_TASK% --- >> "%LOG%"
+schtasks /run /tn "%START_TASK%" >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: could not start task %START_TASK% >> "%LOG%"
+  exit /b 1
+)
+
+echo SUCCESS: deploy completed %date% %time%>> "%LOG%"
+exit /b 0
+
+@REM Create task from Administrator PowerShell:
+@REM schtasks /create /tn "RPIC WWW Deploy" /sc minute /mo 5 /ru "WIN-PBCMT0QQ9B9\svc_gitdeploy" /rp * /tr "cmd.exe /c C:\apps\rpic-community-app\deploy.cmd" /f
+
+@REM Run task:
+@REM schtasks /run /tn "RPIC WWW Deploy"
+
+@REM Show task details:
+@REM schtasks /query /tn "RPIC WWW Deploy" /fo list /v
+
+@REM Delete task:
+@REM schtasks /delete /tn "RPIC WWW Deploy" /f
+
+@REM Show deploy log:
+@REM Get-Content C:\apps\rpic-community-app\deploy.log -Tail 100
+
+@REM Show latest deployed commit:
+@REM git -C C:\apps\rpic-community-app log -1 --oneline
