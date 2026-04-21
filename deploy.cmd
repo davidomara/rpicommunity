@@ -67,10 +67,17 @@ echo --- commit before pull --- >> "%LOG%"
 git log -1 --pretty=format:"Commit: %%H ^| Message: %%s" >> "%LOG%" 2>&1
 echo.>> "%LOG%"
 
-echo --- stop current app on port %PORT% before deploy --- >> "%LOG%"
+echo --- check existing app on port %PORT% before deploy --- >> "%LOG%"
+set PORTPID=
 for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
-  echo Killing PID %%p on port %PORT%>> "%LOG%"
-  taskkill /f /pid %%p >> "%LOG%" 2>&1
+  set PORTPID=%%p
+)
+
+if defined PORTPID (
+  echo Port %PORT% is currently in use by PID !PORTPID!>> "%LOG%"
+  echo NOTE: deploy will not attempt taskkill. App restart must be handled by the owned start task.>> "%LOG%"
+) else (
+  echo Port %PORT% is free.>> "%LOG%"
 )
 
 echo --- git pull origin %BRANCH% --- >> "%LOG%"
@@ -144,7 +151,7 @@ if errorlevel 1 (
 )
 
 echo --- copy public to IIS runtime --- >> "%LOG%"
-powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\public' '%IIS_ROOT%\public' -Recurse -Force" >> "%LOG%" 2>&1
+powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\public\*' '%IIS_ROOT%' -Recurse -Force" >> "%LOG%" 2>&1
 if errorlevel 1 (
   echo FAILED: copy public to IIS runtime >> "%LOG%"
   exit /b 1
