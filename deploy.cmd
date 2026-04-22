@@ -148,6 +148,34 @@ if errorlevel 1 (
   exit /b 1
 )
 
+echo --- stop existing app on port %PORT% before runtime copy --- >> "%LOG%"
+set PORTPID=
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
+  set PORTPID=%%p
+)
+
+if defined PORTPID (
+  echo Stopping PID !PORTPID! on port %PORT%>> "%LOG%"
+  taskkill /PID !PORTPID! /T /F >> "%LOG%" 2>&1
+  if errorlevel 1 (
+    echo FAILED: could not stop PID !PORTPID! on port %PORT% >> "%LOG%"
+    exit /b 1
+  )
+  timeout /t 2 /nobreak >nul
+)
+
+set PORTPID=
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
+  set PORTPID=%%p
+)
+
+if defined PORTPID (
+  echo FAILED: port %PORT% still in use by PID !PORTPID! after stop attempt >> "%LOG%"
+  exit /b 1
+) else (
+  echo Port %PORT% is free for copy/restart.>> "%LOG%"
+)
+
 echo --- copy standalone server to IIS runtime --- >> "%LOG%"
 powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\.next\standalone\*' '%IIS_ROOT%' -Recurse -Force" >> "%LOG%" 2>&1
 if errorlevel 1 (
