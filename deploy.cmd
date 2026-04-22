@@ -190,6 +190,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
+echo {"time":"%date% %time%","commit":"!REMOTEHEAD!","status":"ok"} > C:\inetpub\wwwroot\rpicommunity\deploy-status.json
 echo SUCCESS: deploy completed %date% %time%>> "%LOG%"
 exit /b 0
 
