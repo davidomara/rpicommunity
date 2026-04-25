@@ -109,6 +109,13 @@ if errorlevel 1 (
   exit /b 1
 )
 
+echo --- prisma migrate deploy --- >> "%LOG%"
+call "C:\Program Files\nodejs\npx.cmd" prisma migrate deploy >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: prisma migrate deploy >> "%LOG%"
+  exit /b 1
+)
+
 echo --- build --- >> "%LOG%"
 call "C:\Program Files\nodejs\npm.cmd" run build >> "%LOG%" 2>&1
 if errorlevel 1 (
