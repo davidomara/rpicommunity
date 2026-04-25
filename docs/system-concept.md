@@ -14,7 +14,7 @@ The RPIC Community App is a modern migration of a community welfare, emergency s
 - Next.js App Router
 - TypeScript
 - Tailwind CSS
-- Prisma ORM with PostgreSQL
+- Prisma ORM with SQL Server
 - Auth.js for authentication and database-backed sessions
 - Zod for server-side validation
 - Recharts for dashboard charting
@@ -82,7 +82,7 @@ The RPIC Community App is a modern migration of a community welfare, emergency s
 
 - Monolithic Next.js application with server actions and API routes
 - Local private storage for protected files under `storage/private`
-- PostgreSQL database managed by Prisma migrations
+- SQL Server database managed by Prisma migrations
 - Recommended deployment on Railway with environment variables:
   - `DATABASE_URL`
   - `AUTH_SECRET`
