@@ -1,8 +1,2 @@
--- AlterTable
-ALTER TABLE "BankStatement" ADD COLUMN     "data" BYTEA;
-
--- AlterTable
-ALTER TABLE "GoverningDocument" ADD COLUMN     "sizeBytes" INTEGER NOT NULL DEFAULT 0;
-
--- AlterTable
-ALTER TABLE "GoverningDocument" ADD COLUMN     "data" BYTEA;
+-- Intentionally empty.
+-- Replaced by the SQL Server baseline in 20260401191131_initial_migration.

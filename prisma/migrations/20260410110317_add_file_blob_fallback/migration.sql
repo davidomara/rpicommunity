@@ -1,2 +1,2 @@
--- AlterTable
-ALTER TABLE "GoverningDocument" ALTER COLUMN "sizeBytes" DROP DEFAULT;
+-- Intentionally empty.
+-- Replaced by the SQL Server baseline in 20260401191131_initial_migration.
