@@ -102,6 +102,13 @@ if errorlevel 1 (
   exit /b 1
 )
 
+echo --- prisma migrate reset: WARNING DATA WILL BE LOST --- >> "%LOG%"
+call "C:\Program Files\nodejs\npx.cmd" prisma migrate reset --force >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: prisma migrate reset >> "%LOG%"
+  exit /b 1
+)
+
 echo --- prisma generate --- >> "%LOG%"
 call "C:\Program Files\nodejs\npx.cmd" prisma generate >> "%LOG%" 2>&1
 if errorlevel 1 (
@@ -109,10 +116,10 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo --- prisma migrate deploy --- >> "%LOG%"
-call "C:\Program Files\nodejs\npx.cmd" prisma migrate deploy >> "%LOG%" 2>&1
+echo --- prisma db seed --- >> "%LOG%"
+call "C:\Program Files\nodejs\npx.cmd" prisma db seed >> "%LOG%" 2>&1
 if errorlevel 1 (
-  echo FAILED: prisma migrate deploy >> "%LOG%"
+  echo FAILED: prisma db seed >> "%LOG%"
   exit /b 1
 )
 
