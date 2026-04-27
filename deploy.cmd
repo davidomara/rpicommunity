@@ -136,17 +136,18 @@ if not exist ".next\standalone\server.js" (
 )
 
 echo --- copy standalone static --- >> "%LOG%"
-robocopy .next\static .next\standalone\.next\static /E >> "%LOG%" 2>&1
-
-echo --- copy standalone server --- >> "%LOG%"
-powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '.next\standalone\.next\server' | Out-Null; Copy-Item '.next\server\*' '.next\standalone\.next\server' -Recurse -Force" >> "%LOG%" 2>&1
-if errorlevel 1 (
-  echo FAILED: copy standalone server >> "%LOG%"
+robocopy .next\static .next\standalone\.next\static /E /R:2 /W:1 >> "%LOG%" 2>&1
+if errorlevel 8 (
+  echo FAILED: copy standalone static >> "%LOG%"
   exit /b 1
 )
 
 echo --- copy standalone public --- >> "%LOG%"
-robocopy public .next\standalone\public /E >> "%LOG%" 2>&1
+robocopy public .next\standalone\public /E /R:2 /W:1 >> "%LOG%" 2>&1
+if errorlevel 8 (
+  echo FAILED: copy standalone public >> "%LOG%"
+  exit /b 1
+)
 
 echo --- copy standalone env --- >> "%LOG%"
 powershell -NoProfile -Command "Copy-Item '.env.production' '.next\standalone\.env.production' -Force" >> "%LOG%" 2>&1
@@ -156,64 +157,36 @@ if errorlevel 1 (
 )
 
 echo --- prepare IIS runtime folders --- >> "%LOG%"
-powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '%IIS_ROOT%' | Out-Null; New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next' | Out-Null; New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next\static' | Out-Null" >> "%LOG%" 2>&1
+powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '%IIS_ROOT%' | Out-Null; New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next' | Out-Null; New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next\static' | Out-Null; New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next\server' | Out-Null; New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\public' | Out-Null" >> "%LOG%" 2>&1
 if errorlevel 1 (
   echo FAILED: create IIS runtime folders >> "%LOG%"
   exit /b 1
 )
 
-echo --- stop existing app on port %PORT% before runtime copy --- >> "%LOG%"
-set PORTPID=
-for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
-  set PORTPID=%%p
-)
-
-if defined PORTPID (
-  echo Stopping PID !PORTPID! on port %PORT%>> "%LOG%"
-  taskkill /PID !PORTPID! /T /F >> "%LOG%" 2>&1
-  if errorlevel 1 (
-    echo FAILED: could not stop PID !PORTPID! on port %PORT% >> "%LOG%"
-    exit /b 1
-  )
-  timeout /t 2 /nobreak >nul
-)
-
-set PORTPID=
-for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
-  set PORTPID=%%p
-)
-
-if defined PORTPID (
-  echo FAILED: port %PORT% still in use by PID !PORTPID! after stop attempt >> "%LOG%"
-  exit /b 1
-) else (
-  echo Port %PORT% is free for copy/restart.>> "%LOG%"
-)
-
 echo --- copy standalone server to IIS runtime --- >> "%LOG%"
-powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\.next\standalone\*' '%IIS_ROOT%' -Recurse -Force" >> "%LOG%" 2>&1
-if errorlevel 1 (
+robocopy .next\standalone "%IIS_ROOT%" /E /R:2 /W:1 >> "%LOG%" 2>&1
+if errorlevel 8 (
   echo FAILED: copy standalone server to IIS runtime >> "%LOG%"
   exit /b 1
 )
 
-echo --- copy server to IIS runtime --- >> "%LOG%"
-powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path '%IIS_ROOT%\.next\server' | Out-Null; Copy-Item 'C:\apps\rpic-community-app\.next\server\*' '%IIS_ROOT%\.next\server' -Recurse -Force" >> "%LOG%" 2>&1
-if errorlevel 1 (
-  echo FAILED: copy server to IIS runtime >> "%LOG%"
-  exit /b 1
-)
-
 echo --- copy static to IIS runtime --- >> "%LOG%"
-powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\.next\static\*' '%IIS_ROOT%\.next\static' -Recurse -Force" >> "%LOG%" 2>&1
-if errorlevel 1 (
+robocopy .next\static "%IIS_ROOT%\.next\static" /E /R:2 /W:1 >> "%LOG%" 2>&1
+if errorlevel 8 (
   echo FAILED: copy static to IIS runtime >> "%LOG%"
   exit /b 1
 )
 
+echo --- copy server to IIS runtime --- >> "%LOG%"
+robocopy .next\server "%IIS_ROOT%\.next\server" /E /R:2 /W:1 >> "%LOG%" 2>&1
+if errorlevel 8 (
+  echo FAILED: copy server to IIS runtime >> "%LOG%"
+  exit /b 1
+)
+
 echo --- copy public to IIS runtime --- >> "%LOG%"
-powershell -NoProfile -Command "Copy-Item 'C:\apps\rpic-community-app\public\*' '%IIS_ROOT%' -Recurse -Force" >> "%LOG%" 2>&1
-if errorlevel 1 (
+robocopy public "%IIS_ROOT%\public" /E /R:2 /W:1 >> "%LOG%" 2>&1
+if errorlevel 8 (
   echo FAILED: copy public to IIS runtime >> "%LOG%"
   exit /b 1
 )
