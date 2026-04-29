@@ -5,7 +5,12 @@ const nextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: "8mb",
-      allowedOrigins: ["10.20.70.138"]
+      allowedOrigins: [
+        "10.20.70.138",
+        "10.20.70.138:80",
+        "154.72.204.131",
+        "154.72.204.131:8087"
+      ]
     }
   },
   async redirects() {

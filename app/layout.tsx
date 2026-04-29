@@ -3,6 +3,7 @@ import "./globals.css";
 import { APP_FULL_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { withBasePath } from "@/lib/app-path";
 import { IdleSessionGuard } from "@/components/layout/idle-session-guard";
+import { NetworkHostRedirect } from "@/components/layout/network-host-redirect";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href={appleIconHref} />
       </head>
       <body suppressHydrationWarning>
+        <NetworkHostRedirect />
         <IdleSessionGuard />
         <Toaster />
         {children}
