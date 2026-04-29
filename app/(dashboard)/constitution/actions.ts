@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { deriveDocumentTitleFromFilename } from "@/lib/document-title";
 import { getCurrentUserAuthorization, hasPermission } from "@/lib/rbac";
 import { storePrivateFile } from "@/lib/storage";
 import { protectedDocumentUploadSchema } from "@/lib/validators/uploads";
@@ -40,7 +41,7 @@ export async function uploadConstitutionAction(
 
   await prisma.governingDocument.create({
     data: {
-      title: "RPIC Community Constitution",
+      title: deriveDocumentTitleFromFilename(file.name),
       filename: stored.filename,
       originalName: file.name,
       mimeType: file.type || "application/octet-stream",

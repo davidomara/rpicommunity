@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { withBasePath } from "@/lib/app-path";
+import { getGoverningDocumentDisplayTitle } from "@/lib/document-title";
 import { getGoverningDocuments } from "@/lib/queries";
 import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +48,10 @@ export default async function ConstitutionPage() {
             emptyMessage="No constitution or guidelines document has been uploaded yet."
             documents={documents.map((document) => ({
               id: document.id,
-              title: document.title,
+              title: getGoverningDocumentDisplayTitle({
+                title: document.title,
+                originalName: document.originalName
+              }),
               originalName: document.originalName,
               mimeType: document.mimeType,
               src: withBasePath(`/api/documents/constitution?docId=${document.id}`),
