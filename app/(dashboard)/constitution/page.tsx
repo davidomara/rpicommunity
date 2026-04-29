@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { withBasePath } from "@/lib/app-path";
 import { getGoverningDocumentDisplayTitle } from "@/lib/document-title";
 import { getGoverningDocuments } from "@/lib/queries";
-import { getUserAuthorization, hasPermission } from "@/lib/rbac";
+import { canDeleteGoverningDocuments, getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TabbedDocumentViewer } from "@/components/documents/tabbed-document-viewer";
 import { deleteConstitutionAction, uploadConstitutionAction } from "./actions";
@@ -20,6 +20,7 @@ export default async function ConstitutionPage() {
 
   const documents = await getGoverningDocuments();
   const canUpload = hasPermission(authorization, "constitution.manage");
+  const canDelete = canDeleteGoverningDocuments(authorization);
 
   return (
     <div className="space-y-6">
@@ -46,7 +47,7 @@ export default async function ConstitutionPage() {
           <TabbedDocumentViewer
             ariaLabel="Governing documents"
             emptyMessage="No constitution or guidelines document has been uploaded yet."
-            deleteAction={canUpload ? deleteConstitutionAction : undefined}
+            deleteAction={canDelete ? deleteConstitutionAction : undefined}
             documents={documents.map((document) => ({
               id: document.id,
               title: getGoverningDocumentDisplayTitle({

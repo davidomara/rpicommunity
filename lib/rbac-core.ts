@@ -42,6 +42,7 @@ export const permissionDefinitions = [
   { key: "bank_statements.manage", module: "bank_statements", name: "Manage Bank Statements", description: "Upload and manage bank statements." },
   { key: "constitution.view", module: "constitution", name: "View Constitution", description: "Access the governing constitution document." },
   { key: "constitution.manage", module: "constitution", name: "Manage Constitution", description: "Upload and manage constitution documents." },
+  { key: "constitution.delete", module: "constitution", name: "Delete Constitution Documents", description: "Delete governing constitution documents." },
   { key: "reports.view", module: "reports", name: "View Reports", description: "Access reporting views." },
   { key: "reports.export", module: "reports", name: "Export Reports", description: "Export reports from the system." },
   { key: "logs.view", module: "logs", name: "View Logs", description: "Access system or workflow logs." },
@@ -129,6 +130,7 @@ const defaultRolePermissions: Record<AccessRoleKey, PermissionKey[]> = {
     "bank_statements.manage",
     "constitution.view",
     "constitution.manage",
+    "constitution.delete",
     "reports.view",
     "reports.export",
     "logs.view",
@@ -267,6 +269,15 @@ export function getDualApprovalActor(accessRoleKey: string): DualApprovalActor |
   }
 
   return null;
+}
+
+export function canDeleteGoverningDocuments(authorization: Pick<AuthorizationContext, "accessRoleKey" | "permissionKeys"> | null | undefined) {
+  if (!authorization) return false;
+  return (
+    hasPermission(authorization, "constitution.delete") ||
+    authorization.accessRoleKey === ACCESS_ROLE.SUPER_ADMIN ||
+    authorization.accessRoleKey === ACCESS_ROLE.ADMIN
+  );
 }
 
 export function getSeedAccessRoles() {

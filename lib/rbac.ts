@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import {
   canAccessSettings,
+  canDeleteGoverningDocuments,
   deriveLegacyAccessRoleKey,
   getAccessRoleDescription,
   getAccessRoleLabel,
@@ -26,6 +27,7 @@ import {
 
 export {
   canAccessSettings,
+  canDeleteGoverningDocuments,
   deriveLegacyAccessRoleKey,
   getAccessRoleDescription,
   getAccessRoleLabel,

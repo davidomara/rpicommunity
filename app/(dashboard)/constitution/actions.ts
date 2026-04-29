@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { deriveDocumentTitleFromFilename } from "@/lib/document-title";
-import { getCurrentUserAuthorization, hasPermission } from "@/lib/rbac";
+import { canDeleteGoverningDocuments, getCurrentUserAuthorization, hasPermission } from "@/lib/rbac";
 import { deletePrivateFile, storePrivateFile } from "@/lib/storage";
 import { protectedDocumentUploadSchema } from "@/lib/validators/uploads";
 import { revalidatePath } from "next/cache";
@@ -71,7 +71,7 @@ export async function deleteConstitutionAction(
 ): Promise<ProtectedUploadFormState> {
   const session = await auth();
   const authorization = await getCurrentUserAuthorization();
-  if (!session?.user || !authorization || !hasPermission(authorization, "constitution.manage")) {
+  if (!session?.user || !authorization || !canDeleteGoverningDocuments(authorization)) {
     return { success: false, error: "Unauthorized", message: "" };
   }
 
