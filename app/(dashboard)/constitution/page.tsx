@@ -6,7 +6,7 @@ import { getGoverningDocuments } from "@/lib/queries";
 import { getUserAuthorization, hasPermission } from "@/lib/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TabbedDocumentViewer } from "@/components/documents/tabbed-document-viewer";
-import { uploadConstitutionAction } from "./actions";
+import { deleteConstitutionAction, uploadConstitutionAction } from "./actions";
 import { ProtectedUploadForm } from "@/components/forms/protected-upload-form";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +46,7 @@ export default async function ConstitutionPage() {
           <TabbedDocumentViewer
             ariaLabel="Governing documents"
             emptyMessage="No constitution or guidelines document has been uploaded yet."
+            deleteAction={canUpload ? deleteConstitutionAction : undefined}
             documents={documents.map((document) => ({
               id: document.id,
               title: getGoverningDocumentDisplayTitle({

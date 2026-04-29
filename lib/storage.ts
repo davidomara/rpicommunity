@@ -1,5 +1,5 @@
 import { createReadStream } from "node:fs";
-import { mkdir, writeFile, readFile, stat } from "node:fs/promises";
+import { mkdir, writeFile, readFile, stat, unlink } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { Readable } from "node:stream";
@@ -47,6 +47,16 @@ export async function getPrivateFileSize(storagePath: string) {
 
 export async function getPrivateFileStat(storagePath: string) {
   return stat(resolveStoragePath(storagePath));
+}
+
+export async function deletePrivateFile(storagePath: string) {
+  const fullPath = resolveStoragePath(storagePath);
+  const relativeToRoot = path.relative(normalizedUploadRoot, fullPath);
+  if (relativeToRoot.startsWith("..") || path.isAbsolute(relativeToRoot)) {
+    throw new Error("Invalid storage path");
+  }
+
+  return unlink(fullPath);
 }
 
 export function streamPrivateFile(storagePath: string, start?: number, end?: number) {
