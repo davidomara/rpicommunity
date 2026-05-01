@@ -1,6 +1,6 @@
 import { type Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { CONTRIBUTION_APPROVAL_STATUS, TRANSACTION_TYPE } from "@/lib/domain-types";
+import { CONTRIBUTION_APPROVAL_STATUS, TRANSACTION_TYPE, WITHDRAWAL_PURPOSE } from "@/lib/domain-types";
 import { getExpectedContributionAmount } from "@/lib/member-status";
 
 type BalanceClient = Prisma.TransactionClient | typeof prisma;
@@ -27,8 +27,8 @@ export async function getAvailableCommunityBalance(db: BalanceClient, now = new 
       where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED },
       _sum: { amount: true }
     }),
-    db.transaction.aggregate({
-      where: { type: TRANSACTION_TYPE.WITHDRAWAL },
+    db.withdrawal.aggregate({
+      where: { purpose: WITHDRAWAL_PURPOSE.WELFARE },
       _sum: { amount: true }
     })
   ]);

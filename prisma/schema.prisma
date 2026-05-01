@@ -120,6 +120,7 @@ model Withdrawal {
   memberId       String   @db.VarChar(191)
   amount         Decimal  @db.Decimal(12, 2)
   reason         String
+  purpose        String   @default("WELFARE") @db.VarChar(32)
   withdrawalDate DateTime
   createdById    String?  @db.VarChar(191)
   createdAt      DateTime @default(now())
@@ -128,6 +129,7 @@ model Withdrawal {
   member         User     @relation("WithdrawalMember", fields: [memberId], references: [id], onUpdate: NoAction)
 
   @@index([memberId, withdrawalDate])
+  @@index([purpose])
   @@index([createdAt])
 }
 

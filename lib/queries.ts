@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { CONTRIBUTION_APPROVAL_STATUS, EMERGENCY_STATUS, COMMUNITY_ROLES } from "@/lib/domain-types";
-import { getArrearsAmount, getSavingsAmount } from "@/lib/member-status";
+import { CONTRIBUTION_APPROVAL_STATUS, EMERGENCY_STATUS, COMMUNITY_ROLES, WITHDRAWAL_PURPOSE } from "@/lib/domain-types";
+import { getArrearsAmount, getAvailableSavingsAmount } from "@/lib/member-status";
 import { syncAutoMemberStatuses } from "@/lib/member-status-sync";
 import { sortCommunityRows } from "@/lib/community-order";
 import { deriveLegacyAccessRoleKey, getAccessRoleLabel, hasPermission, type AuthorizationContext } from "@/lib/rbac";
@@ -129,6 +129,9 @@ export async function getDashboardData(): Promise<{
   const memberRows = sortCommunityRows<DashboardMemberRow>(members.map((member) => {
     const contributionTotal = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
     const withdrawalTotal = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
+    const savingsWithdrawalTotal = member.withdrawals
+      .filter((row) => row.purpose === WITHDRAWAL_PURPOSE.SAVINGS)
+      .reduce((sum, row) => sum + Number(row.amount), 0);
     return {
       id: member.id,
       name: member.name,
@@ -138,7 +141,7 @@ export async function getDashboardData(): Promise<{
       totalContributions: contributionTotal,
       totalWithdrawals: withdrawalTotal,
       missing: getArrearsAmount(contributionTotal),
-      savings: getSavingsAmount(contributionTotal),
+      savings: getAvailableSavingsAmount(contributionTotal, savingsWithdrawalTotal),
       pendingEmergencyRequests: member.emergencyRequests.length
     };
   }));
@@ -289,7 +292,31 @@ export async function getNotificationCount(authorization: AuthorizationContext |
 export async function getWithdrawalContext() {
   const members = await prisma.user.findMany({
     where: { role: { in: COMMUNITY_ROLES } },
-    select: { id: true, name: true, username: true }
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      contributions: {
+        where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED },
+        select: { amount: true }
+      },
+      withdrawals: {
+        where: { purpose: WITHDRAWAL_PURPOSE.SAVINGS },
+        select: { amount: true }
+      }
+    }
+  });
+
+  const memberOptions = members.map((member) => {
+    const totalApprovedContributions = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
+    const totalSavingsWithdrawals = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
+
+    return {
+      id: member.id,
+      name: member.name,
+      username: member.username,
+      availableSavings: getAvailableSavingsAmount(totalApprovedContributions, totalSavingsWithdrawals)
+    };
   });
 
   const rows = await prisma.withdrawal.findMany({
@@ -304,7 +331,7 @@ export async function getWithdrawalContext() {
     }
   });
 
-  return { members: sortCommunityRows(members), rows };
+  return { members: sortCommunityRows(memberOptions), rows };
 }
 
 export async function getEmergencyContext({

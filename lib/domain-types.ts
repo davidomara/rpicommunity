@@ -2,6 +2,7 @@ export type Role = "ADMIN" | "MEMBER" | "TREASURER";
 export type MemberStatus = "ACTIVE" | "WARNING" | "CLOSED";
 export type EmergencyStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type TransactionType = "CONTRIBUTION" | "WITHDRAWAL";
+export type WithdrawalPurpose = "SAVINGS" | "WELFARE";
 export type StatementType = "PDF" | "IMAGE";
 export type StatusMode = "AUTO" | "MANUAL";
 export type ChangeRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
@@ -28,6 +29,11 @@ export const EMERGENCY_STATUS = {
 export const TRANSACTION_TYPE = {
   CONTRIBUTION: "CONTRIBUTION" as TransactionType,
   WITHDRAWAL: "WITHDRAWAL" as TransactionType
+};
+
+export const WITHDRAWAL_PURPOSE = {
+  SAVINGS: "SAVINGS" as WithdrawalPurpose,
+  WELFARE: "WELFARE" as WithdrawalPurpose
 };
 
 export const STATEMENT_TYPE = {

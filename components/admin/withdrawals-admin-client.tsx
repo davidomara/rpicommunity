@@ -10,6 +10,7 @@ type MemberOption = {
   id: string;
   name: string;
   username: string;
+  availableSavings: number;
 };
 
 type WithdrawalRow = {
@@ -48,7 +49,8 @@ export function WithdrawalsAdminClient({
             members={members.map((member) => ({
               id: member.id,
               name: member.name || member.username,
-              username: member.username
+              username: member.username,
+              availableSavings: member.availableSavings
             }))}
             selectedMemberId={selectedMemberId}
             onSelectedMemberChange={setSelectedMemberId}

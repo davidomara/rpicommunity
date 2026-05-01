@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { getAvailableCommunityBalance } from "@/lib/community-balance";
 import { prisma } from "@/lib/db";
+import { WITHDRAWAL_PURPOSE } from "@/lib/domain-types";
 import { getCurrentUserAuthorization, getDualApprovalActor, hasPermission } from "@/lib/rbac";
 import { formatMoney } from "@/lib/utils";
 import { emergencyRequestSchema, emergencyDecisionSchema } from "@/lib/validators/finance";
@@ -284,6 +285,7 @@ async function decideEmergencyRequestSubmission(formData: FormData): Promise<Eme
         memberId: current.memberId,
         amount: disbursedAmount,
         reason: `Emergency disbursement: ${current.reason}`,
+        purpose: WITHDRAWAL_PURPOSE.WELFARE,
         withdrawalDate: new Date(),
         createdById: session.user.id
       }

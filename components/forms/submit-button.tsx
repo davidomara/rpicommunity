@@ -7,12 +7,14 @@ import { cn } from "@/lib/utils";
 export function SubmitButton({
   label,
   pendingLabel,
-  className
+  className,
+  disabled = false
 }: {
   label: string;
   pendingLabel: string;
   className?: string;
+  disabled?: boolean;
 }) {
   const { pending } = useFormStatus();
-  return <Button type="submit" className={cn(className)}>{pending ? pendingLabel : label}</Button>;
+  return <Button type="submit" className={cn(className)} disabled={disabled || pending}>{pending ? pendingLabel : label}</Button>;
 }

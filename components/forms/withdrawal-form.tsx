@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getTodayISODate } from "@/lib/utils";
+import { formatMoney, getTodayISODate } from "@/lib/utils";
 
 const initialState: WithdrawalFormState = {
   success: false,
@@ -23,12 +23,15 @@ export function WithdrawalForm({
   selectedMemberId,
   onSelectedMemberChange
 }: {
-  members: Array<{ id: string; name: string; username: string }>;
+  members: Array<{ id: string; name: string; username: string; availableSavings: number }>;
   selectedMemberId?: string;
   onSelectedMemberChange?: (memberId: string) => void;
 }) {
   const [state, formAction] = useFormState(createWithdrawalAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const selectedMember = members.find((member) => member.id === selectedMemberId);
+  const availableSavings = selectedMember?.availableSavings ?? 0;
+  const hasAvailableSavings = availableSavings > 0;
 
   useEffect(() => {
     if (!state.success) return;
@@ -61,7 +64,21 @@ export function WithdrawalForm({
           </div>
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="amount">Amount</Label>
-            <Input id="amount" name="amount" type="number" min="1" step="0.01" required />
+            <Input
+              id="amount"
+              name="amount"
+              type="number"
+              min="1"
+              max={hasAvailableSavings ? availableSavings : undefined}
+              step="0.01"
+              required
+              disabled={!hasAvailableSavings}
+            />
+            {selectedMember ? (
+              <p className="text-xs text-slate-500">
+                Enter an amount up to {formatMoney(availableSavings)}.
+              </p>
+            ) : null}
           </div>
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="withdrawalDate">Withdrawal Date</Label>
@@ -83,7 +100,7 @@ export function WithdrawalForm({
               <FormMessage type="success" message={state.success ? state.message : ""} />
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <SubmitButton label="Save Withdrawal" pendingLabel="Saving..." className="w-full sm:w-auto" />
+              <SubmitButton label="Save Withdrawal" pendingLabel="Saving..." className="w-full sm:w-auto" disabled={!hasAvailableSavings} />
               <Button type="reset" variant="outline" className="w-full border-amber-200 bg-amber-50 font-medium text-amber-800 hover:bg-amber-100 sm:w-auto">
                 Clear
               </Button>
@@ -91,9 +108,13 @@ export function WithdrawalForm({
             <div className="mt-4 w-full overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-sm leading-6 text-slate-600">
               <p className="font-medium text-emerald-800">Withdrawal note</p>
               <p className="mt-1">
-                Capture the full withdrawal reason and correct date for each member so approved payouts,
-                emergency support records, and the running community balance remain consistent.
+                Only approved contributions above the expected monthly amount count as savings, and withdrawals can only be made from that savings balance.
               </p>
+              {selectedMember ? (
+                <p className="mt-2 text-xs text-emerald-900/80">
+                  Current withdrawable savings for {selectedMember.name}: <span className="font-semibold">{formatMoney(selectedMember.availableSavings)}</span>
+                </p>
+              ) : null}
             </div>
           </div>
         </form>
