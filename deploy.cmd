@@ -95,13 +95,6 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo --- clean stale build and dependencies --- >> "%LOG%"
-powershell -NoProfile -Command "Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue" >> "%LOG%" 2>&1
-if errorlevel 1 (
-  echo FAILED: clean stale build and dependencies >> "%LOG%"
-  exit /b 1
-)
-
 echo --- npm install --- >> "%LOG%"
 call "C:\Program Files\nodejs\npm.cmd" install >> "%LOG%" 2>&1
 if errorlevel 1 (
