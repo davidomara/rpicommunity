@@ -4,6 +4,7 @@ import { APP_FULL_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { withBasePath } from "@/lib/app-path";
 import { IdleSessionGuard } from "@/components/layout/idle-session-guard";
 import { NetworkHostRedirect } from "@/components/layout/network-host-redirect";
+import { SessionProvider } from "@/components/providers/session-provider";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const manifestHref = withBasePath("/meta.json");
   const faviconHref = withBasePath("/favicon.svg");
   const appleIconHref = withBasePath("/branding/rpic-logo.png");
+  const authBasePath = withBasePath("/api/auth");
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -25,10 +27,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href={appleIconHref} />
       </head>
       <body suppressHydrationWarning>
-        <NetworkHostRedirect />
-        <IdleSessionGuard />
-        <Toaster />
-        {children}
+        <SessionProvider basePath={authBasePath}>
+          <NetworkHostRedirect />
+          <IdleSessionGuard />
+          <Toaster />
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );
