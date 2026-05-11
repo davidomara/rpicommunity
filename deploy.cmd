@@ -59,7 +59,9 @@ if not defined REMOTEHEAD (
 echo Remote HEAD after fetch: !REMOTEHEAD!>> "%LOG%"
 
 if /I "!LOCALHEAD!"=="!REMOTEHEAD!" (
-  echo No new commit detected. Nothing to deploy.>> "%LOG%"
+  echo No new commit detected. Checking whether the app is still running.>> "%LOG%"
+  call :EnsureAppRunning
+  if errorlevel 1 exit /b 1
   exit /b 0
 )
 
@@ -75,7 +77,6 @@ for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING'
 
 if defined PORTPID (
   echo Port %PORT% is currently in use by PID !PORTPID!>> "%LOG%"
-  echo NOTE: deploy will not attempt taskkill. App restart must be handled by the owned start task.>> "%LOG%"
 ) else (
   echo Port %PORT% is free.>> "%LOG%"
 )
@@ -191,6 +192,35 @@ if errorlevel 1 (
   exit /b 1
 )
 
+echo --- stop existing app on port %PORT% before restart --- >> "%LOG%"
+set PORTPID=
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
+  set PORTPID=%%p
+)
+
+if defined PORTPID (
+  echo Stopping PID !PORTPID! on port %PORT%>> "%LOG%"
+  taskkill /PID !PORTPID! /T /F >> "%LOG%" 2>&1
+  if errorlevel 1 (
+    echo FAILED: could not stop PID !PORTPID! on port %PORT% >> "%LOG%"
+    exit /b 1
+  )
+
+  timeout /t 2 /nobreak >nul
+)
+
+set PORTPID=
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
+  set PORTPID=%%p
+)
+
+if defined PORTPID (
+  echo FAILED: port %PORT% still in use by PID !PORTPID! after stop attempt >> "%LOG%"
+  exit /b 1
+) else (
+  echo Port %PORT% is free for restart.>> "%LOG%"
+)
+
 echo --- start app task %START_TASK% --- >> "%LOG%"
 schtasks /run /tn "%START_TASK%" >> "%LOG%" 2>&1
 if errorlevel 1 (
@@ -198,9 +228,57 @@ if errorlevel 1 (
   exit /b 1
 )
 
+timeout /t 5 /nobreak >nul
+
+set PORTPID=
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
+  set PORTPID=%%p
+)
+
+if defined PORTPID (
+  echo App restarted and is listening on port %PORT% as PID !PORTPID!>> "%LOG%"
+) else (
+  echo FAILED: app task started but port %PORT% is not listening after restart >> "%LOG%"
+  exit /b 1
+)
+
 echo {"time":"%date% %time%","commit":"!REMOTEHEAD!","status":"ok"} > C:\inetpub\wwwroot\rpicommunity\deploy-status.json
 echo SUCCESS: deploy completed %date% %time%>> "%LOG%"
 exit /b 0
+
+:EnsureAppRunning
+echo --- health check app on port %PORT% --- >> "%LOG%"
+set PORTPID=
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
+  set PORTPID=%%p
+)
+
+if defined PORTPID (
+  echo App is already listening on port %PORT% as PID !PORTPID!>> "%LOG%"
+  exit /b 0
+)
+
+echo App is not listening on port %PORT%. Starting task %START_TASK%.>> "%LOG%"
+schtasks /run /tn "%START_TASK%" >> "%LOG%" 2>&1
+if errorlevel 1 (
+  echo FAILED: could not start task %START_TASK% during health check >> "%LOG%"
+  exit /b 1
+)
+
+timeout /t 5 /nobreak >nul
+
+set PORTPID=
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :%PORT% ^| findstr LISTENING') do (
+  set PORTPID=%%p
+)
+
+if defined PORTPID (
+  echo App recovered and is listening on port %PORT% as PID !PORTPID!>> "%LOG%"
+  exit /b 0
+)
+
+echo FAILED: app is still not listening on port %PORT% after health-check restart >> "%LOG%"
+exit /b 1
 
 @REM Create task from Administrator PowerShell:
 @REM schtasks /create /tn "RPIC WWW Deploy" /sc minute /mo 5 /ru "WIN-PBCMT0QQ9B9\svc_gitdeploy" /rp * /tr "cmd.exe /c C:\apps\rpic-community-app\deploy.cmd" /f

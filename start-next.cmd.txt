@@ -1,5 +1,12 @@
 @echo off
-cd /d C:\apps\rpic-community-app || exit /b 1
+setlocal
+cd /d C:\inetpub\wwwroot\rpicommunity || exit /b 1
 set PATH=C:\Program Files\nodejs;%PATH%
-call "C:\Program Files\nodejs\npm.cmd" run start >> C:\apps\rpic-community-app\next-start.log 2>&1
-exit /b %errorlevel%
+set NODE_ENV=production
+set PORT=3000
+set HOSTNAME=127.0.0.1
+echo Starting app at %date% %time%>> C:\apps\rpic-community-app\next-start.log
+"C:\Program Files\nodejs\node.exe" server.js >> C:\apps\rpic-community-app\next-start.log 2>&1
+set EXITCODE=%ERRORLEVEL%
+echo App exited at %date% %time% with code %EXITCODE%>> C:\apps\rpic-community-app\next-start.log
+exit /b %EXITCODE%
