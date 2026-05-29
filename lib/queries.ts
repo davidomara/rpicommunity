@@ -267,7 +267,7 @@ export async function getMembersDirectory(): Promise<MemberDirectoryRow[]> {
 
 export async function getMemberAccountDirectory(): Promise<MemberAccountDirectoryRow[]> {
   const rows = await prisma.user.findMany({
-    where: { role: "MEMBER" },
+    where: { role: { in: COMMUNITY_ROLES } },
     select: {
       id: true,
       name: true,

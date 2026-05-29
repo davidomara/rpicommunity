@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { ROLE } from "@/lib/domain-types";
+import { COMMUNITY_ROLES, type Role } from "@/lib/domain-types";
 import { getCurrentUserAuthorization, hasPermission } from "@/lib/rbac";
 import { resetMemberPinSchema, updateEmailSchema, updateMemberEmailSchema, updateMemberStatusThresholdsSchema, updatePasswordSchema } from "@/lib/validators/account";
 import { revalidatePath } from "next/cache";
@@ -20,7 +20,7 @@ async function assertMemberTarget(memberId: string) {
     select: { id: true, role: true }
   });
 
-  if (!member || member.role !== ROLE.MEMBER) {
+  if (!member || !COMMUNITY_ROLES.includes(member.role as Role)) {
     return false;
   }
 
