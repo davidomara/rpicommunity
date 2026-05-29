@@ -22,13 +22,13 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const logoutButtonClassName = "gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800";
-  const notificationLinkClassName = "relative h-12 w-12 rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-sm hover:bg-slate-50 hover:text-slate-950";
+  const notificationLinkClassName = "relative h-12 w-12 rounded-2xl border border-sky-200 bg-white text-slate-900 shadow-sm hover:bg-sky-50 hover:text-slate-950";
   const logoSrc = withBasePath("/branding/rpic-logo.svg");
   const canViewNotifications = hasPermission(permissionKeys, "notifications.view");
 
   return (
-    <div className="page-shell h-screen overflow-hidden">
-      <aside className="hidden h-screen w-72 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-950 px-5 py-6 text-slate-100 lg:block">
+    <div className="page-shell h-dvh overflow-hidden">
+      <aside className="hidden h-dvh w-72 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-950 px-5 py-6 text-slate-100 lg:block">
         <div className="mb-2 flex items-center gap-2 rounded-xl border border-white/8 bg-white/5 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center">
             <Image
@@ -46,8 +46,8 @@ export function AppShell({
         </div>
         <DesktopDashboardNav permissionKeys={permissionKeys} notificationCount={notificationCount} />
       </aside>
-      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-[linear-gradient(180deg,rgba(238,244,251,0.99)_0%,rgba(224,234,245,0.99)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.68)] backdrop-blur">
+      <div className="flex h-dvh min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="fixed inset-x-0 top-0 z-40 border-b border-sky-200 bg-[linear-gradient(180deg,rgba(226,239,255,0.99)_0%,rgba(201,224,249,0.99)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_8px_22px_rgba(15,23,42,0.08)] backdrop-blur lg:sticky lg:inset-x-auto lg:z-30 lg:shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
           <div className="mx-auto flex w-full max-w-7xl items-start justify-between gap-3 px-3 py-3 sm:px-6 sm:py-4 lg:px-8">
             <div className="flex min-w-0 flex-1 items-start gap-1.5 sm:gap-3">
               <MobileDashboardNav
@@ -95,7 +95,7 @@ export function AppShell({
             </div>
           </div>
         </header>
-        <main data-app-scroll-container="true" className="mx-auto flex w-full min-w-0 max-w-7xl flex-1 flex-col gap-5 overflow-x-hidden overflow-y-auto px-2 py-5 sm:gap-6 sm:px-6 sm:py-6 lg:px-8">
+        <main data-app-scroll-container="true" className="mx-auto flex w-full min-w-0 max-w-7xl flex-1 flex-col gap-5 overflow-x-hidden overflow-y-auto px-2 pb-5 pt-24 sm:gap-6 sm:px-6 sm:pb-6 sm:pt-28 lg:px-8 lg:py-6">
           {children}
         </main>
         <BackToTopButton />
