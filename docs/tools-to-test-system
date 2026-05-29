@@ -15,7 +15,7 @@ This repo is a migration and modernization of the original Lango Community appli
 - Tailwind CSS
 - shadcn-style UI primitives
 - Prisma ORM
-- SQL Server
+- PostgreSQL
 - Auth.js with database sessions
 - Zod validation
 - Recharts
@@ -70,7 +70,7 @@ npm run build
 
 ## Deployment
 
-- Provision one SQL Server database that is reachable from the app
+- Provision one PostgreSQL database that is reachable from the app
 - Create one web service for this app
 - Root directory: repo root. Leave it blank if this repository is deployed directly because `package.json` is already at the project root.
 - Set `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, and `UPLOAD_ROOT`
@@ -87,13 +87,13 @@ npm run build
 - Recommended migration flow:
   Run `npx prisma migrate deploy` manually from a Railway shell or CI job when you intentionally want to apply pending production migrations.
 - Example production migration commands from your own terminal:
-  `DATABASE_URL='sqlserver://HOST:1433;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=false;' npx prisma migrate deploy`
-  `DATABASE_URL='sqlserver://HOST:1433;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=false;' npx prisma migrate status`
+  `DATABASE_URL='postgresql://USERNAME:PASSWORD@HOST:5432/DB_NAME?schema=public' npx prisma migrate deploy`
+  `DATABASE_URL='postgresql://USERNAME:PASSWORD@HOST:5432/DB_NAME?schema=public' npx prisma migrate status`
 - Why:
   Running `prisma migrate deploy` inside the app start command can put the service into a restart loop if a migration fails. Keeping migrations as a manual deployment step is safer for production.
 - First deploy flow:
   1. Push this repo to GitHub
-  2. Provision or select the SQL Server database
+  2. Provision or select the PostgreSQL database
   3. Create a web service from the GitHub repo
   4. Confirm the root directory is blank or `/`
   5. Add the environment variables listed above
@@ -105,9 +105,9 @@ npm run build
   11. If Prisma reports a failed production migration record but the schema changes are already present, resolve it before future deploys with:
      `npx prisma migrate resolve --applied <migration_name>`
   12. If you only need to add a Treasurer user in production, do not reseed the whole database. Run a one-off create command instead:
-     `DATABASE_URL='sqlserver://HOST:1433;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=false;' node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.create({ data:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer created: treasurer / Admin@123'); })().finally(()=>prisma.$disconnect());"`
+     `DATABASE_URL='postgresql://USERNAME:PASSWORD@HOST:5432/DB_NAME?schema=public' node -e "const bcrypt=require('bcryptjs'); const {PrismaClient}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.create({ data:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:'TREASURER', status:'ACTIVE' } }); console.log('Treasurer created: treasurer / Admin@123'); })().finally(()=>prisma.$disconnect());"`
   13. If a Treasurer account may already exist, use an upsert instead:
-     `DATABASE_URL='sqlserver://HOST:1433;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=false;' node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.upsert({ where:{ username:'treasurer' }, update:{ email:'treasurer@rpic.local', role:Role.TREASURER, status:MemberStatus.ACTIVE }, create:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer upserted'); })().finally(()=>prisma.$disconnect());"`
+     `DATABASE_URL='postgresql://USERNAME:PASSWORD@HOST:5432/DB_NAME?schema=public' node -e "const bcrypt=require('bcryptjs'); const {PrismaClient}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.upsert({ where:{ username:'treasurer' }, update:{ email:'treasurer@rpic.local', role:'TREASURER', status:'ACTIVE' }, create:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:'TREASURER', status:'ACTIVE' } }); console.log('Treasurer upserted'); })().finally(()=>prisma.$disconnect());"`
 - Railway CLI example:
   `railway up`
 
@@ -121,7 +121,7 @@ Protected files are stored under `storage/private` by default. This starter keep
 - Password reset sends email links when `RESEND_API_KEY` and `RESET_EMAIL_FROM` are configured.
 - The architecture is intentionally monolithic for faster, cheaper, and simpler deployment.
 
-For your **RPIC Community App** (Next.js + TypeScript + Prisma + Auth.js + SQL Server), you should combine several testing tools to cover **unit, integration, and end‑to‑end behavior**.[^1][^2][^3]
+For your **RPIC Community App** (Next.js + TypeScript + Prisma + Auth.js + PostgreSQL), you should combine several testing tools to cover **unit, integration, and end‑to‑end behavior**.[^1][^2][^3]
 
 ***
 
@@ -180,7 +180,7 @@ Example flows:
 
 ### 4. **Database / schema \& migration tests**
 
-Since you use **Prisma + SQL Server**, you need to verify the schema and data integrity.
+Since you use **Prisma + PostgreSQL**, you need to verify the schema and data integrity.
 
 - **Prisma client tests**
     - Write small scripts to verify:
@@ -217,11 +217,11 @@ Use Playwright or API tests to simulate multiple users with different roles logg
 To make testing part of your deployment workflow:
 
 - **GitHub Actions** or similar CI:
-    - Run migrations on a **test SQL Server** database.
+    - Run migrations on a **test PostgreSQL** database.
     - Run `npm run test` (Vitest/Jest) + Playwright.
 - **Before deploy**:
     - Require passing tests in CI.
-    - Optionally run a small smoke-test script against the SQL Server database to verify migrations and basic queries.[^8][^7]
+    - Optionally run a small smoke-test script against the PostgreSQL database to verify migrations and basic queries.[^8][^7]
 
 ***
 

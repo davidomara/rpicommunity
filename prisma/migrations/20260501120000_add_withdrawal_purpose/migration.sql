@@ -1,5 +1,2 @@
-ALTER TABLE [dbo].[Withdrawal]
-ADD [purpose] VARCHAR(32) NOT NULL
-CONSTRAINT [Withdrawal_purpose_df] DEFAULT 'WELFARE';
-
-CREATE INDEX [Withdrawal_purpose_idx] ON [dbo].[Withdrawal]([purpose]);
+-- Intentionally empty.
+-- Replaced by the PostgreSQL baseline in 20260401191131_initial_migration.

@@ -9,7 +9,7 @@ For Next.js development, WSL is the better option than running the repo from a W
 Benefits:
 - faster file watching and rebuilds
 - cleaner Node/npm behavior
-- better fit for Prisma and SQL Server development
+- better fit for Prisma and PostgreSQL development
 
 ## Recommended Repo Location
 
@@ -143,16 +143,16 @@ Run development server with:
 npm run dev
 ```
 
-## SQL Server From WSL
+## PostgreSQL From WSL
 
-The project datasource is SQL Server through Prisma's `sqlserver` provider. WSL does not need a database service running inside Linux when SQL Server is already available on Windows, Windows Server, Azure SQL, or another reachable host.
+The project datasource is PostgreSQL through Prisma's `postgresql` provider. WSL does not need a database service running inside Linux when PostgreSQL is already available on Windows, a managed host, or another reachable server.
 
-### SQL Server connection checks
+### PostgreSQL connection checks
 
-Confirm the SQL Server host and TCP port are reachable from WSL:
+Confirm the PostgreSQL host and TCP port are reachable from WSL:
 
 ```bash
-nc -vz HOST 1433
+nc -vz HOST 5432
 ```
 
 If `nc` is not installed:
@@ -162,34 +162,32 @@ sudo apt update
 sudo apt install -y netcat-openbsd
 ```
 
-If SQL Server is running as Express or a named instance, configure a fixed TCP port in SQL Server Configuration Manager and use `HOST:PORT` in `DATABASE_URL`. Prisma is most predictable with an explicit TCP port.
+Use `HOST:PORT` in `DATABASE_URL`. Prisma is most predictable with an explicit TCP port.
 
 ## Database URL Options
 
-### Option 1: Local or network SQL Server
+### Option 1: Local or network PostgreSQL
 
-Use this in `.env` when SQL Server is reachable on a fixed TCP port:
+Use this in `.env` when PostgreSQL is reachable on a fixed TCP port:
 
 ```env
-DATABASE_URL="sqlserver://HOST:1433;database=rpic_community;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;"
+DATABASE_URL="postgresql://USERNAME:PASSWORD@HOST:5432/rpic_community?schema=public"
 ```
 
-### Option 2: Production SQL Server
+### Option 2: Production PostgreSQL
 
-Use the production SQL Server host, database, and credentials:
+Use the production PostgreSQL host, database, and credentials:
 
 ```env
-DATABASE_URL="sqlserver://HOST:1433;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=false;"
+DATABASE_URL="postgresql://USERNAME:PASSWORD@HOST:5432/DB_NAME?schema=public"
 ```
 
 Notes:
-- use `trustServerCertificate=true` only for local development or self-signed certificates
-- use `trustServerCertificate=false` when production has a trusted certificate chain
-- keep the URL scheme as `sqlserver://` because the Prisma datasource provider is `sqlserver`
+- keep the URL scheme as `postgresql://` because the Prisma datasource provider is `postgresql`
 
 ## Project Startup Flow In WSL
 
-After Node and SQL Server are ready:
+After Node and PostgreSQL are ready:
 
 ```bash
 cd /home/nord/projects/RPICCommunityApp
@@ -268,16 +266,16 @@ Fix:
 - install WSL-native Node with `nvm`
 - confirm `which node` and `which npm` both point into `~/.nvm`
 
-### Mistake 4: Database URL does not match SQL Server
+### Mistake 4: Database URL does not match PostgreSQL
 
 Symptom:
 - Prisma reports a datasource provider mismatch
 - `npx prisma migrate dev` refuses to use the migration history
 
 Fix:
-- confirm `prisma/schema.prisma` uses `provider = "sqlserver"`
-- confirm `prisma/migrations/migration_lock.toml` uses `provider = "mssql"`
-- confirm `.env` starts `DATABASE_URL` with `sqlserver://`
+- confirm `prisma/schema.prisma` uses `provider = "postgresql"`
+- confirm `prisma/migrations/migration_lock.toml` uses `provider = "postgresql"`
+- confirm `.env` starts `DATABASE_URL` with `postgresql://`
 
 ## Quick Verification Checklist
 

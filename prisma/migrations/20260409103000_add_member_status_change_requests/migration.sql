@@ -1,2 +1,2 @@
 -- Intentionally empty.
--- Replaced by the SQL Server baseline in 20260401191131_initial_migration.
+-- Replaced by the PostgreSQL baseline in 20260401191131_initial_migration.

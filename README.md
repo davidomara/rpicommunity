@@ -13,7 +13,7 @@ This repo is a migration and modernization of the original Lango Community appli
 - Tailwind CSS
 - shadcn-style UI primitives
 - Prisma ORM
-- SQL Server
+- PostgreSQL
 - Auth.js with database sessions
 - Zod validation
 - Recharts
@@ -35,16 +35,16 @@ This repo is a migration and modernization of the original Lango Community appli
 ## Getting started
 
 1. Copy `.env.example` to `.env`
-2. Set `DATABASE_URL` to your SQL Server connection string, and set `AUTH_SECRET`
+2. Set `DATABASE_URL` to your PostgreSQL connection string, and set `AUTH_SECRET`
 3. Run `npm install`
 4. Run `npx prisma migrate dev`
 5. Run `npm run prisma:seed`
 6. Run `npm run dev`
 
-Example `DATABASE_URL` for SQL Server:
+Example `DATABASE_URL` for PostgreSQL:
 
 ```env
-DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;"
+DATABASE_URL="postgresql://USERNAME:PASSWORD@HOST:5432/DB_NAME?schema=public"
 ```
 
 ## Default users
@@ -67,7 +67,7 @@ DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASS
 
 ## Windows Server deployment
 
-This branch targets Windows Server with SQL Server.
+This branch targets Windows Server with PostgreSQL.
 
 Use standalone output in Next.js. This repo already uses `next.config.mjs` with standalone output enabled.
 
@@ -100,13 +100,13 @@ schtasks /run /tn "RPIC WWW"
 If you only need to add a Treasurer user in production, do not reseed the whole database. Use a one-off command instead:
 
 ```bash
-DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;" node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.create({ data:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer created: treasurer / Admin@123'); })().finally(()=>prisma.$disconnect());"
+DATABASE_URL="postgresql://USERNAME:PASSWORD@HOST:5432/DB_NAME?schema=public" node -e "const bcrypt=require('bcryptjs'); const {PrismaClient}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.create({ data:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:'TREASURER', status:'ACTIVE' } }); console.log('Treasurer created: treasurer / Admin@123'); })().finally(()=>prisma.$disconnect());"
 ```
 
 If a Treasurer account may already exist, use an upsert instead:
 
 ```bash
-DATABASE_URL="sqlserver://HOST:PORT;database=DB_NAME;user=USERNAME;password=PASSWORD;encrypt=true;trustServerCertificate=true;" node -e "const bcrypt=require('bcryptjs'); const {PrismaClient,Role,MemberStatus}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.upsert({ where:{ username:'treasurer' }, update:{ email:'treasurer@rpic.local', role:Role.TREASURER, status:MemberStatus.ACTIVE }, create:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:Role.TREASURER, status:MemberStatus.ACTIVE } }); console.log('Treasurer upserted'); })().finally(()=>prisma.$disconnect());"
+DATABASE_URL="postgresql://USERNAME:PASSWORD@HOST:5432/DB_NAME?schema=public" node -e "const bcrypt=require('bcryptjs'); const {PrismaClient}=require('@prisma/client'); const prisma=new PrismaClient(); (async()=>{ await prisma.user.upsert({ where:{ username:'treasurer' }, update:{ email:'treasurer@rpic.local', role:'TREASURER', status:'ACTIVE' }, create:{ name:'RPIC Community Treasurer', username:'treasurer', email:'treasurer@rpic.local', passwordHash:await bcrypt.hash('Admin@123',12), role:'TREASURER', status:'ACTIVE' } }); console.log('Treasurer upserted'); })().finally(()=>prisma.$disconnect());"
 ```
 
 Production environment example:
