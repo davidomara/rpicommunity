@@ -116,8 +116,6 @@ APP_URL=http://10.20.70.138/rpicommunity
 NEXT_PUBLIC_APP_URL=http://10.20.70.138/rpicommunity
 AUTH_URL=http://10.20.70.138/rpicommunity/api/auth
 NEXTAUTH_URL=http://10.20.70.138/rpicommunity/api/auth
-NEXT_PUBLIC_POLICE_APP_URL=http://10.20.70.138/rpicommunity
-NEXT_PUBLIC_PUBLIC_APP_URL=http://154.72.204.131:8087/rpicommunity
 ```
 
 If you are deploying behind IIS with URL Rewrite and Application Request Routing, create the reverse-proxy rule in IIS.

@@ -12,3 +12,4 @@ storage/private/*
 !storage/private/.gitkeep
 deploy.log
 next-start.log
+*.bak

@@ -3,7 +3,6 @@ import "./globals.css";
 import { APP_FULL_NAME, APP_SUBTITLE } from "@/lib/settings";
 import { withBasePath } from "@/lib/app-path";
 import { IdleSessionGuard } from "@/components/layout/idle-session-guard";
-import { NetworkHostRedirect } from "@/components/layout/network-host-redirect";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -28,7 +27,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body suppressHydrationWarning>
         <SessionProvider basePath={authBasePath}>
-          <NetworkHostRedirect />
           <IdleSessionGuard />
           <Toaster />
           {children}
