@@ -19,36 +19,43 @@ export async function syncAutoMemberStatuses() {
   }
 
   inFlightStatusSync = (async () => {
-  const [settings, members] = await Promise.all([
-    getCommunitySettings(),
-    prisma.user.findMany({
-      where: {
-        role: { in: COMMUNITY_ROLES },
-        statusMode: STATUS_MODE.AUTO
-      },
-      include: {
-        contributions: {
-          select: { amount: true }
+    const [settings, members, contributionTotals] = await Promise.all([
+      getCommunitySettings(),
+      prisma.user.findMany({
+        where: {
+          role: { in: COMMUNITY_ROLES },
+          statusMode: STATUS_MODE.AUTO
+        },
+        select: {
+          id: true,
+          status: true
         }
+      }),
+      prisma.contribution.groupBy({
+        by: ["memberId"],
+        _sum: { amount: true }
+      })
+    ]);
+
+    const contributionTotalByMemberId = new Map(
+      contributionTotals.map((row) => [row.memberId, Number(row._sum.amount ?? 0)])
+    );
+
+    const updates = members.reduce<ReturnType<typeof prisma.user.update>[]>((acc, member) => {
+      const totalContributions = contributionTotalByMemberId.get(member.id) ?? 0;
+      const nextStatus = resolveMemberStatus(totalContributions, settings).status;
+      if (member.status !== nextStatus) {
+        acc.push(prisma.user.update({
+          where: { id: member.id },
+          data: { status: nextStatus }
+        }));
       }
-    })
-  ]);
+      return acc;
+    }, []);
 
-  const updates = members.reduce<ReturnType<typeof prisma.user.update>[]>((acc, member) => {
-    const totalContributions = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
-    const nextStatus = resolveMemberStatus(totalContributions, settings).status;
-    if (member.status !== nextStatus) {
-      acc.push(prisma.user.update({
-        where: { id: member.id },
-        data: { status: nextStatus }
-      }));
+    if (updates.length) {
+      await prisma.$transaction(updates);
     }
-    return acc;
-  }, []);
-
-  if (updates.length) {
-    await prisma.$transaction(updates);
-  }
 
     lastStatusSyncAt = Date.now();
     return settings;

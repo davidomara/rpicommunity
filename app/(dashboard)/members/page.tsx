@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AddMemberPanel } from "@/components/members/add-member-panel";
-import { WITHDRAWAL_PURPOSE, type Role } from "@/lib/domain-types";
+import type { Role } from "@/lib/domain-types";
 import { getArrearsAmount, getAvailableSavingsAmount, getExpectedContributionAmount } from "@/lib/member-status";
 import { getMembersDirectory } from "@/lib/queries";
 import { getUserAuthorization, hasPermission } from "@/lib/rbac";
@@ -23,11 +23,6 @@ export default async function MembersPage() {
   const members = await getMembersDirectory();
   const expectedPerMemberToDate = getExpectedContributionAmount();
   const rows = members.map((member) => {
-    const totalContributions = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
-    const totalWithdrawals = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
-    const totalSavingsWithdrawals = member.withdrawals
-      .filter((row) => row.purpose === WITHDRAWAL_PURPOSE.SAVINGS)
-      .reduce((sum, row) => sum + Number(row.amount), 0);
     const pendingChange = (member.memberStatusChanges as Array<{
       id: string;
       currentStatus: string;
@@ -43,10 +38,10 @@ export default async function MembersPage() {
       email: member.email,
       role: member.role as Role,
       status: member.status,
-      contributions: totalContributions,
-      withdrawals: totalWithdrawals,
-      savings: getAvailableSavingsAmount(totalContributions, totalSavingsWithdrawals),
-      arrears: getArrearsAmount(totalContributions),
+      contributions: member.totalContributions,
+      withdrawals: member.totalWithdrawals,
+      savings: getAvailableSavingsAmount(member.totalContributions, member.totalSavingsWithdrawals),
+      arrears: getArrearsAmount(member.totalContributions),
       pendingStatusChange: pendingChange
         ? {
             id: pendingChange.id,

@@ -8,25 +8,37 @@ import { deriveLegacyAccessRoleKey, getAccessRoleLabel, hasPermission, type Auth
 
 const memberDirectoryArgs = {
   where: { role: { in: COMMUNITY_ROLES } },
-  include: {
-    contributions: {
-      where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED }
-    },
-    withdrawals: true,
-    emergencyRequests: {
-      where: { status: EMERGENCY_STATUS.PENDING }
-    },
+  select: {
+    id: true,
+    name: true,
+    username: true,
+    email: true,
+    role: true,
+    status: true,
     memberStatusChanges: {
       where: { status: "PENDING" },
       orderBy: { createdAt: "desc" },
-      take: 1
+      take: 1,
+      select: {
+        id: true,
+        currentStatus: true,
+        requestedStatus: true,
+        adminApprovedAt: true,
+        treasurerApprovedAt: true
+      }
     }
   }
 } satisfies Prisma.UserFindManyArgs;
 
-export type MemberDirectoryRow = Prisma.UserGetPayload<{ 
-  include: typeof memberDirectoryArgs.include 
+type MemberDirectoryBaseRow = Prisma.UserGetPayload<{
+  select: typeof memberDirectoryArgs.select;
 }>;
+
+export type MemberDirectoryRow = MemberDirectoryBaseRow & {
+  totalContributions: number;
+  totalWithdrawals: number;
+  totalSavingsWithdrawals: number;
+};
 
 export type MemberAccountDirectoryRow = {
   id: string;
@@ -105,18 +117,42 @@ export async function getDashboardData(): Promise<{
   summary: DashboardSummary;
 }> {
   await syncAutoMemberStatuses();
-  const [members, pendingRequests] = await Promise.all([
+  const [
+    members,
+    contributionTotals,
+    withdrawalTotals,
+    savingsWithdrawalTotals,
+    pendingEmergencyCounts,
+    pendingRequests
+  ] = await Promise.all([
     prisma.user.findMany({
       where: { role: { in: COMMUNITY_ROLES } },
-      include: {
-        contributions: {
-          where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED }
-        },
-        withdrawals: true,
-        emergencyRequests: {
-          where: { status: EMERGENCY_STATUS.PENDING }
-        }
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        status: true,
+        role: true
       }
+    }),
+    prisma.contribution.groupBy({
+      by: ["memberId"],
+      where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED },
+      _sum: { amount: true }
+    }),
+    prisma.withdrawal.groupBy({
+      by: ["memberId"],
+      _sum: { amount: true }
+    }),
+    prisma.withdrawal.groupBy({
+      by: ["memberId"],
+      where: { purpose: WITHDRAWAL_PURPOSE.SAVINGS },
+      _sum: { amount: true }
+    }),
+    prisma.emergencyRequest.groupBy({
+      by: ["memberId"],
+      where: { status: EMERGENCY_STATUS.PENDING },
+      _count: { _all: true }
     }),
     prisma.emergencyRequest.findMany({
       where: { status: EMERGENCY_STATUS.PENDING },
@@ -126,12 +162,23 @@ export async function getDashboardData(): Promise<{
     })
   ]);
 
+  const contributionTotalByMemberId = new Map(
+    contributionTotals.map((row) => [row.memberId, Number(row._sum.amount ?? 0)])
+  );
+  const withdrawalTotalByMemberId = new Map(
+    withdrawalTotals.map((row) => [row.memberId, Number(row._sum.amount ?? 0)])
+  );
+  const savingsWithdrawalTotalByMemberId = new Map(
+    savingsWithdrawalTotals.map((row) => [row.memberId, Number(row._sum.amount ?? 0)])
+  );
+  const pendingEmergencyCountByMemberId = new Map(
+    pendingEmergencyCounts.map((row) => [row.memberId, row._count._all])
+  );
+
   const memberRows = sortCommunityRows<DashboardMemberRow>(members.map((member) => {
-    const contributionTotal = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
-    const withdrawalTotal = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
-    const savingsWithdrawalTotal = member.withdrawals
-      .filter((row) => row.purpose === WITHDRAWAL_PURPOSE.SAVINGS)
-      .reduce((sum, row) => sum + Number(row.amount), 0);
+    const contributionTotal = contributionTotalByMemberId.get(member.id) ?? 0;
+    const withdrawalTotal = withdrawalTotalByMemberId.get(member.id) ?? 0;
+    const savingsWithdrawalTotal = savingsWithdrawalTotalByMemberId.get(member.id) ?? 0;
     return {
       id: member.id,
       name: member.name,
@@ -142,7 +189,7 @@ export async function getDashboardData(): Promise<{
       totalWithdrawals: withdrawalTotal,
       missing: getArrearsAmount(contributionTotal),
       savings: getAvailableSavingsAmount(contributionTotal, savingsWithdrawalTotal),
-      pendingEmergencyRequests: member.emergencyRequests.length
+      pendingEmergencyRequests: pendingEmergencyCountByMemberId.get(member.id) ?? 0
     };
   }));
 
@@ -182,9 +229,40 @@ export async function getDashboardData(): Promise<{
 
 export async function getMembersDirectory(): Promise<MemberDirectoryRow[]> {
   await syncAutoMemberStatuses();
-  const rows = await prisma.user.findMany(memberDirectoryArgs);
+  const [rows, contributionTotals, withdrawalTotals, savingsWithdrawalTotals] = await Promise.all([
+    prisma.user.findMany(memberDirectoryArgs),
+    prisma.contribution.groupBy({
+      by: ["memberId"],
+      where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED },
+      _sum: { amount: true }
+    }),
+    prisma.withdrawal.groupBy({
+      by: ["memberId"],
+      _sum: { amount: true }
+    }),
+    prisma.withdrawal.groupBy({
+      by: ["memberId"],
+      where: { purpose: WITHDRAWAL_PURPOSE.SAVINGS },
+      _sum: { amount: true }
+    })
+  ]);
 
-  return sortCommunityRows(rows);
+  const contributionTotalByMemberId = new Map(
+    contributionTotals.map((row) => [row.memberId, Number(row._sum.amount ?? 0)])
+  );
+  const withdrawalTotalByMemberId = new Map(
+    withdrawalTotals.map((row) => [row.memberId, Number(row._sum.amount ?? 0)])
+  );
+  const savingsWithdrawalTotalByMemberId = new Map(
+    savingsWithdrawalTotals.map((row) => [row.memberId, Number(row._sum.amount ?? 0)])
+  );
+
+  return sortCommunityRows<MemberDirectoryRow>(rows.map((member) => ({
+    ...member,
+    totalContributions: contributionTotalByMemberId.get(member.id) ?? 0,
+    totalWithdrawals: withdrawalTotalByMemberId.get(member.id) ?? 0,
+    totalSavingsWithdrawals: savingsWithdrawalTotalByMemberId.get(member.id) ?? 0
+  })));
 }
 
 export async function getMemberAccountDirectory(): Promise<MemberAccountDirectoryRow[]> {
@@ -290,26 +368,48 @@ export async function getNotificationCount(authorization: AuthorizationContext |
 }
 
 export async function getWithdrawalContext() {
-  const members = await prisma.user.findMany({
-    where: { role: { in: COMMUNITY_ROLES } },
-    select: {
-      id: true,
-      name: true,
-      username: true,
-      contributions: {
-        where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED },
-        select: { amount: true }
-      },
-      withdrawals: {
-        where: { purpose: WITHDRAWAL_PURPOSE.SAVINGS },
-        select: { amount: true }
+  const [members, contributionTotals, savingsWithdrawalTotals, rows] = await Promise.all([
+    prisma.user.findMany({
+      where: { role: { in: COMMUNITY_ROLES } },
+      select: {
+        id: true,
+        name: true,
+        username: true
       }
-    }
-  });
+    }),
+    prisma.contribution.groupBy({
+      by: ["memberId"],
+      where: { approvalStatus: CONTRIBUTION_APPROVAL_STATUS.APPROVED },
+      _sum: { amount: true }
+    }),
+    prisma.withdrawal.groupBy({
+      by: ["memberId"],
+      where: { purpose: WITHDRAWAL_PURPOSE.SAVINGS },
+      _sum: { amount: true }
+    }),
+    prisma.withdrawal.findMany({
+      orderBy: [{ withdrawalDate: "desc" }, { createdAt: "desc" }],
+      take: 200,
+      select: {
+        id: true,
+        memberId: true,
+        amount: true,
+        reason: true,
+        withdrawalDate: true
+      }
+    })
+  ]);
+
+  const contributionTotalByMemberId = new Map(
+    contributionTotals.map((row) => [row.memberId, Number(row._sum.amount ?? 0)])
+  );
+  const savingsWithdrawalTotalByMemberId = new Map(
+    savingsWithdrawalTotals.map((row) => [row.memberId, Number(row._sum.amount ?? 0)])
+  );
 
   const memberOptions = members.map((member) => {
-    const totalApprovedContributions = member.contributions.reduce((sum, row) => sum + Number(row.amount), 0);
-    const totalSavingsWithdrawals = member.withdrawals.reduce((sum, row) => sum + Number(row.amount), 0);
+    const totalApprovedContributions = contributionTotalByMemberId.get(member.id) ?? 0;
+    const totalSavingsWithdrawals = savingsWithdrawalTotalByMemberId.get(member.id) ?? 0;
 
     return {
       id: member.id,
@@ -317,18 +417,6 @@ export async function getWithdrawalContext() {
       username: member.username,
       availableSavings: getAvailableSavingsAmount(totalApprovedContributions, totalSavingsWithdrawals)
     };
-  });
-
-  const rows = await prisma.withdrawal.findMany({
-    orderBy: [{ withdrawalDate: "desc" }, { createdAt: "desc" }],
-    take: 200,
-    select: {
-      id: true,
-      memberId: true,
-      amount: true,
-      reason: true,
-      withdrawalDate: true
-    }
   });
 
   return { members: sortCommunityRows(memberOptions), rows };

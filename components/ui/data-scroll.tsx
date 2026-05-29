@@ -23,12 +23,13 @@ export function DataScroll({
       <div
         ref={viewportRef}
         className={cn(
-          "scroll-x cursor-grab touch-pan-x active:cursor-grabbing",
+          "scroll-x cursor-grab touch-auto active:cursor-grabbing",
           dragging && "select-none",
           className
         )}
         onPointerDown={(event) => {
           if (!viewportRef.current) return;
+          if (event.pointerType !== "mouse") return;
           const target = event.target as HTMLElement | null;
           if (target?.closest("button, a, input, select, textarea, label")) {
             return;
